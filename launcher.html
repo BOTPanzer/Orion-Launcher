@@ -1,0 +1,127 @@
+<div id="content" style="height: 100%; margin: 10px; color: white;">
+  <div style="margin: 10px; display: flex; align-items: center;">
+	  <div id="txtMenu" style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden; width: 100%; color: var(--c4); font-size: 40px; margin-right: 10px;">Home</div>
+	  <input id='editText' placeholder="Search Games" type="text" maxlength="50" style="height: 32px; width: 250px; padding-left: 10px; padding-right: 10px; margin-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
+    <div id="search" style="height: 36px; min-width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
+      <div style="font-family: ItemFont;">Search</div>
+	  </div>
+  </div>
+	<div style="display: flex; justify-content: space-between;">
+	  <div id="list" style="color: var(--c3); font-family: ItemFont; margin-left: 10px">
+
+    </div>
+	</div>
+</div>
+
+<script>
+  click = ''
+  search = ''
+
+  ipcRenderer.on('clearList', (event) => {
+    document.getElementById('list').innerHTML = '';
+  })
+
+  ipcRenderer.on('add1ToList', (event, item) => {
+    document.getElementById('list').insertAdjacentHTML('beforeend', item)
+  })
+
+  ipcRenderer.on('addListener', (event, id, img, path, name, gamePathArg, gamePath, iconPath) => {
+    document.getElementById(id).addEventListener('click', () => {
+      document.getElementById('editText').value = ''
+      document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item_clicked.png")';
+	    setTimeout(function() {
+        document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
+        if (click == id) {
+          if (gamePathArg.argsClean != '') {
+            let spawn = require("child_process").spawn;
+            let bat = spawn("cmd.exe", gamePathArg.argsClean)
+          } else {
+            const { shell } = require('electron');
+            shell.openPath(gamePathArg.pathClean)
+          }
+          click = ''
+        } else {
+          click = id
+          setTimeout(function() {
+            if (click == id) {
+              click = ''
+            }
+          }, 500)
+        }
+      }, 100)
+    })
+
+    document.getElementById(id).addEventListener('contextmenu', () => {
+      document.getElementById('body').replaceWith(document.getElementById('body').cloneNode(true));
+      ipcRenderer.send('contextFile', path, name, gamePath, iconPath)
+    })
+  })
+
+  ipcRenderer.on('addFolderListener', (event, id, path) => {
+    document.getElementById(id).addEventListener('click', () => {
+      document.getElementById('editText').value = ''
+      document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item_clicked.png")';
+	    window.scrollTo(0, 0);
+	    setTimeout(function() {
+        document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
+        ipcRenderer.send('loadPath', path)
+      }, 100)
+    })
+
+    if (id != 'backButt')
+    document.getElementById(id).addEventListener('contextmenu', () => {
+      document.getElementById('body').replaceWith(document.getElementById('body').cloneNode(true));
+      ipcRenderer.send('contextFolder', path)
+    })
+  })
+
+  ipcRenderer.on('changeIcon', (event, img, icon) => {
+    document.getElementById(img).src = icon
+  })
+
+  ipcRenderer.on('setLocPath', (event, path, dataFolder, search) => {
+    let loc = ''
+    if (path == dataFolder) loc = 'Home'
+    else loc = path.slice(0,-1).substring(path.slice(0,-1).lastIndexOf("\\")+1)
+    if (search != '') loc = loc+' - '+search
+    document.getElementById('txtMenu').innerHTML = loc
+
+    document.getElementById('editText').addEventListener("keydown", event => {
+      if (event.keyCode === 13) {
+        event.preventDefault();
+        if (document.getElementById('editText').value != search) {
+          window.scrollTo(0, 0);
+          ipcRenderer.send('loadPath', path, document.getElementById('editText').value)
+        }
+        return false;
+      }
+    })
+
+    document.getElementById('search').addEventListener('click', () => {
+      document.getElementById('search').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+      setTimeout(function() {
+        document.getElementById('search').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+      }, 100)
+
+      if (document.getElementById('editText').value != search) {
+        window.scrollTo(0, 0);
+        ipcRenderer.send('loadPath', path, document.getElementById('editText').value)
+      }
+    })
+  })
+
+  ipcRenderer.on('setbutt', (event) => {
+    setbuttons()
+
+    document.getElementById('add').style.display = 'flex'
+
+    document.getElementById('content').style.minHeight = document.getElementById('content').offsetHeight+'px'
+    setTimeout(function() { 
+      document.getElementById('content').style.minHeight = ''
+    }, 250)
+  })
+
+  ipcRenderer.on('setSearch', (event, s) => {
+    search = s
+  })
+</script>

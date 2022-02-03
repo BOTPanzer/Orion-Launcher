@@ -1,86 +1,8 @@
-<!doctype html>
-<html lang="en">
-<head>
-<title>Oriøn: Launcher</title>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=0">
-<style>
-	
-@font-face { font-family: BodyFont; src: url('Data/Fonts/font_body.ttf'); } 
-@font-face { font-family: ItemFont; src: url('Data/Fonts/font_item.ttf'); } 
-	
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  font-family: BodyFont;
-  margin: 0px;
-  padding: 0px;
-  vertical-align: baseline;
-  background: url('./Data/Images/lines.png'), linear-gradient(#38151C, #070B14 75%);
-  background-attachment: fixed;
-  --c1: #181B22;
-  --c2: #7E0D0E;
-  --c3: #68D8D5;
-  --c4: white;
-}
-
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--c1); 
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--c2); 
-}
-
-.content { 
-  height: 100%;
-  margin: 10px;
-  color: white;
-}	
-
-.unselectableDiv {
-  vertical-align: middle;
-  height: 40px;
-  width: 140px;
-  display: table-cell;
-  align-items: center;
-}
-	
-.unselectable {
-  overflow:hidden;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  -webkit-user-drag: none;
-}
-</style>
-</head>
-	
-<body id="body">
-<div>
-  <img id="logo" class="unselectable" style="margin: 20px;" src="./Data/Images/logo.png"  height="150px" width="auto"/>
-  <div style="float: right;">
-    <div id="launcher" style="height: 36px; width: 107px; margin: 20px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
-      <div class="unselectable" style="font-family: ItemFont;">Launcher</div>
-    </div>
-  </div>
-</div>
-
-<div id="content" class="content">
+<div id="content" style="height: 100%; margin: 10px; color: white;">
   <div style="display: flex; align-items: center; margin: 10px;">
-    <div id="txtMenu" class="unselectable" style="color: var(--c4); font-size: 40px; margin: 0px;">Theme Manager</div>
+    <div id="txtMenu" style="color: var(--c4); font-size: 40px; margin: 0px;">Theme Manager</div>
     <div id="folder" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px;">
-      <img class="unselectable" style="height: 30px; min-width: 30px; margin: 3px;" src="./Data/Images/icon_folder.png"></img>
+      <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/icon_folder.png"></img>
     </div>
   </div>
 	<div style="display: flex; justify-content: space-between;">
@@ -102,19 +24,6 @@ body {
 </div>
 
 <script>
-  const { ipcRenderer } = require('electron');
-  
-
-  ipcRenderer.on('theme', (event, theme) => {
-    document.body.style.setProperty('--c1', theme.c1);
-    document.body.style.setProperty('--c2', theme.c2);
-    document.body.style.setProperty('--c3', theme.c3);
-    document.body.style.setProperty('--c4', theme.c4);
-    //BACKGROUND
-    document.body.style.background = theme.background
-    document.body.style.backgroundAttachment = 'fixed'
-  })
-
   ipcRenderer.on('clearList', (event) => {
     document.getElementById('list').innerHTML = '';
   })
@@ -130,27 +39,17 @@ body {
 	    window.scrollTo(0, 0);
 	    setTimeout(function() {
         document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
-        document.getElementById('launcher').style.display = 'none'
+        document.getElementById('body').replaceWith(document.getElementById('body').cloneNode(true));
         ipcRenderer.send('copyTheme', path)
       }, 100)
     })
   })
 
-  document.getElementById('launcher').addEventListener('click', () => {
-    document.getElementById('launcher').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+  document.getElementById('folder').addEventListener('click', () => {
+    document.getElementById('folder').style.backgroundImage = 'url("./Data/Images/icon_description_folder_clicked.png")';
 	  setTimeout(function() {
-      document.getElementById('launcher').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-      ipcRenderer.send('launcher')
+      document.getElementById('folder').style.backgroundImage = 'url("./Data/Images/icon_description_folder.png")';
+      ipcRenderer.send('openThemeFolder')
     }, 100)
   })
-
-  document.getElementById('folder').addEventListener('click', () => {
-      document.getElementById('folder').style.backgroundImage = 'url("./Data/Images/icon_description_folder_clicked.png")';
-	    setTimeout(function() {
-        document.getElementById('folder').style.backgroundImage = 'url("./Data/Images/icon_description_folder.png")';
-        ipcRenderer.send('openThemeFolder')
-      }, 100)
-    })
 </script>
-</body>
-</html>

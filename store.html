@@ -1,138 +1,56 @@
-<!doctype html>
-<html lang="en">
-<head>
-<title>Oriøn: Game Store</title>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=0">
-<style>
-/* Style the body */
-	
-@font-face { font-family: BodyFont; src: url('Data/Fonts/font_body.ttf'); } 
-@font-face { font-family: ItemFont; src: url('Data/Fonts/font_item.ttf'); } 
-	
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  font-family: BodyFont;
-  margin: 0px;
-  vertical-align: baseline;
-  background: url('./Data/Images/lines.png'), linear-gradient(#38151C, #070B14 75%);
-  background-attachment: fixed;
-  --c1: #181B22;
-  --c2: #7E0D0E;
-  --c3: #68D8D5;
-  --c4: white;
-}
-
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--c1); 
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--c2); 
-}
-
+<style>	
 .list {
   color: var(--c3);
   font-family: ItemFont;
   padding-left: 5px; 
   padding-bottom: 5px;
   margin-left: 5px; 
-  margin-right: 5px; 
-  white-space: nowrap;
+  margin-right: 5px;
   overflow-x: auto;
   display: none;
 }
-	
-.unselectableDiv {
-  vertical-align: middle;
-  height: 40px;
-  width: 140px;
-  display: table-cell;
-  align-items: center;
-}
-
-.unselectable {
-  overflow: hidden;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  -webkit-user-drag: none;
-}
 </style>
-</head>
 	
-<body>
 <div>
-  <img id="logo" class="unselectable" style="margin: 20px;" src="./Data/Images/logo.png"  height="150px" width="auto"/>
-  <div id="launcher" style="height: 36px; width: 107px; margin: 20px; float: right; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
-    <div class="unselectable" style="font-family: ItemFont;">Launcher</div>
-  </div>
-</div>
-
-<div style="height: 36px; display: flex; align-items: center; margin-top: 20px; margin-bottom: 30px; margin-left: 50px; margin-right: 50px;">
+<div style="height: 36px; display: flex; align-items: center; margin-top: 20px; margin-bottom: 30px; margin-left: 30px; margin-right: 30px;">
   <div id="discover" style="height: 36px; min-width: 107px; margin-right: 10px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
-    <div class="unselectable" style="font-family: ItemFont;">Discover</div>
+    <div style="font-family: ItemFont;">Discover</div>
   </div>
-  <input id='editText' type="text" maxlength="50" style="height: 32px; width: 100%; padding-left: 10px; padding-right: 10px; margin-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
+  <input id='editText' placeholder="Search Games" type="text" maxlength="50" style="height: 32px; width: 100%; padding-left: 10px; padding-right: 10px; margin-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
   <div id="search" style="height: 36px; min-width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
-    <div class="unselectable" style="font-family: ItemFont;">Search</div>
+    <div style="font-family: ItemFont;">Search</div>
   </div>
 </div>
 
-<div style="margin-bottom: 10px; margin-top: 20px; margin-left: 70px; margin-right: 70px;">
+<div style="margin-bottom: 10px; margin-top: 20px; margin-left: 50px; margin-right: 50px;">
   <div style="display: flex; font-family: ItemFont; font-size: 20px; margin-top: 20px; justify-content: space-between">
-    <div class="unselectable" id="Elamigos" style="color: var(--c4); padding: 5px;">ElAmigos:</div>
-    <div class="unselectable" id="moreElamigos" style="color: var(--c4); padding: 5px; float: right;">Show More</div>
+    <div id="Elamigos" style="color: var(--c4); padding: 5px;">ElAmigos:</div>
+    <div id="moreElamigos" style="color: var(--c4); padding: 5px; float: right;">Show More</div>
   </div>
   <div class="list" id="listElamigos"></div>
 
   <div style="display: flex; font-family: ItemFont; font-size: 20px; margin-top: 20px; justify-content: space-between">
-    <div class="unselectable" id="Fitgirl" style="color: var(--c4); padding: 5px;">Fitgirl:</div>
-    <div class="unselectable" id="moreFitgirl" style="color: var(--c4); padding: 5px; float: right;">Show More</div>
+    <div id="Fitgirl" style="color: var(--c4); padding: 5px;">Fitgirl:</div>
+    <div id="moreFitgirl" style="color: var(--c4); padding: 5px; float: right;">Show More</div>
   </div>
   <div class="list" id="listFitgirl"></div>
 
   <div style="display: flex; font-family: ItemFont; font-size: 20px; margin-top: 20px; justify-content: space-between">
-    <div class="unselectable" id="Pivi" style="color: var(--c4); padding: 5px;">Pivi:</div>
-    <div class="unselectable" id="morePivi" style="color: var(--c4); padding: 5px; float: right;">Show More</div>
+    <div id="Pivi" style="color: var(--c4); padding: 5px;">Pivi:</div>
+    <div id="morePivi" style="color: var(--c4); padding: 5px; float: right;">Show More</div>
   </div>
   <div class="list" id="listPivi"></div>
 
   <div style="display: flex; font-family: ItemFont; font-size: 20px; margin-top: 20px; justify-content: space-between">
-    <div class="unselectable" id="SteamUnlocked" style="color: var(--c4); padding: 5px;">Steam Unlocked:</div>
-    <div class="unselectable" id="moreSteamUnlocked" style="color: var(--c4); padding: 5px; float: right;">Show More</div>
+    <div id="SteamUnlocked" style="color: var(--c4); padding: 5px;">Steam Unlocked:</div>
+    <div id="moreSteamUnlocked" style="color: var(--c4); padding: 5px; float: right;">Show More</div>
   </div>
   <div class="list" id="listSteamUnlocked"></div>
 </div>
+</div>
 
 <script>
-  const { ipcRenderer } = require('electron');
-  window.$ = window.jQuery = require('jquery');
   var user = true
-  let c4 = null
-
-
-  ipcRenderer.on('theme', (event, theme) => {
-    document.body.style.setProperty('--c1', theme.c1);
-    document.body.style.setProperty('--c2', theme.c2);
-    document.body.style.setProperty('--c3', theme.c3);
-    document.body.style.setProperty('--c4', theme.c4);
-    //BACKGROUND
-    document.body.style.background = theme.background
-    document.body.style.backgroundAttachment = 'fixed'
-    c4 = theme.c4
-  })
 
   ipcRenderer.on('searchingResults', (event, id) => {
     document.getElementById(id).style.color = 'gray'
@@ -144,7 +62,7 @@ body {
   })
 
   ipcRenderer.on('hasResults', (event, id) => {
-    document.getElementById(id).style.color = c4
+    document.getElementById(id).style.color = 'var(--c4)'
     document.getElementById('list'+id).style.display = 'flex'
     let name = id
     if (name == 'Elamigos') name = 'ElAmigos'
@@ -167,7 +85,6 @@ body {
       document.getElementById('listFitgirl').innerHTML = '';
       document.getElementById('listPivi').innerHTML = '';
       document.getElementById('listSteamUnlocked').innerHTML = '';
-      document.getElementById('listSkidrow').innerHTML = '';
     } else document.getElementById(list).innerHTML = '';
   })
   
@@ -190,15 +107,6 @@ body {
     document.getElementById(img).src = icon
   })
 
-
-  document.getElementById('launcher').addEventListener('click', () => {
-    document.getElementById('launcher').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-	  setTimeout(function() {
-      document.getElementById('launcher').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-      ipcRenderer.send('launcher')
-    }, 100)
-  })
-
   document.getElementById('discover').addEventListener('click', () => {
     document.getElementById('discover').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
 	  setTimeout(function() {
@@ -207,7 +115,6 @@ body {
 
     ipcRenderer.send('searchGames', '')
   })
-  
 
   document.getElementById('editText').addEventListener("keydown", event => {
     if (event.keyCode === 13) {
@@ -283,5 +190,3 @@ body {
     return this.get(0).scrollWidth > this.innerWidth();
   }
 </script>
-</body>
-</html>
