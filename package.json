@@ -1,0 +1,16 @@
+{
+  "name": "Orion-Launcher",
+  "version": "1.0.0",
+  "author": "BOT Panzer",
+  "description": "USB Launcher",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^12.0.1"
+  }
+}

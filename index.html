@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>Orion Launcher v1.0.0</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=0">
+<style>
+/* Style the body */
+	
+body {
+  font-family: Arial;
+  margin: 0;
+  vertical-align: baseline;
+  background: #262626;
+}
+
+/* Header/Logo Title */
+.header {
+  height: 50px;
+  width: 50%;
+  padding-top: 0px;
+  background: #1f1f1f;
+}
+
+.menuButt {
+  padding: 10px;
+  margin: 0;
+  color: white;
+  font-size: 20px;
+  padding-left: auto; 
+  padding-right: 10px; 
+  float: right;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+	
+/* Page Content */
+.content { 
+  margin: 10px;
+  color: white;
+}	
+
+.unselectableDiv {
+  vertical-align: middle;
+  height: 40px;
+  width: 140px;
+  display: table-cell;
+  align-items: center;
+}
+	
+.unselectable {
+  overflow:hidden;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+</style>
+</head>
+	
+<body>
+
+<div style="display: flex; margin-left: auto; margin-right: 0px;">
+  <div style="width: 50%;">
+	<img style="margin: 20px; margin-left: 40px;" src="./logo.png"  height="100px" width="auto" alt=""/>
+  </div>
+  <div style="height: 40px; padding: 5px; background: #1f1f1f; margin-left: auto; margin-right: 0px; text-align: center;">
+	<h4 id="topMenu" class="menuButt">HOME</h4>
+  </div>
+</div>
+	
+<div class="content">
+  <h1 id="txtMenu" path="" style="color: white; margin: 10px">Home</h1>
+  <div id="list" style="color: white; margin-top: 10px; display: inline-block">
+	  
+	<div id="b2" style="margin-top: 5px; margin-right: 5px; width: 150px; height: 150px; background: #1E1E1E; text-align: center; display: inline-block;">
+    <div style="width: 150px; height: 100px;">
+		  <img id="img2" class="unselectable" style="margin: 10px; max-width: 90px; max-height: 90px;" src="./icon.png"></img>
+	</div>
+	  <div style="width: 140px; height: 40px; padding: 5px">
+		  <div class="unselectableDiv">
+		    <div class="unselectable" style="line-height:20px; display: inline-block; max-height: 40px; width: 140px;">Game</div>
+		  </div>
+	  </div>
+	</div>
+	
+  </div>
+</div>
+
+<script>
+  const { app, shell, ipcRenderer } = require('electron');
+
+  ipcRenderer.on('clearList', (event, list) => {
+    let infoDiv = document.querySelector('div[id=list]')
+    infoDiv.innerHTML = '';
+  })
+
+  ipcRenderer.on('add1ToList', (event, item) => {
+    let infoDiv = document.querySelector('div[id=list]')
+    infoDiv.insertAdjacentHTML('beforeend', item)
+  })
+
+  ipcRenderer.on('addListener', (event, id, path) => {
+    document.getElementById(id).addEventListener('click', () => {
+      document.getElementById(id).style.backgroundColor = '#141414'
+      setTimeout(function () {
+        document.getElementById(id).style.backgroundColor = '#1E1E1E'
+        shell.openPath(path)
+      }, 100);
+    })
+  })
+
+  ipcRenderer.on('addReturnListener', (event, id, path) => {
+    document.getElementById(id).addEventListener('click', () => {
+      document.getElementById(id).style.backgroundColor = '#141414'
+      setTimeout(function () {
+        document.getElementById(id).style.backgroundColor = '#1E1E1E'
+        load(path)
+      }, 100);
+    })
+  })
+
+  ipcRenderer.on('changeImage', (event, img, type) => {
+    if (type == 'folder') {
+      document.getElementById(img).src = "./icon_folder.png"
+    } else {
+      document.getElementById(img).src = "./icon_file.png"
+    }
+  })
+
+  ipcRenderer.on('setMenuPath', (event, path) => {
+    document.getElementById('topMenu').addEventListener('click', () => {
+      load(path)
+    })
+  })
+
+  ipcRenderer.on('setLocPath', (event, path, homePath) => {
+    let name = path
+    if (path == homePath) {
+      name = 'Home'
+    } else {
+      if (name.endsWith("\\")) name = name.slice(0,-1)
+      name = name.substring(name.lastIndexOf("\\")+1)
+    }
+    document.getElementById('txtMenu').firstChild.data = name
+  })
+
+  function load(path) {
+    ipcRenderer.send('load', path)
+  }
+</script>
+</body>
+</html>

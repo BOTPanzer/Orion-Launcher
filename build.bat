@@ -1,0 +1,1 @@
+electron-packager "X:\Progects\Other\Lancher-JS" "launcher" --platform=win32 --arch=x64 --icon="X:\Progects\Other\Lancher-JS\icon.ico"
