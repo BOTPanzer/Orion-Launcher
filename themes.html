@@ -13,6 +13,13 @@
 </div>
 
 <script>
+  ipcRenderer.on('resized', (event, size) => {
+    let s1 = size/7
+    if (s1 < 150) s1 = 150
+    if (s1 > 171) s1 = 171
+    document.body.style.setProperty('--size1', s1+'px')
+  })
+
   ipcRenderer.on('clearList', (event) => {
     document.getElementById('list').innerHTML = '';
   })

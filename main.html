@@ -26,6 +26,7 @@ body {
   --c2: #7E0D0E;
   --c3: #68D8D5;
   --c4: white;
+  --size1: 150px;
 
   overflow:hidden;
   -webkit-touch-callout: none;
@@ -52,14 +53,6 @@ body {
 
 ::placeholder {
   color: var(--c3);
-}
-
-.unselectableDiv {
-  vertical-align: middle;
-  height: 40px;
-  width: 140px;
-  display: table-cell;
-  align-items: center;
 }
 </style>
 </head>
@@ -297,6 +290,23 @@ body {
 
     $('#'+id).bind('click', function() {
       if (event.which != 1) return
+      click()
+    })
+  }
+
+  function addRightButtonListener(id, mousedown, mouseup, click) {
+    $('#'+id).bind('mousedown', function() {
+      if (event.which != 3) return
+      mousedown()
+    })
+
+    $(window).bind('mouseup', function() {
+      if (event.which != 3) return
+      mouseup()
+    })
+
+    $('#'+id).bind('contextmenu', function() {
+      if (event.which != 3) return
       click()
     })
   }

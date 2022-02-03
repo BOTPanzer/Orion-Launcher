@@ -73,14 +73,14 @@ if (!app.requestSingleInstanceLock()) {
   })
 
   ipcMain.on('loaded', (event) => {
+    var size = win.getSize()
+    win.webContents.send('resized', size[0])
     win.webContents.send('theme', theme)
     if (window == 'launcher') {
       createList(actualPath)
     } else if (window == 'store') {
       if (tempsearch != undefined) searchGames(tempsearch)
       else searchGames('')
-    } else if (window == 'add') {
-      win.webContents.send('start', actualPath, launcherFolder);
     } else if (window == 'themes') {
       createThemeList()
     }
@@ -92,7 +92,12 @@ if (!app.requestSingleInstanceLock()) {
       win.webContents.send('load', 'launcher.html')
       window = 'launcher'
     }
-  });
+  })
+
+  win.on('resize', function () {    
+    var size = win.getSize()
+    win.webContents.send('resized', size[0])
+  })
 
   ipcMain.on('mini', (event) => {
     win.minimize();
@@ -813,7 +818,7 @@ if (!app.requestSingleInstanceLock()) {
       //Id
       let id = 'theme'+i
       //HTML
-      let html = createHTML(id, null, image, name)
+      let html = createDataHTML(id, null, image, undefined, undefined, name)
       //Create
       win.webContents.send('add1ToList', html);
       win.webContents.send('addListener', id, path);
@@ -1051,22 +1056,9 @@ function closeWin3() {
   win3.close()
 }
 
-function createHTML(id, img, icon, name) {
-  let html = `<div id="${id}" style="margin-top: 5px; margin-right: 5px; width: 150px; height: 150px; background-image: url('./Data/Images/icon_item.png'); text-align: center; display: inline-block;">
-                <div style="width: 150px; height: 100px;">
-                  <img id="${img}" style="margin: 10px; max-width: 130px; height: 90px; object-fit: contain; -webkit-user-drag: none;" src="${icon}"></img>
-                </div>
-                <div style="width: 140px; height: 40px; padding: 5px">
-                  <div class="unselectableDiv">
-                    <div style="color: var(--c3); font-size: 17px; overflow: hidden; width: 140px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${name}</div>
-                  </div>
-                </div>
-              </div>`
-  return html
-}
 
 function createDataHTML(id, img, icon, path, isFile, name, gamePath, iconPath, pathClean, argsClean) {
-  let html = `<div id="${id}" style="margin-top: 5px; margin-right: 5px; width: 150px; height: 150px; background-image: url('./Data/Images/icon_item.png'); text-align: center; display: inline-block;">
+  let html = `<div id="${id}" style="width: var(--size1); height: var(--size1); margin-top: 5px; margin-right: 5px; background-image: url('./Data/Images/icon_item.png'); background-repeat: no-repeat; background-size: cover; text-align: center; display: inline-block;">
                 
                 <div id="${'path-'+id}" style="display: none;">${path}</div>
                 <div id="${'isFile-'+id}" style="display: none;">${isFile}</div>
@@ -1075,42 +1067,39 @@ function createDataHTML(id, img, icon, path, isFile, name, gamePath, iconPath, p
                 <div id="${'iconPath-'+id}" style="display: none;">${iconPath}</div>
                 <div id="${'pathClean-'+id}" style="display: none;">${pathClean}</div>
                 <div id="${'argsClean-'+id}" style="display: none;">${argsClean}</div>
-                
-                <div style="width: 150px; height: 100px;">
-                  <img id="${img}" style="margin: 10px; max-width: 130px; height: 90px; object-fit: contain; -webkit-user-drag: none;" src="${icon}"></img>
+  
+                <div style="width: 100%; height: 65%;">
+                  <div style="height: 10%;"></div>
+                  <img id="${img}" style="width: 90%; height: 90%; object-fit: contain; -webkit-user-drag: none;" src="${icon}"></img>
                 </div>
-                <div style="width: 140px; height: 40px; padding: 5px">
-                  <div class="unselectableDiv">
-                    <div style="color: var(--c3); font-size: 17px; overflow: hidden; width: 140px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${name}</div>
-                  </div>
+                <div style="width: 100%; height: 35%; display: flex;">
+                  <div style="width: 90%; margin: auto; font-size: calc(var(--size1)/9); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: var(--c3);">${name}</div>
                 </div>
               </div>`
   return html
 }
 
 function createStoreHTML(id, img, icon, name) {
-  let html = `<div id="${id}" style="margin-top: 5px; margin-right: 5px; width: 200px; height: 250px; background-image: url('./Data/Images/icon_store_item.png'); text-align: center; display: inline-block;">
-                <div style="width: 200px; height: 200px;">
-                  <img id="${img}" style="margin: 10px; max-width: 180px; height: 180px; object-fit: contain; -webkit-user-drag: none;" src="${icon}"></img>
+  let html = `<div id="${id}" style="min-width: var(--size1); height: calc(var(--size1)/4*5); min-height: 250px; margin-top: 5px; margin-right: 5px; background-image: url('./Data/Images/icon_store_item.png'); background-repeat: no-repeat; background-size: cover; text-align: center; display: inline-block;">
+                <div style="width: var(--size1); height: 80%;">
+                  <img id="${img}" style="width: 90%; height: 95%; margin: 10px; object-fit: contain; -webkit-user-drag: none;" src="${icon}"></img>
                 </div>
-                <div style="width: 190px; height: 40px; padding: 5px">
-                  <div class="unselectableDiv">
-                    <div style="font-size: 17px; overflow: hidden; width: 190px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${name}</div>
-                  </div>
+                <div style="width: var(--size1); height: 20%; display: flex;">
+                  <div style="width: 90%; margin: auto; font-size: calc(var(--size1)/12); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${name}</div>
                 </div>
               </div>`
   return html
 }
 
 function createStoreHTML2(id, img, icon, name, info) {
-  let html = `<div id="${id}" style="margin-top: 5px; margin-right: 5px; width: 200px; height: 250px; background-image: url('./Data/Images/icon_store_item.png'); text-align: center; display: inline-block;">
-                <div style="width: 200px; height: 200px;">
-                  <img id="${img}" style="margin: 10px; max-width: 180px; height: 180px; object-fit: contain; -webkit-user-drag: none;" src="${icon}"></img>
+  let html = `<div id="${id}" style="min-width: var(--size1); height: calc(var(--size1)/4*5); min-height: 250px; margin-top: 5px; margin-right: 5px; background-image: url('./Data/Images/icon_store_item.png'); background-repeat: no-repeat; background-size: cover; text-align: center; display: inline-block;">
+                <div style="width: var(--size1); height: 80%;">
+                  <img id="${img}" style="width: 90%; height: 95%; margin: 10px; object-fit: contain; -webkit-user-drag: none;" src="${icon}"></img>
                 </div>
-                <div style="width: 190px; height: 40px; padding: 5px">
-                  <div class="unselectableDiv">
-                    <div style="font-size: 17px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; width: 190px;">${name}</div>
-                    <div style="font-size: 14px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; width: 190px; padding-top: 2px;">${info}</div>
+                <div style="width: var(--size1); height: 20%; display: flex;">
+                  <div style="width: 100%; margin: auto;">
+                    <div style="width: 90%; margin: auto; font-size: calc(var(--size1)/12); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}</div>
+                    <div style="width: 90%; margin: auto; font-size: calc(var(--size1)/15); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-top: 2px;">${info}</div>
                   </div>
                 </div>
               </div>`
