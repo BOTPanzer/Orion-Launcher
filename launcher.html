@@ -88,69 +88,11 @@
     document.getElementById('list').insertAdjacentHTML('beforeend', item)
   })
 
-  ipcRenderer.on('addListener', (event, id, img, path, name, gamePathArg, gamePath, iconPath) => {
-    addButtonListener(id, function() {
-      if (adding) return
-      document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item_clicked.png")';
-      timeId = id
-      time = Date.now()
-    }, function() {
-      if (adding) return
-      if ($("#"+id+":hover").length != 0) { //IF IS A CLICK
-        if (timeId == id && time+350 < Date.now()) selecting = true
-        if (selecting) {
-          if (selected.includes(id)) {
-            const index = selected.indexOf(id);
-            if (index > -1) {
-              selected.splice(index, 1);
-              if (selected.length == 0) selecting = false
-              document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
-            }
-          } else {
-            selected.push(id)
-          }
-        } else {
-          document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
-          if (click == id) {
-            if (gamePathArg.argsClean != '') {
-              let spawn = require("child_process").spawn;
-              let bat = spawn("cmd.exe", gamePathArg.argsClean)
-            } else {
-              const { shell } = require('electron');
-              shell.openPath(gamePathArg.pathClean)
-            }
-            addNoti(name)
-            click = ''
-          } else {
-            click = id
-            setTimeout(function() {
-              if (click == id) {
-                click = ''
-              }
-            }, 500)
-          }
-        }
-      } else {
-        if (!selecting) document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
-      }
-    }, function() {})
+  ipcRenderer.on('addListener', (event, id, img) => {
+    let path = document.getElementById('path-'+id).innerText
+    let isFile = true
+    if (document.getElementById('isFile-'+id).innerText != 'true') isFile = false
 
-    $('#'+id).bind('contextmenu', function() {
-      if (!selecting || selected.length == 1) {
-        ipcRenderer.send('pause')
-        ipcRenderer.send('contextFile', path, name, gamePath, iconPath, document.getElementById(img).src)
-      } else {
-        let paths = []
-        for(i in selected) {
-          paths.push(document.getElementById('data-'+selected[i]).innerText)
-        }
-        ipcRenderer.send('pause')
-        ipcRenderer.send('contextMulti', paths)
-      }
-    })
-  })
-
-  ipcRenderer.on('addFolderListener', (event, id, path) => {
     addButtonListener(id, function() {
       if (adding) return
       document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item_clicked.png")';
@@ -173,15 +115,14 @@
           }
         } else {
           document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
-          document.getElementById('editText').value = ''
-          let scroll = document.getElementById('rightBar').scrollTop
-          if (scroll == 0) {
-            ipcRenderer.send('loadPath', path)
+          if (isFile) {
+            let name = document.getElementById('name-'+id).innerText
+            let pathClean = document.getElementById('pathClean-'+id).innerText
+            let argsClean = document.getElementById('argsClean-'+id).innerText
+            if (argsClean != '') argsClean = argsClean.split(",")
+            openFile(id, name, pathClean, argsClean)
           } else {
-            $("#rightBar").animate({ scrollTop: 0 }, "fast");
-	          setTimeout(function() {
-              ipcRenderer.send('loadPath', path)
-            }, 150)
+            openFolder(path)
           }
         }
       } else {
@@ -191,13 +132,16 @@
 
     if (id != 'backButt')
     $('#'+id).bind('contextmenu', function() {
-      if (!selecting || selected.length == 1) {
+      if (!selecting || selected.length == 1 && selected.includes(id)) {
         ipcRenderer.send('pause')
-        ipcRenderer.send('contextFolder', path)
-      } else {
+        if (isFile) {
+          ipcRenderer.send('contextFile', path, document.getElementById(img).src)
+        } else
+          ipcRenderer.send('contextFolder', path)
+      } else if (selected.includes(id)) {
         let paths = []
         for(i in selected) {
-          paths.push(document.getElementById('data-'+selected[i]).innerText)
+          paths.push(document.getElementById('path-'+selected[i]).innerText)
         }
         ipcRenderer.send('pause')
         ipcRenderer.send('contextMulti', paths)
@@ -212,6 +156,41 @@
   ipcRenderer.on('finished', (event) => {
     adding = false
   })
+
+  //OPEN
+  function openFile(id, name, pathClean, argsClean) {
+    if (click == id) {
+      if (argsClean != '') {
+        let spawn = require("child_process").spawn;
+        let bat = spawn("cmd.exe", argsClean)
+      } else {
+        const { shell } = require('electron');
+        shell.openPath(pathClean)
+      }
+      addNoti(name)
+      click = ''
+    } else {
+      click = id
+      setTimeout(function() {
+        if (click == id) {
+          click = ''
+        }
+      }, 500)
+    }
+  }
+
+  function openFolder(path) {
+    document.getElementById('editText').value = ''
+    let scroll = document.getElementById('rightBar').scrollTop
+    if (scroll == 0) {
+      ipcRenderer.send('loadPath', path)
+    } else {
+      $("#rightBar").animate({ scrollTop: 0 }, "fast");
+	    setTimeout(function() {
+        ipcRenderer.send('loadPath', path)
+      }, 150)
+    }
+  }
 
   //NOTI
   function addNoti(name) {

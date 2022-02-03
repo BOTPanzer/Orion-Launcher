@@ -111,14 +111,22 @@ if (!app.requestSingleInstanceLock()) {
   })
 
   ipcMain.on('pause', (event) => {
-    win.webContents.send('pause')
-    paused = true
+    pause()
   })
 
+  function pause() {
+    win.webContents.send('pause')
+    paused = true
+  }
+
   ipcMain.on('resume', (event) => {
+    resume()
+  })
+
+  function resume() {
     paused = false
     win.webContents.send('resume')
-  })
+  }
 
   ipcMain.on('exitContext', (event) => {
     closeWin2();
@@ -194,30 +202,36 @@ if (!app.requestSingleInstanceLock()) {
         let name = data.name
         let gamePath = data.gamePath
         let iconPath = data.iconPath
+        if (iconPath == undefined) iconPath = ''
+        let pathClean = ''
+        let argsClean = ''
+        if (isFile) {
+          let gamePathArg = getPathInfo(gamePath)
+          pathClean = gamePathArg.pathClean
+          argsClean = gamePathArg.argsClean
+        }
         //Id
         let id = `game${i}`
         if (!isFile) id = `folder${i}`
         let img = `img${i}`
         //Default Image
-        let image = "./Data/Images/icon_folder.png"
-        if (isFile) image = "./Data/Images/icon_file.png"
-        //HTML
-        let html = createDataHTML(id, img, image, name, path)
-        //Create
-        win.webContents.send('add1ToList', html);
+        let icon = "./Data/Images/icon_folder.png"
+        if (isFile) icon = "./Data/Images/icon_file.png"
+        //Create HTML
+        let html = createDataHTML(id, img, icon, path, isFile, name, gamePath, iconPath, pathClean, argsClean)
+        win.webContents.send('add1ToList', html)
+        win.webContents.send('addListener', id, img)
         if (isFile) {
-          let gamePathArg = getPathInfo(gamePath)
-          if (iconPath != undefined) {
-            win.webContents.send('addListener', id, img, path, name, gamePathArg, gamePath, iconPath)
-          } else {
-            win.webContents.send('addListener', id, img, path, name, gamePathArg, gamePath, '')
-            iconPath = gamePathArg.pathClean
-          }
+          if (iconPath == '') iconPath = pathClean
           app.getFileIcon(iconPath, {size:"large"}).then((fileIcon) =>{
-            if (actualPath == argPath) win.webContents.send('changeIcon', img, fileIcon.toDataURL()) 
+            if (actualPath == argPath) {
+              win.webContents.send('changeIcon', img, fileIcon.toDataURL())
+              setTimeout(function() {
+                if (win2 != null)
+                  win2.webContents.send('changeIcon', path, fileIcon.toDataURL())
+              }, 1000)
+            }
           })
-        } else{
-          win.webContents.send('addFolderListener', id, path)
         }
       }
       win.webContents.send('finished')
@@ -225,19 +239,22 @@ if (!app.requestSingleInstanceLock()) {
   }
 
   function createBackButt(argPath, search) {
-    //HTML
-    let html = createHTML("backButt", "backImg", "./Data/Images/icon_back.png", "Back")
+    let bpath = argPath
     if (search == '' && argPath != launcherFolder) {
-      win.webContents.send('add1ToList', html);
       //bpath
-      let bpath = argPath
       if (bpath.endsWith("\\")) bpath = bpath.slice(0,-1)
       let numb = bpath.split("\\").length - 1
       if (numb > 1) bpath = bpath.substring(0, bpath.lastIndexOf("\\")+1)
       win.webContents.send('addFolderListener', 'backButt', bpath);
+      //HTML
+      let html = createDataHTML('backButt', 'backImg', './Data/Images/icon_back.png', bpath, 'false', 'Back', '', '', '', '')
+      win.webContents.send('add1ToList', html)
+      win.webContents.send('addListener', 'backButt', 'backImg')
     } else if (search != '') {
-      win.webContents.send('add1ToList', html);
-      win.webContents.send('addFolderListener', 'backButt', argPath);
+      //HTML
+      let html = createDataHTML('backButt', 'backImg', './Data/Images/icon_back.png', bpath, 'false', 'Back', '', '', '', '')
+      win.webContents.send('add1ToList', html)
+      win.webContents.send('addListener', 'backButt', 'backImg')
     }
   }
 
@@ -248,19 +265,23 @@ if (!app.requestSingleInstanceLock()) {
 
 
   //FUNCTIONS LAUNCHER CONTEXT
-  ipcMain.on('contextFile', (event, path, name, filePath, iconPath, img) => {
-    let gamePathArg = getPathInfo(filePath)
-    showPath = gamePathArg.pathClean
+  ipcMain.on('contextFile', (event, path, img) => {
+    let data = getFileInfo(path, false)
+    let name = data.name
+    let gamePath = data.gamePath
+    let iconPath = data.iconPath
+    if (iconPath == undefined) iconPath = ''
+
     createWin2('context.html', 420)
 
     win2.on('close', function() {
-      createList(actualPath)
+      resume()
       win2 = null
     });
 
     win2.webContents.send('setLocation', path, img);
     win2.webContents.send('setName', name);
-    win2.webContents.send('setPath', filePath);
+    win2.webContents.send('setPath', gamePath);
     win2.webContents.send('setIconPath', iconPath);
   })
 
@@ -268,7 +289,7 @@ if (!app.requestSingleInstanceLock()) {
     createWin2('context.html', 189)
 
     win2.on('close', function() {
-      createList(actualPath)
+      resume()
       win2 = null
     });
 
@@ -284,7 +305,7 @@ if (!app.requestSingleInstanceLock()) {
     else createWin2('context-multi.html', 215)
 
     win2.on('close', function() {
-      createList(actualPath)
+      resume()
       win2 = null
     })
 
@@ -355,6 +376,7 @@ if (!app.requestSingleInstanceLock()) {
             if (i == paths.length-1) {
               closeWin2()
               closeWin3()
+              createList(actualPath)
             }
           })
         } else {
@@ -363,6 +385,7 @@ if (!app.requestSingleInstanceLock()) {
             if (i == paths.length-1) {
               closeWin2()
               closeWin3()
+              createList(actualPath)
             }
           })
         }
@@ -426,7 +449,7 @@ if (!app.requestSingleInstanceLock()) {
     createWin2('addfolder.html', 189)
 
     win2.on('close', function() {
-      createList(actualPath)
+      resume()
       win2 = null
     });
 
@@ -437,7 +460,7 @@ if (!app.requestSingleInstanceLock()) {
     createWin2('addgame.html', 375)
 
     win2.on('close', function() {
-      createList(actualPath)
+      resume()
       win2 = null
     });
 
@@ -461,10 +484,11 @@ if (!app.requestSingleInstanceLock()) {
   ipcMain.on('addFolderContext', (event, name) => {
     let fullName = actualPath+name.trim()
     if (!fs.existsSync(fullName)) {
-      fs.mkdirSync(fullName);
+      fs.mkdirSync(fullName)
       closeWin2()
-      win.webContents.send('log', `Folder "${name}" Added`);
-    } else win.webContents.send('log', `Folder "${name}" Already Exists`);
+      createList(actualPath)
+      win.webContents.send('log', `Folder "${name}" Added`)
+    } else win.webContents.send('log', `Folder "${name}" Already Exists`)
   })
 
   ipcMain.on('addGameContext', (event, name, path, icon) => {
@@ -475,6 +499,7 @@ if (!app.requestSingleInstanceLock()) {
       fs.writeFile(fullName, data, (err) => {
         win.webContents.send('log', `Game "${name}" Added`);
         closeWin2()
+        createList(actualPath)
       })
     } else win.webContents.send('log', `Game "${name}" Already Exists`);
   })
@@ -483,6 +508,16 @@ if (!app.requestSingleInstanceLock()) {
   //FUNCTIONS STORE
   ipcMain.on('searchGames', (event, orSearch) => {
     searchGames(orSearch)
+  })
+
+  ipcMain.on('storeLeftClick', (event, link) => {
+    let winStore = new BrowserWindow({
+      height: 550,
+      width: 970
+    })
+  
+    winStore.loadURL(link)
+    winStore.removeMenu()
   })
 
   function searchGames(orSearch) {
@@ -898,7 +933,8 @@ function updateTheme() {
   theme = { background, c1, c2, c3, c4}
 }
 
-function getFileInfo(argPath) {
+function getFileInfo(argPath, fixed) {
+  if (fixed == undefined) fixed = true
   let path = argPath
   if (path.endsWith('\\')) path = path.slice(0,-1)
   //isFile
@@ -914,7 +950,7 @@ function getFileInfo(argPath) {
     let gamePath = si[0]
     if (gamePath != undefined) {
       gamePath = gamePath.replaceAll('\r', '')
-      if (gamePath.startsWith('?:')) gamePath = gamePath.replace('?:', launcherFolder.substring(0, 2))
+      if (gamePath.startsWith('?:') && fixed) gamePath = gamePath.replace('?:', launcherFolder.substring(0, 2))
     }
     //Icon
     let iconPath = si[1]
@@ -1029,10 +1065,17 @@ function createHTML(id, img, icon, name) {
   return html
 }
 
-function createDataHTML(id, img, icon, name, path) {
-  let data = path
+function createDataHTML(id, img, icon, path, isFile, name, gamePath, iconPath, pathClean, argsClean) {
   let html = `<div id="${id}" style="margin-top: 5px; margin-right: 5px; width: 150px; height: 150px; background-image: url('./Data/Images/icon_item.png'); text-align: center; display: inline-block;">
-                <div id="${'data-'+id}" style="display: none;">${data}</div>
+                
+                <div id="${'path-'+id}" style="display: none;">${path}</div>
+                <div id="${'isFile-'+id}" style="display: none;">${isFile}</div>
+                <div id="${'name-'+id}" style="display: none;">${name}</div>
+                <div id="${'gamePath-'+id}" style="display: none;">${gamePath}</div>
+                <div id="${'iconPath-'+id}" style="display: none;">${iconPath}</div>
+                <div id="${'pathClean-'+id}" style="display: none;">${pathClean}</div>
+                <div id="${'argsClean-'+id}" style="display: none;">${argsClean}</div>
+                
                 <div style="width: 150px; height: 100px;">
                   <img id="${img}" style="margin: 10px; max-width: 130px; height: 90px; object-fit: contain; -webkit-user-drag: none;" src="${icon}"></img>
                 </div>

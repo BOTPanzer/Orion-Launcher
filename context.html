@@ -114,7 +114,7 @@ body {
   let showPath = ''
 
   addButtonListener('exit', function() {
-    document.getElementById('exit').style.backgroundColor = '#690108';
+    document.getElementById('exit').style.backgroundColor = 'var(--c2)';
   }, function() {
     document.getElementById('exit').style.backgroundColor = 'rgba(0, 0, 0, 0)';
   }, function() {
@@ -143,6 +143,11 @@ body {
     oldName = name
   })
 
+  ipcRenderer.on('changeIcon', (event, argPath, icon) => {
+    if (actualPath == argPath)
+      document.getElementById('img').src = icon
+  })
+
   ipcRenderer.on('setPath', (event, path) => {
     if (path == undefined) {
       document.getElementById('path').style.display = 'none'
@@ -152,6 +157,7 @@ body {
       const fs = require('fs');
       let gamePathArg = getPathInfo(path)
       showPath = gamePathArg.pathClean
+      if (showPath.startsWith('?:')) showPath = showPath.replace('?:', actualPath.substring(0, 2))
       if (fs.existsSync(showPath)) {
         document.getElementById('show').style.display = 'flex'
       } else {

@@ -1,7 +1,11 @@
 <style>	
+::-webkit-scrollbar-track {
+  border-radius: 5px;
+}
+
 .list {
-  height: 270px;
   color: var(--c3);
+  border-radius: 5px;
   font-family: ItemFont;
   padding-left: 5px;
   padding-bottom: 5px;
@@ -107,6 +111,10 @@
       const { shell } = require('electron');
       shell.openExternal(link)
     })
+
+    $('#'+id).bind('contextmenu', function() {
+      ipcRenderer.send('storeLeftClick', link)
+    })
   })
 
   ipcRenderer.on('changeIcon', (event, img, icon) => {
@@ -161,33 +169,22 @@
   })
   
   //HORIZONTAL SCROLL
-  $('#listElamigos').bind('wheel', function() {
-    if ($('#listElamigos').hasScrollBar()) {
-      this.scrollLeft -= (event.wheelDelta/2);
-      event.preventDefault();
-    }
-  })
+  addScroll('listElamigos')
 
-  $('#listFitgirl').bind('wheel', function() {
-    if ($('#listFitgirl').hasScrollBar()) {
-      this.scrollLeft -= (event.wheelDelta/2);
-      event.preventDefault();
-    }
-  })
+  addScroll('listFitgirl')
 
-  $('#listPivi').bind('wheel', function() {
-    if ($('#listPivi').hasScrollBar()) {
-      this.scrollLeft -= (event.wheelDelta/2);
-      event.preventDefault();
-    }
-  })
+  addScroll('listPivi')
 
-  $('#listSteamUnlocked').bind('wheel', function() {
-    if ($('#listSteamUnlocked').hasScrollBar()) {
-      this.scrollLeft -= (event.wheelDelta/2);
-      event.preventDefault();
-    }
-  })
+  addScroll('listSteamUnlocked')
+
+  function addScroll(id) {
+    $('#'+id).bind('wheel', function() {
+      if ($('#'+id).hasScrollBar()) {
+        this.scrollLeft -= (event.wheelDelta/1.2)
+        event.preventDefault()
+      }
+    })
+  }
 
   jQuery.fn.hasScrollBar = function(direction) {
     return this.get(0).scrollWidth > this.innerWidth();
