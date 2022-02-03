@@ -179,7 +179,12 @@ body {
     document.getElementById('folderIcon').style.backgroundImage = 'url("./Data/Images/icon_description_folder_clicked")';
 	  setTimeout(function() {
       document.getElementById('folderIcon').style.backgroundImage = 'url("./Data/Images/icon_description_folder.png")';
-      ipcRenderer.send('getFileIconContext')
+      let a = document.getElementById('pathText').value
+      if (a.startsWith('"') && !a.endsWith('"')) {
+        ipcRenderer.send('getFileIconContext', a.substring(1, a.lastIndexOf('"')))
+      } else {
+        ipcRenderer.send('getFileIconContext', a)
+      }
     }, 100)
   })
 

@@ -64,7 +64,7 @@ if (!app.requestSingleInstanceLock()) {
     if (window == 'launcher') {
       createList(actualPath)
     } else if (window == 'store') {
-      
+      searchGames('')
     } else if (window == 'add') {
       win.webContents.send('start', actualPath, launcherFolder);
     } else if (window == 'themes') {
@@ -225,8 +225,10 @@ if (!app.requestSingleInstanceLock()) {
     win2.webContents.send('fileGotten', await getFile("Choose a Game"));
   })
 
-  ipcMain.on('getFileIconContext', async function() {
-    win2.webContents.send('fileGottenIcon', await getFile("Choose a Game"));
+  ipcMain.on('getFileIconContext', async function(event, path) {
+    let apath = path.substring(0, path.lastIndexOf('\\')+1)
+    if (!fs.existsSync(apath)) win2.webContents.send('fileGottenIcon', await getFile("Choose a Game"))
+    else win2.webContents.send('fileGottenIcon', await getFile("Choose a Game", `${apath}`))
   })
 
   ipcMain.on('move', async function(event, path) {
@@ -323,6 +325,9 @@ if (!app.requestSingleInstanceLock()) {
               closeWin2()
               createList(actualPath)
             })
+          } else {
+            closeWin2()
+            createList(actualPath)
           }
         })
       } else {
@@ -332,6 +337,9 @@ if (!app.requestSingleInstanceLock()) {
             closeWin2()
             createList(actualPath)
           })
+        } else {
+          closeWin2()
+          createList(actualPath)
         }
       }
     }
@@ -343,8 +351,10 @@ if (!app.requestSingleInstanceLock()) {
     win.webContents.send('fileGotten', await getFile("Choose a Game"));
   })
 
-  ipcMain.on('getFileIcon', async function() {
-    win.webContents.send('fileGottenIcon', await getFile("Choose a Game"));
+  ipcMain.on('getFileIcon', async function(event, path) {
+    let apath = path.substring(0, path.lastIndexOf('\\')+1)
+    if (!fs.existsSync(apath)) win.webContents.send('fileGottenIcon', await getFile("Choose a Game"))
+    else win.webContents.send('fileGottenIcon', await getFile("Choose a Game", `${apath}`))
   })
 
   ipcMain.on('addFolder', (event, name) => {
@@ -369,44 +379,46 @@ if (!app.requestSingleInstanceLock()) {
 
   //FUNCTIONS STORE
   ipcMain.on('searchGames', (event, orSearch) => {
+    searchGames(orSearch)
+  })
+
+  function searchGames(orSearch) {
     win.webContents.send('clearList');
     win.webContents.send('searchingResults', 'Elamigos');
     win.webContents.send('searchingResults', 'Fitgirl');
     win.webContents.send('searchingResults', 'Pivi');
     win.webContents.send('searchingResults', 'SteamUnlocked');
-    win.webContents.send('searchingResults', 'Skidrow');
 
     let search = orSearch.replaceAll(' ', '+')
 
     let fullURL = 'https://www.elamigos-games.com/?q='+search
     if (search == '') fullURL = 'https://www.elamigos-games.com/'
     getHTML(fullURL).then(function(result) {
-      elamigos(result)
+      if (result == undefined) win.webContents.send('noResults', 'Elamigos');
+      else elamigos(result)
     })
 
     fullURL = 'https://fitgirlrepacks.co/search/'+search
     if (search == '' || search.length < 3) fullURL = 'https://fitgirlrepacks.co/'
     getHTML(fullURL).then(function(result) {
-      fitgirl(result)
+      if (result == undefined) win.webContents.send('noResults', 'Fitgirl');
+      else fitgirl(result)
     })
 
     fullURL = 'https://pivigames.blog/?s='+search
     if (search == '') fullURL = 'https://pivigames.blog/'
     getHTML(fullURL).then(function(result) {
-      pivi(result)
+      if (result == undefined) win.webContents.send('noResults', 'Fitgirl');
+      else pivi(result)
     })
 
     fullURL = 'https://steamunlocked.net/?s='+search
     if (search == '') fullURL = 'https://steamunlocked.net/'
-    getHTML(fullURL).then(function(result) {
-      steamunlocked(result, search)
+    getHTMLAgent(fullURL).then(function(result) {
+      if (result == undefined) win.webContents.send('noResults', 'Fitgirl');
+      else steamunlocked(result, search)
     })
-    
-
-    getHTML('https://www.skidrowcodex.net/game-list/').then(function(result) {
-      skidrow(result, orSearch)
-    })
-  })
+  }
 
   function elamigos(result) {
     win.webContents.send('clearList', 'listElamigos');
@@ -440,7 +452,7 @@ if (!app.requestSingleInstanceLock()) {
       let img = imgs[i]
       let link = links[i]
       let name = names[i]
-      let html = createHTML(id, null, img, name)
+      let html = createStoreHTML(id, null, img, name)
       win.webContents.send('add1ToList', html, 'listElamigos');
       win.webContents.send('addListener', id, link);
     }
@@ -459,15 +471,13 @@ if (!app.requestSingleInstanceLock()) {
     var names = []
     //LINKS & NAMES
     for(i in si) {
-      if (si[i].includes('href="https://fitgirlrepacks.co/repack')) {
-        let link = si[i].substring(si[i].indexOf('href="https://fitgirlrepacks.co/repack')+6)
-        link = link.substring(0, link.indexOf('"'))
-        let name = si[i].substring(si[i].indexOf('rel="bookmark">')+15)
-        name = name.substring(0, name.indexOf('<'))
-        if (link != '' && name != '' && name != 'Upcoming repacks') {
-          links.push(link)
-          names.push(titleCase(name))
-        }
+      let link = si[i].substring(si[i].indexOf('href="https://fitgirlrepacks.co/repack')+6)
+      link = link.substring(0, link.indexOf('"'))
+      let name = si[i].substring(si[i].indexOf('rel="bookmark">')+15)
+      name = name.substring(0, name.indexOf('<'))
+      if (link != '' && name != '' && name != 'Upcoming repacks') {
+        links.push(link)
+        names.push(titleCase(name))
       }
     }
     //HAS RESULTS
@@ -477,16 +487,19 @@ if (!app.requestSingleInstanceLock()) {
     for(i in links) {
       if (window != 'store') return
       let id = `fitgirl${i}`
-      let link = links[i]
+      let tmp = links[i]
+      tmp = tmp.substring(tmp.lastIndexOf('/'))
+      tmp = tmp.substring(tmp.indexOf('-')+1)
+      let link = 'https://fitgirl-repacks.site/'+tmp
       let name = names[i]
       let img = i+link
-      let html = createHTML(id, img, './Data/Images/icon_file.png', name)
+      let html = createStoreHTML(id, img, './Data/Images/icon_file.png', name)
       win.webContents.send('add1ToList', html, 'listFitgirl');
       win.webContents.send('addListener', id, link);
       //IMAGE
-      fitgirlImg(link).then((image) =>{ 
+      fitgirlImg(links[i]).then((image) =>{ 
         win.webContents.send('changeIcon', img, image) 
-      }) 
+      })
     }
 
     async function fitgirlImg(link) {
@@ -536,88 +549,9 @@ if (!app.requestSingleInstanceLock()) {
       let img = imgs[i]
       let link = links[i]
       let name = names[i]
-      let html = createHTML(id, null, img, name)
+      let html = createStoreHTML(id, null, img, name)
       win.webContents.send('add1ToList', html, 'listPivi');
       win.webContents.send('addListener', id, link);
-    }
-  }
-
-  function skidrow(result, search) {
-    win.webContents.send('clearList', 'listSkidrow');
-    let part = result.substring(result.indexOf('<h2 style="text-align: center;">'), result.indexOf('<footer class="container">'))
-    var si = part.split('<li >')
-    var links = []
-    var names = []
-    //LINKS & NAMES W/ SEARCH
-    if (search != '')
-    for(i in si) {
-      if (links.length == 12) break
-      if (!si[i].includes('href="') && !si[i].includes('title="')) continue
-      let link = si[i].substring(si[i].indexOf('href="')+6)
-      link = link.substring(0, link.indexOf('"')-1)
-      let name = si[i].substring(si[i].indexOf('title="')+7)
-      name = name.substring(0, name.indexOf('"'))
-      if (link != '' && name != '') {
-        if (name.toLowerCase().includes(search.toLowerCase())) {
-          links.push(link)
-          names.push(titleCase(name))
-        }
-      }
-    }
-    //LINKS & NAMES NO SEARCH
-    if (search == '') {
-      let tmpi = 12
-      var ranNumbs = []
-      while (tmpi > 0) {
-        getNumb()
-        function getNumb() { addNumb(Math.floor(Math.random() * (si.length - 1) + 1)) }
-        function addNumb(numb) {
-          if (!ranNumbs.includes(numb)) {
-            ranNumbs.push(numb)
-            tmpi = tmpi-1
-          } else getNumb()
-        }
-      }
-      for(i in ranNumbs) {
-        if (!si[ranNumbs[i]].includes('href="') && !si[ranNumbs[i]].includes('title="')) continue
-        let link = si[ranNumbs[i]].substring(si[ranNumbs[i]].indexOf('href="')+6)
-        link = link.substring(0, link.indexOf('"')-1)
-        let name = si[ranNumbs[i]].substring(si[ranNumbs[i]].indexOf('title="')+7)
-        name = name.substring(0, name.indexOf('"'))
-        if (link != '' && name != '') {
-          links.push(link)
-          names.push(titleCase(name))
-        }
-      }
-    }
-    //HAS RESULTS
-    if (links.length == 0) win.webContents.send('noResults', 'Skidrow');
-    else win.webContents.send('hasResults', 'Skidrow');
-    //ADD GAMES
-    for(i in links) {
-      if (window != 'store') return
-      let id = `skidrow${i}`
-      let link = links[i]
-      let name = names[i]
-      let img = i+link
-      let html = createHTML(id, img, './Data/Images/icon_file.png', name)
-      win.webContents.send('add1ToList', html, 'listSkidrow');
-      win.webContents.send('addListener', id, link);
-      //IMAGE
-      skidrowImg(link).then((image) =>{ 
-        win.webContents.send('changeIcon', img, image) 
-      }) 
-    }
-
-    async function skidrowImg(link) {
-      const superagent = require('superagent');
-      const response = await superagent.get(link)
-      let html = response.text
-      
-      let img = html.substring(html.indexOf('<div id="post'))
-      img = img.substring(img.indexOf('src="')+5)
-      img = img.substring(0, img.indexOf('"'))
-      return img
     }
   }
 
@@ -667,7 +601,7 @@ if (!app.requestSingleInstanceLock()) {
       let img = imgs[i]
       let link = links[i]
       let name = names[i]
-      let html = createHTML(id, null, img, name)
+      let html = createStoreHTML(id, null, img, name)
       win.webContents.send('add1ToList', html, 'listSteamUnlocked');
       win.webContents.send('addListener', id, link);
     }
@@ -675,7 +609,13 @@ if (!app.requestSingleInstanceLock()) {
 
   async function getHTML(url) {
     const superagent = require('superagent');
-    const response = await superagent.get(url).set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36')
+    const response = await superagent.get(url).catch(function(err){})
+    return response.text
+  }
+
+  async function getHTMLAgent(url) {
+    const superagent = require('superagent');
+    const response = await superagent.get(url).set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36').catch(function(err){})
     return response.text
   }
 
@@ -855,11 +795,25 @@ function getFileInfo(argPath) {
 function createHTML(id, img, icon, name) {
   let html = `<div id="${id}" style="margin-top: 5px; margin-right: 5px; width: 150px; height: 150px; background-image: url('./Data/Images/icon_item.png'); text-align: center; display: inline-block;">
                 <div style="width: 150px; height: 100px;">
-                  <img id="${img}" class="unselectable" style="margin: 10px; max-width: 130px; height: 90px;" src="${icon}"></img>
+                  <img id="${img}" class="unselectable" style="margin: 10px; max-width: 130px; height: 90px; object-fit: contain;" src="${icon}"></img>
                 </div>
                 <div style="width: 140px; height: 40px; padding: 5px">
                   <div class="unselectableDiv">
                     <div class="unselectable" style="line-height:20px; display: inline-block; max-height: 40px; width: 140px; white-space: normal;">${name}</div>
+                  </div>
+                </div>
+              </div>`
+  return html
+}
+
+function createStoreHTML(id, img, icon, name) {
+  let html = `<div id="${id}" style="margin-top: 5px; margin-right: 5px; width: 200px; height: 250px; background-image: url('./Data/Images/icon_store_item.png'); text-align: center; display: inline-block;">
+                <div style="width: 200px; height: 200px;">
+                  <img id="${img}" class="unselectable" style="margin: 10px; max-width: 180px; height: 180px; object-fit: contain;" src="${icon}"></img>
+                </div>
+                <div style="width: 190px; height: 40px; padding: 5px">
+                  <div class="unselectableDiv">
+                    <div class="unselectable" style="line-height:20px; display: inline-block; max-height: 40px; width: 190px; white-space: normal;">${name}</div>
                   </div>
                 </div>
               </div>`
@@ -871,9 +825,12 @@ function closeWin2() {
   win2.close()
 }
 
-async function getFile(title) {
+async function getFile(title, path) {
+  let defpath = path
+  if (defpath == undefined) defpath = launcherFolder
   let result = await dialog.showOpenDialog({
     title: title,
+    defaultPath: defpath,
     properties: ['openFile'],
   }).then(function(files) {
     let file = files.filePaths[0]
@@ -889,7 +846,7 @@ async function getFile(title) {
 async function getFolder(title) {
   let result = await dialog.showOpenDialog({
     title: title,
-    defaultPath: launcherFolder,
+    defaultPath: defpath,
     properties: ['openDirectory'],
   }).then(function(files) {
     let file = files.filePaths[0]

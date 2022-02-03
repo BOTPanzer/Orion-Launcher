@@ -1,6 +1,6 @@
 {
   "name": "orion-launcher",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "author": "BOT Panzer",
   "description": "Launcher & Game Store",
   "main": "main.js",
@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "fs-extra": "^9.1.0",
+    "got": "^11.8.2",
     "jquery": "^3.6.0",
     "jsdom": "^16.2.2",
     "node-addon-api": "^3.1.0",

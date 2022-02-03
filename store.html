@@ -40,13 +40,19 @@ body {
 }
 
 .list {
-  color: var(--c3); 
-  font-family: ItemFont; 
-  margin-left: 10px; 
-  margin-right: 10px; 
-  padding-bottom: 5px; 
-  overflow-x: auto;
+  color: var(--c3);
+  font-family: ItemFont;
+  padding-left: 5px; 
+  padding-bottom: 5px;
+  margin-left: 5px; 
+  margin-right: 5px; 
   white-space: nowrap;
+  background-color: var(--c1); 
+  border-style: solid; 
+  border-color: var(--c2); 
+  border-width: 1px; 
+  overflow-x: auto;
+  display: none;
 }
 	
 .unselectableDiv {
@@ -79,22 +85,36 @@ body {
 </div>
 
 <div style="height: 36px; display: flex; align-items: center; margin: 20px; margin-bottom: 30px;">
-  <div id="search" style="height: 36px; min-width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px; color: var(--c3);">
+  <input id='editText' type="text" size="60" maxlength="50" style="height: 32px; padding-left: 10px; padding-right: 10px; margin-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
+  <div id="search" style="height: 36px; min-width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
     <div class="unselectable" style="font-family: ItemFont;">Search</div>
   </div>
-  <input id='editText' type="text" size="60" maxlength="50" style="height: 32px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
 </div>
 <div style="margin: 10px; margin-top: 20px;">
-  <div class="unselectable" id="Elamigos" style="color: var(--c4); font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">ElAmigos:</div>
+
+  <div style="display: flex; font-family: ItemFont; font-size: 20px; margin-top: 20px; justify-content: space-between">
+    <div class="unselectable" id="Elamigos" style="color: var(--c4); padding: 5px; padding-left: 10px;">ElAmigos:</div>
+    <div class="unselectable" id="moreElamigos" style="color: var(--c4); padding: 5px; padding-left: 10px; float: right;">Show More</div>
+  </div>
   <div class="list" id="listElamigos"></div>
-  <div class="unselectable" id="Fitgirl" style="color: var(--c4); font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">Fitgirl:</div>
+
+  <div style="display: flex; font-family: ItemFont; font-size: 20px; margin-top: 20px; justify-content: space-between">
+    <div class="unselectable" id="Fitgirl" style="color: var(--c4); padding: 5px; padding-left: 10px;">Fitgirl:</div>
+    <div class="unselectable" id="moreFitgirl" style="color: var(--c4); padding: 5px; padding-left: 10px; float: right;">Show More</div>
+  </div>
   <div class="list" id="listFitgirl"></div>
-  <div class="unselectable" id="Pivi" style="color: var(--c4); font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">Pivi:</div>
+
+  <div style="display: flex; font-family: ItemFont; font-size: 20px; margin-top: 20px; justify-content: space-between">
+    <div class="unselectable" id="Pivi" style="color: var(--c4); padding: 5px; padding-left: 10px;">Pivi:</div>
+    <div class="unselectable" id="morePivi" style="color: var(--c4); padding: 5px; padding-left: 10px; float: right;">Show More</div>
+  </div>
   <div class="list" id="listPivi"></div>
-  <div class="unselectable" id="SteamUnlocked" style="color: var(--c4); font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">Steam Unlocked:</div>
+
+  <div style="display: flex; font-family: ItemFont; font-size: 20px; margin-top: 20px; justify-content: space-between">
+    <div class="unselectable" id="SteamUnlocked" style="color: var(--c4); padding: 5px; padding-left: 10px;">Steam Unlocked:</div>
+    <div class="unselectable" id="moreSteamUnlocked" style="color: var(--c4); padding: 5px; padding-left: 10px; float: right;">Show More</div>
+  </div>
   <div class="list" id="listSteamUnlocked"></div>
-  <div class="unselectable" id="Skidrow" style="color: var(--c4); font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">Skidrow Codex:</div>
-  <div class="list" id="listSkidrow"></div>
 </div>
 
 <script>
@@ -117,28 +137,28 @@ body {
 
   ipcRenderer.on('searchingResults', (event, id) => {
     document.getElementById(id).style.color = 'gray'
+    document.getElementById('list'+id).style.display = 'none'
     let name = id
     if (name == 'Elamigos') name = 'ElAmigos'
     if (name == 'SteamUnlocked') name = 'Steam Unlocked'
-    if (name == 'Skidrow') name = 'Skidrow Codex'
     document.getElementById(id).innerHTML = name+' (searching):'
   })
 
   ipcRenderer.on('hasResults', (event, id) => {
     document.getElementById(id).style.color = c4
+    document.getElementById('list'+id).style.display = 'flex'
     let name = id
     if (name == 'Elamigos') name = 'ElAmigos'
     if (name == 'SteamUnlocked') name = 'Steam Unlocked'
-    if (name == 'Skidrow') name = 'Skidrow Codex'
     document.getElementById(id).innerHTML = name+':'
   })
 
   ipcRenderer.on('noResults', (event, id) => {
     document.getElementById(id).style.color = '#7E0D0E'
+    document.getElementById('list'+id).style.display = 'none'
     let name = id
     if (name == 'Elamigos') name = 'ElAmigos'
     if (name == 'SteamUnlocked') name = 'Steam Unlocked'
-    if (name == 'Skidrow') name = 'Skidrow Codex'
     document.getElementById(id).innerHTML = name+' (no results)'
   })
 
@@ -158,9 +178,9 @@ body {
 
   ipcRenderer.on('addListener', (event, id, link) => {
     document.getElementById(id).addEventListener('click', () => {
-      document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item_clicked.png")';
+      document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_store_item_clicked.png")';
 	    setTimeout(function() {
-        document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
+        document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_store_item.png")';
         const { shell } = require('electron');
         shell.openExternal(link)
       }, 100)
@@ -201,6 +221,26 @@ body {
     ipcRenderer.send('searchGames', search)
   })
   
+  document.getElementById('moreFitgirl').addEventListener('click', () => {
+    const { shell } = require('electron');
+    shell.openExternal('https://fitgirl-repacks.site/')
+  })
+
+  document.getElementById('moreElamigos').addEventListener('click', () => {
+    const { shell } = require('electron');
+    shell.openExternal('https://www.elamigos-games.com/')
+  })
+
+  document.getElementById('morePivi').addEventListener('click', () => {
+    const { shell } = require('electron');
+    shell.openExternal('https://pivigames.blog/')
+  })
+
+  document.getElementById('moreSteamUnlocked').addEventListener('click', () => {
+    const { shell } = require('electron');
+    shell.openExternal('https://steamunlocked.net/')
+  })
+  
   //HORIZONTAL SCROLL
   document.getElementById('listElamigos').addEventListener("wheel", function (event) {
     if ($('#listElamigos').hasScrollBar()) {
@@ -225,13 +265,6 @@ body {
 
   document.getElementById('listSteamUnlocked').addEventListener("wheel", function (event) {
     if ($('#listSteamUnlocked').hasScrollBar()) {
-      this.scrollLeft -= (event.wheelDelta/2);
-      event.preventDefault();
-    }
-  })
-
-  document.getElementById('listSkidrow').addEventListener("wheel", function (event) {
-    if ($('#listSkidrow').hasScrollBar()) {
       this.scrollLeft -= (event.wheelDelta/2);
       event.preventDefault();
     }
