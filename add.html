@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>Oriøn: Game Store</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=0">
+<style>
+/* Style the body */
+	
+@font-face { font-family: BodyFont; src: url('Data/Fonts/font_body.ttf'); } 
+@font-face { font-family: ItemFont; src: url('Data/Fonts/font_item.ttf'); } 
+	
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: BodyFont;
+  margin: 0px;
+  vertical-align: baseline;
+  background: url('./Data/Images/lines.png'), linear-gradient(#38151C, #070B14 75%);
+  background-attachment: fixed;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #181B22; 
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #7E0D0E; 
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #572629; 
+}
+
+.list {
+  color: #68D8D5; 
+  font-family: ItemFont; 
+  margin-left: 10px; 
+  margin-right: 10px; 
+  padding-bottom: 5px; 
+  overflow-x: auto;
+  white-space: nowrap;
+}
+	
+.unselectableDiv {
+  vertical-align: middle;
+  height: 40px;
+  width: 140px;
+  display: table-cell;
+  align-items: center;
+}
+
+.unselectable {
+  overflow: hidden;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+</style>
+</head>
+	
+<body>
+<div>
+  <img id="logo" style="margin: 20px;" src="./Data/Images/logo.png"  height="150px" width="auto"/>
+  <div id="launcher" style="height: 36px; width: 107px; margin: 20px; float: right; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png');">
+    <div class="unselectable" style="color: #68D8D5; font-family: ItemFont;">Launcher</div>
+  </div>
+</div>
+
+<div class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Name:</div>
+<div style="align-items: center; margin: 20px; margin-top: 0px;">
+  <input id='editText' type="text" size="50" maxlength="50" style="height: 32px; padding-left: 10px; padding-right: 10px; color: #68D8D5; font-size: 16px; font-family: ItemFont; background-color: #181B22; border-style: solid; border-color: #7E0D0E; border-width: 1px;"></input>
+</div>
+<div style="margin-left: 20px; margin-right: 20px; display: flex;">
+  <div id="b1" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px;">
+    <div class="unselectable" style="color: #68D8D5; font-family: ItemFont;">Add Folder</div>
+  </div>
+  <div id="b3" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px;">
+    <div class="unselectable" style="color: #68D8D5; font-family: ItemFont;">Add Game</div>
+  </div>
+</div>
+<div id="text" class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Texto</div>
+
+<script>
+  const { shell, ipcRenderer } = require('electron');
+  const fs = require('fs');
+  
+  ipcRenderer.on('changeText', (event, actualPath) => {
+    document.getElementById('text').innerHTML = actualPath
+
+    document.getElementById('b1').addEventListener('click', () => {
+      document.getElementById('b1').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+	    setTimeout(function() {
+        document.getElementById('b1').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+        let name = document.getElementById('editText').value
+        if (name == '') return
+        ipcRenderer.send('b1', name)
+      }, 100)
+    })
+
+    document.getElementById('b3').addEventListener('click', () => {
+      document.getElementById('b3').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+	    setTimeout(function() {
+        document.getElementById('b3').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+        let name = document.getElementById('editText').value
+        if (name == '') return
+        ipcRenderer.send('b3', name)
+      }, 100)
+    })
+  })
+
+  document.getElementById('launcher').addEventListener('click', () => {
+    document.getElementById('launcher').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+	  setTimeout(function() {
+      document.getElementById('launcher').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+      ipcRenderer.send('launcher')
+    }, 100)
+  })
+</script>
+</body>
+</html>

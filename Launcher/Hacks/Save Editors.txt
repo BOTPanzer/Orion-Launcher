@@ -1,6 +1,0 @@
-?:\No Tocar\Hacks\Save Editors\GTA SA Savegame Editor 3.2\editor.jar
-?:\No Tocar\Hacks\Save Editors\NBTExplorer\NBTExplorer.exe
-?:\No Tocar\Hacks\Save Editors\Animal Map\AnimalMap.exe
-?:\No Tocar\Hacks\Save Editors\NHSE\NHSE.exe
-?:\No Tocar\Hacks\Save Editors\PokeSav 2\PokéSav2.exe
-?:\No Tocar\Hacks\Save Editors\SDSME181\SDSME.exe

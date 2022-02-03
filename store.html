@@ -89,13 +89,13 @@ body {
   <input id='editText' type="text" size="60" maxlength="50" style="height: 32px; padding-left: 10px; padding-right: 10px; color: #68D8D5; font-size: 16px; font-family: ItemFont; background-color: #181B22; border-style: solid; border-color: #7E0D0E; border-width: 1px;"></input>
 </div>
 <div style="margin: 10px; margin-top: 20px;">
-  <div class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">ElAmigos:</div>
+  <div class="unselectable" id="Elamigos" style="color: white; font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">ElAmigos:</div>
   <div class="list" id="listElamigos"></div>
-  <div class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">Fitgirl:</div>
+  <div class="unselectable" id="Fitgirl" style="color: white; font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">Fitgirl:</div>
   <div class="list" id="listFitgirl"></div>
-  <div class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">Pivi:</div>
+  <div class="unselectable" id="Pivi" style="color: white; font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">Pivi:</div>
   <div class="list" id="listPivi"></div>
-  <div class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">Skidrow Codex:</div>
+  <div class="unselectable" id="Skidrow" style="color: white; font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">Skidrow Codex:</div>
   <div class="list" id="listSkidrow"></div>
 </div>
 
@@ -103,6 +103,14 @@ body {
   const { shell, ipcRenderer } = require('electron');
   window.$ = window.jQuery = require('jquery');
   var user = true
+
+  ipcRenderer.on('si', (event, id) => {
+    document.getElementById(id).style.color = 'white'
+  })
+
+  ipcRenderer.on('no', (event, id) => {
+    document.getElementById(id).style.color = '#7E0D0E'
+  })
 
   ipcRenderer.on('clearList', (event) => {
     let infoDiv = document.querySelector('div[id=listElamigos]')
@@ -156,8 +164,6 @@ body {
     } else user = true
 
     let search = document.getElementById('editText').value
-    if (search == '') return
-
     ipcRenderer.send('searchGames', search)
   })
   

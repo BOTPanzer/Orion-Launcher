@@ -1,9 +1,0 @@
-?:\No Tocar\Hacks\Game Related\WeMod\WeMod.exe
-?:\No Tocar\Hacks\Game Related\Amidst\amidst-v4-6.exe
-?:\No Tocar\Hacks\Game Related\BAE\bae.exe
-?:\No Tocar\Hacks\Game Related\Idle Master\IdleMaster.exe
-?:\No Tocar\Hacks\Game Related\NifSkope\NifSkope.exe
-?:\No Tocar\Hacks\Game Related\QuickBMS\quickbms_4gb_files.exe
-?:\No Tocar\Hacks\Game Related\Sims4Studio v3.1.3.9\S4Studio.exe
-?:\No Tocar\Hacks\Game Related\Steam Achievement Manager\SAM.Picker.exe
-?:\No Tocar\Hacks\Game Related\Umodel\umodel.exe

@@ -1,7 +1,8 @@
-const { app, ipcMain, BrowserWindow } = require('electron')
+const { app, ipcMain, BrowserWindow, Notification, dialog } = require('electron')
 const superagent = require('superagent');
+const rimraf = require("rimraf");
 const fs = require('fs');
-let launcher = true
+let window = 'launcher'
 let win = null
 
 
@@ -11,74 +12,115 @@ function createWindow(_height, _width) {
     width: 1040,
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false
+      contextIsolation: false,
+      enableRemoteModule: true
     }
   })
 
   win.loadFile('main.html')
   win.removeMenu()
   //win.openDevTools()
-  launcher = true
+  window = 'launcher'
 }
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit()
+  }
+})
 
 app.whenReady().then(() => {
   createWindow()
 
-  ipcMain.on('store', (event) => {
-    win.loadFile('store.html')
-    launcher = false
-  })
-
   ipcMain.on('launcher', (event) => {
     win.loadFile('main.html')
-    launcher = true
+    window = 'launcher'
+  })
+
+  ipcMain.on('store', (event) => {
+    win.loadFile('store.html')
+    window = 'store'
+  })
+
+  ipcMain.on('add', (event) => {
+    win.loadFile('add.html')
+    window = 'add'
   })
 
   win.webContents.on('dom-ready', () => {
-    if (launcher) {
-      createListFromFolder(dataFolder)
+    if (window == 'launcher') {
+      createList(actualPath)
+    } else if (window == 'store') {
+      
+    } else if (window == 'add') {
+      win.webContents.send('changeText', actualPath);
     }
   });
+
   
   //FUNCTIONS LAUNCHER
   let dataFolder = app.getAppPath()+'\\Launcher\\'
+  let actualPath = dataFolder
   
   ipcMain.on('load', (event, path) => {
-    var f = fs.statSync(path);
-    if (f.isFile()) {
-      createListFromFile(path)
-    } else if (f.isDirectory()) {
-      createListFromFolder(path)
-    }
+    createList(path)
   })
 
-  function createListFromFile(argPath) {
-    win.webContents.send('setLocPath', argPath, dataFolder);
-    var paths = fs.readFileSync(argPath).toString().trim().split("\n");
-    win.webContents.send('clearList', null);
-    createBackButt(argPath)
-    for(i in paths) {
-      let path = paths[i].replace('\r', '')
-      if (path.startsWith('?:')) path = path.replace('?:', dataFolder.substring(0, 2))
-      //if (path.startsWith('?:')) path = path.replace('?:', 'E:')
-      //Name
-      let name = path.substring(0, path.lastIndexOf("\\"))
-      name = name.substring(name.lastIndexOf("\\")+1)
-      //Id
-      let id = `b${i}`
-      let img = `img${i}`
-      //HTML
-      let html = createHTML(id, img, "./Data/Images/icon_file.png", name)
-      //Create
-      win.webContents.send('add1ToList', html);
-      win.webContents.send('addListener', id, path, img);
-      app.getFileIcon(path, {size:"large"}).then((fileIcon) =>{
-        win.webContents.send('changeIcon', img, fileIcon.toDataURL());
-      })
-    }
-  }
+  ipcMain.on('delFile', (event, path) => {
+    const options = {
+      icon: __dirname+'.\\Data\\Images\\icon.ico',
+      buttons: ['Yes', 'No'],
+      title: 'Oriøn: Launcher',
+      message: 'Remove Game?',
+      detail: path,
+    };
 
-  function createListFromFolder(argPath) {
+    const delWin = async () => {
+      let response = await dialog.showMessageBox(options)
+      if (response.response == 0) {
+        if (fs.existsSync(path)) {
+          fs.unlink(path, (err) => {
+            if (err) {
+              console.error(err)
+              return
+            }
+            createList(actualPath)
+          })
+        }
+      }
+    }
+
+    delWin()
+  })
+
+  ipcMain.on('delFolder', (event, path) => {
+    const options = {
+      icon: __dirname+'.\\Data\\Images\\icon.ico',
+      buttons: ['Yes', 'No'],
+      title: 'Oriøn: Launcher',
+      message: 'Remove Folder?',
+      detail: path,
+    };
+
+    const delWin = async () => {
+      let response = await dialog.showMessageBox(options)
+      if (response.response == 0) {
+        if (fs.existsSync(path)) {
+          rimraf(path, (err) => {
+            if (err) {
+              console.error(err)
+              return
+            }
+            createList(actualPath)
+          })
+        }
+      }
+    }
+
+    delWin()
+  })
+
+  function createList(argPath) {
     win.webContents.send('setLocPath', argPath, dataFolder);
     var paths = fs.readdirSync(argPath);
     win.webContents.send('clearList', null);
@@ -92,14 +134,29 @@ app.whenReady().then(() => {
       //Id
       let id = `b${i}`
       let img = `img${i}`
+      //Default Image
+      let image = "./Data/Images/icon_folder.png"
+      if (fs.statSync(path).isFile()) image = "./Data/Images/icon_file.png"
       //HTML
-      let html = createHTML(id, img, "./Data/Images/icon_folder.png", name)
+      let html = createHTML(id, img, image, name)
       //Create
       win.webContents.send('add1ToList', html);
-      win.webContents.send('addReturnListener', id, path);
+      if (fs.statSync(path).isFile()) {
+        var filePath = fs.readFileSync(path).toString().replaceAll('\n', '').trim()
+        if (filePath.startsWith('?:')) filePath = filePath.replace('?:', dataFolder.substring(0, 2))
+        //if (filePath.startsWith('?:')) filePath = filePath.replace('?:', 'E:')
+        win.webContents.send('addListener', id, path, filePath, name, img);
+        //Image
+        app.getFileIcon(filePath, {size:"large"}).then((fileIcon) =>{ 
+          win.webContents.send('changeIcon', img, fileIcon.toDataURL()) 
+        })
+      } else{
+        win.webContents.send('addFolderListener', id, path);
+      }
     }
+    actualPath = argPath
   }
-  
+
   function createBackButt(argPath) {
     if (argPath != dataFolder) {
       //HTML
@@ -110,14 +167,62 @@ app.whenReady().then(() => {
       if (bpath.endsWith("\\")) bpath = bpath.slice(0,-1)
       let numb = bpath.split("\\").length - 1
       if (numb > 1) bpath = bpath.substring(0, bpath.lastIndexOf("\\")+1)
-      win.webContents.send('addReturnListener', 'backButt', bpath);
+      win.webContents.send('addFolderListener', 'backButt', bpath);
     }
   }
 
   
+  //FUNCTIONS LAUNCHER CREATOR
+  ipcMain.on('b1', (event, name) => {
+    createFolder(actualPath+name.trim())
+  })
+
+  ipcMain.on('b3', (event, name) => {
+    addGameToFolder(actualPath+name.trim())
+  })
+
+  function createFolder(path) {
+    if (!fs.existsSync(path)) {
+      fs.mkdirSync(path);
+      const notification = {
+        title: 'Oriøn Launcher',
+        body: 'Folder Added'
+      }
+      new Notification(notification).show()
+    }
+  }
+
+  function addGameToFolder(pathToFile) {
+    let name = pathToFile+'.txt'
+    if (!fs.existsSync(name)) {
+      dialog.showOpenDialog({
+        title: "Choose Game to Open",
+        properties: ['openFile'],
+      }).then((files)=>{
+        let file = files.filePaths[0]
+        if (file == undefined) {
+          console.log("No file selected");
+        } else {
+          fs.writeFile(name, file, (err) => {
+            const notification = {
+              title: 'Oriøn Launcher',
+              body: 'Game Added'
+            }
+            new Notification(notification).show()
+          })
+        }
+      }).catch(err=>console.log('Handle Error',err))
+    }
+  }
+
+
   //FUNCTIONS STORE
   ipcMain.on('searchGames', (event, orSearch) => {
     win.webContents.send('clearList');
+    win.webContents.send('si', 'Elamigos');
+    win.webContents.send('si', 'Fitgirl');
+    win.webContents.send('si', 'Pivi');
+    win.webContents.send('si', 'Skidrow');
 
     let search = orSearch.replaceAll(' ', '+')
 
@@ -127,19 +232,23 @@ app.whenReady().then(() => {
     })
 
     fullURL = 'https://fitgirlrepacks.co/search/'+search
+    if (search == '' || search.length < 3) fullURL = 'https://fitgirlrepacks.co/'
     getHTML(fullURL).then(function(result) {
       fitgirl(result)
     })
 
     fullURL = 'https://pivigames.blog/?s='+search
+    if (search == '') fullURL = 'https://pivigames.blog/'
     getHTML(fullURL).then(function(result) {
       pivi(result)
     })
 
     fullURL = 'https://www.skidrowcodex.net/game-list/'
+    if (search != '') 
     getHTML(fullURL).then(function(result) {
       skidrow(result, orSearch)
     })
+    else win.webContents.send('no', 'Skidrow');
   })
 
   function elamigos(result) {
@@ -176,10 +285,15 @@ app.whenReady().then(() => {
       win.webContents.send('add1ToList', html, 'listElamigos');
       win.webContents.send('addListener', id, link);
     }
+    if (links.length == 0) win.webContents.send('no', 'Elamigos');
   }
 
   async function fitgirl(result) {
-    let part = result.substring(result.indexOf('<header class="page-header">'), result.indexOf('<nav class="navigation paging-navigation"'))
+    if (!result.includes('<article class="post')) {
+      win.webContents.send('no', 'Fitgirl');
+      return
+    }
+    let part = result.substring(result.indexOf('<article class="post'), result.indexOf('<nav class="navigation paging-navigation"'))
     var si = part.split('<article class="post')
     var links = []
     var names = []
@@ -224,7 +338,8 @@ app.whenReady().then(() => {
   }
 
   function pivi(result) {
-    let part = result.substring(result.indexOf('<section class="gp-post-item gp-standard-post'), result.indexOf("<div class='code-block code-block-7'"))
+    let part = result.substring(result.indexOf('<div id="gp-content-wrapper"')) //remove top bar
+    part = part.substring(part.indexOf('<section class="gp-post-item gp-standard-post'))
     var si = part.split('<section')
     var links = []
     var imgs = []
@@ -232,12 +347,12 @@ app.whenReady().then(() => {
     //LINKS & IMAGES
     for(i in si) {
       if (links.length == 10) break
-      if (!si[i].includes('https://pivigames.blog/estrenos') && !si[i].includes('https://pivigames.blog/tops') && !si[i].includes('https://pivigames.blog/promociones')) {
+      if (!si[i].includes('https://pivigames.blog/estrenos') && !si[i].includes('https://pivigames.blog/tops') && !si[i].includes('https://pivigames.blog/promociones') && !si[i].includes('https://pivigames.blog/oferta')) {
         let link = si[i].substring(si[i].indexOf('href="')+6)
         link = link.substring(0, link.indexOf('"')-1)
         let img = si[i].substring(si[i].indexOf('src="')+5)
         img = img.substring(0, img.indexOf('"'))
-        if (link != '' && img != '') {
+        if (link != '' && img != '' && link.startsWith('https://pivigames.blog/')&& !links.includes(link)) {
           links.push(link)
           imgs.push(img)
         }
@@ -259,6 +374,7 @@ app.whenReady().then(() => {
       win.webContents.send('add1ToList', html, 'listPivi');
       win.webContents.send('addListener', id, link);
     }
+    if (links.length == 0) win.webContents.send('no', 'Pivi');
   }
 
   function skidrow(result, search) {
@@ -269,6 +385,7 @@ app.whenReady().then(() => {
     //LINKS & NAMES
     for(i in si) {
       if (links.length == 10) break
+      if (!si[i].includes('href="') && !si[i].includes('title="')) continue
       let link = si[i].substring(si[i].indexOf('href="')+6)
       link = link.substring(0, link.indexOf('"')-1)
       let name = si[i].substring(si[i].indexOf('title="')+7)
@@ -289,6 +406,7 @@ app.whenReady().then(() => {
       win.webContents.send('add1ToList', html, 'listSkidrow');
       win.webContents.send('addListener', id, link);
     }
+    if (links.length == 0) win.webContents.send('no', 'Skidrow');
   }
 
   async function getHTML(url) {
@@ -318,11 +436,5 @@ app.whenReady().then(() => {
                   </div>
                 </div>`
     return html
-  }
-})
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
   }
 })
