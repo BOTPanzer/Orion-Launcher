@@ -124,30 +124,29 @@ body {
 
 <script>
   const { ipcRenderer } = require('electron');
+  let descPath = null
 
-  ipcRenderer.on('clearList', (event, list) => {
-    let infoDiv = document.getElementById('list')
-    infoDiv.innerHTML = '';
+  ipcRenderer.on('clearList', (event) => {
+    document.getElementById('list').innerHTML = '';
   })
 
   ipcRenderer.on('add1ToList', (event, item) => {
-    let infoDiv = document.getElementById('list')
-    infoDiv.insertAdjacentHTML('beforeend', item)
+    document.getElementById('list').insertAdjacentHTML('beforeend', item)
   })
 
-  ipcRenderer.on('addListener', (event, id, path, filePath, name, img, iconPath) => {
+  ipcRenderer.on('addListener', (event, id, img, path, name, gamePath, iconPath) => {
     document.getElementById(id).addEventListener('click', () => {
       document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item_clicked.png")';
 	    window.scrollTo(0, 0);
 	    setTimeout(function() {
         document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
-        showDesc(filePath, name, img)
+        showDesc(img, path, name, gamePath)
       }, 100)
     })
 
     document.getElementById(id).addEventListener('contextmenu', () => {
       document.getElementById('body').replaceWith(document.getElementById('body').cloneNode(true));
-      ipcRenderer.send('contextFile', path, name, filePath, iconPath)
+      ipcRenderer.send('contextFile', path, name, gamePath, iconPath)
     })
   })
 
@@ -161,6 +160,7 @@ body {
       }, 100)
     })
 
+    if (id != 'backButt')
     document.getElementById(id).addEventListener('contextmenu', () => {
       document.getElementById('body').replaceWith(document.getElementById('body').cloneNode(true));
       ipcRenderer.send('contextFolder', path)
@@ -171,20 +171,14 @@ body {
     document.getElementById(img).src = icon
   })
 
-  ipcRenderer.on('setLocPath', (event, path, homePath) => {
-    let name = path
-    if (path == homePath) {
-      name = 'Home'
-    } else {
-      if (name.endsWith("\\")) name = name.slice(0,-1)
-      name = name.substring(name.lastIndexOf("\\")+1)
-      if (name.includes('.')) name = name.substring(0, name.lastIndexOf('.'))
-    }
-    document.getElementById('txtMenu').firstChild.data = name
+  ipcRenderer.on('setLocPath', (event, path, dataFolder) => {
+    if (path == dataFolder) document.getElementById('txtMenu').innerHTML = 'Home'
+    else document.getElementById('txtMenu').innerHTML = path.slice(0,-1).substring(path.slice(0,-1).lastIndexOf("\\")+1)
   })
 
-  ipcRenderer.on('setbutt', (event, path, homePath) => {
+  ipcRenderer.on('setbutt', (event) => {
     document.getElementById('description').style.display = 'none'
+    descPath = null
     document.getElementById('content').style.minHeight = document.getElementById('content').offsetHeight+'px'
     setTimeout(function() { 
       document.getElementById('content').style.minHeight = ''
@@ -211,7 +205,14 @@ body {
     ipcRenderer.send('load', path)
   }
 
-  function showDesc(path, name, img) {
+  function showDesc(img, path, name, gamePath) {
+    //Hide if Open
+    if (descPath == path) {
+      document.getElementById('description').style.display = 'none'
+      descPath = null
+      return
+    }
+    descPath = path
     //Description
     document.getElementById('imgDescription').src = document.getElementById(img).src
     document.getElementById('txtDescription').innerHTML = name
@@ -220,16 +221,16 @@ body {
       document.getElementById('launchDescription').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
       setTimeout(function() {
         document.getElementById('launchDescription').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-        if (path.startsWith('"') && !path.endsWith('"')) {
+        if (gamePath.startsWith('"') && !gamePath.endsWith('"')) {
           let spawn = require("child_process").spawn;
-          let pathClean = path.substring(1, path.lastIndexOf('"'))
-          let args = path.substring(pathClean.length+2).trim()
+          let pathClean = gamePath.substring(1, gamePath.lastIndexOf('"'))
+          let args = gamePath.substring(pathClean.length+2).trim()
           let argsClean = args.split(' ')
           argsClean.unshift("/c", pathClean)
           let bat = spawn("cmd.exe", argsClean)
         } else {
           const { shell } = require('electron');
-          shell.openPath(path)
+          shell.openPath(gamePath)
         }
       }, 100)
     })
@@ -238,11 +239,11 @@ body {
       document.getElementById('folderDescription').style.backgroundImage = 'url("./Data/Images/icon_description_folder_clicked.png")';
       setTimeout(function() {
         document.getElementById('folderDescription').style.backgroundImage = 'url("./Data/Images/icon_description_folder.png")';
-        if (path.startsWith('"') && !path.endsWith('"')) {;
-          let pathClean = path.substring(1, path.lastIndexOf('"'))
+        if (gamePath.startsWith('"') && !gamePath.endsWith('"')) {;
+          let pathClean = gamePath.substring(1, gamePath.lastIndexOf('"'))
           ipcRenderer.send('showOnExplorer', pathClean)
         } else {
-          ipcRenderer.send('showOnExplorer', path)
+          ipcRenderer.send('showOnExplorer', gamePath)
         }
       }, 100)
     })

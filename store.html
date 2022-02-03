@@ -104,28 +104,41 @@ body {
   window.$ = window.jQuery = require('jquery');
   var user = true
 
-  ipcRenderer.on('si', (event, id) => {
+  ipcRenderer.on('searchingResults', (event, id) => {
+    document.getElementById(id).style.color = 'gray'
+    let name = id
+    if (name == 'Elamigos') name = 'ElAmigos'
+    if (name == 'Skidrow') name = 'Skidrow Codex'
+    document.getElementById(id).innerHTML = name+' (searching):'
+  })
+
+  ipcRenderer.on('hasResults', (event, id) => {
     document.getElementById(id).style.color = 'white'
+    let name = id
+    if (name == 'Elamigos') name = 'ElAmigos'
+    if (name == 'Skidrow') name = 'Skidrow Codex'
+    document.getElementById(id).innerHTML = name+':'
   })
 
-  ipcRenderer.on('no', (event, id) => {
+  ipcRenderer.on('noResults', (event, id) => {
     document.getElementById(id).style.color = '#7E0D0E'
+    let name = id
+    if (name == 'Elamigos') name = 'ElAmigos'
+    if (name == 'Skidrow') name = 'Skidrow Codex'
+    document.getElementById(id).innerHTML = name+' (no results)'
   })
 
-  ipcRenderer.on('clearList', (event) => {
-    let infoDiv = document.getElementById('listElamigos')
-    infoDiv.innerHTML = '';
-    infoDiv = document.getElementById('listFitgirl')
-    infoDiv.innerHTML = '';
-    infoDiv = document.getElementById('listPivi')
-    infoDiv.innerHTML = '';
-    infoDiv = document.getElementById('listSkidrow')
-    infoDiv.innerHTML = '';
+  ipcRenderer.on('clearList', (event, list) => {
+    if (list == undefined) {
+      document.getElementById('listElamigos').innerHTML = '';
+      document.getElementById('listFitgirl').innerHTML = '';
+      document.getElementById('listPivi').innerHTML = '';
+      document.getElementById('listSkidrow').innerHTML = '';
+    } else document.getElementById(list).innerHTML = '';
   })
   
   ipcRenderer.on('add1ToList', (event, item, list) => {
-    let infoDiv = document.getElementById(list)
-    infoDiv.insertAdjacentHTML('beforeend', item)
+    document.getElementById(list).insertAdjacentHTML('beforeend', item)
   })
 
   ipcRenderer.on('addListener', (event, id, link) => {
@@ -138,6 +151,11 @@ body {
       }, 100)
     })
   })
+
+  ipcRenderer.on('changeIcon', (event, img, icon) => {
+    document.getElementById(img).src = icon
+  })
+
 
   document.getElementById('launcher').addEventListener('click', () => {
     document.getElementById('launcher').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';

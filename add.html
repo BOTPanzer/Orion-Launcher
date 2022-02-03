@@ -82,20 +82,20 @@ body {
   </div>
 </div>
 
-<div id="text" class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; margin: 10px; margin-bottom: 20px; padding: 5px; padding-left: 10px;">Texto</div>
+<h1 id="text" class="unselectable" style="color: white; margin: 10px; margin-left: 20px; margin-bottom: 20px;">Home</h1>
 
-<div class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Name:</div>
+<div class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Folder/Game Name:</div>
 <div style="align-items: center; margin: 20px; margin-top: 0px;">
   <input id='nameText' type="text" size="50" maxlength="50" style="height: 32px; padding-left: 10px; padding-right: 10px; color: #68D8D5; font-size: 16px; font-family: ItemFont; background-color: #181B22; border-style: solid; border-color: #7E0D0E; border-width: 1px;"></input>
 </div>
-<div class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Path For Game:</div>
+<div class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Game Path:</div>
 <div style="align-items: center; margin: 20px; margin-top: 0px; display: flex;">
   <input id='pathText' type="text" size="50" style="height: 32px; padding-left: 10px; padding-right: 10px; color: #68D8D5; font-size: 16px; font-family: ItemFont; background-color: #181B22; border-style: solid; border-color: #7E0D0E; border-width: 1px;"></input>
   <div id="folder" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px">
 	  <img class="unselectable" style="height: 30px; min-width: 30px; margin: 3px;" src="./Data/Images/icon_folder.png"></img>
   </div>
 </div>
-<div class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Icon For Game (Optional):</div>
+<div class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Game Icon Path (Optional):</div>
 <div style="align-items: center; margin: 20px; margin-top: 0px; display: flex;">
   <input id='iconText' type="text" size="50" style="height: 32px; padding-left: 10px; padding-right: 10px; color: #68D8D5; font-size: 16px; font-family: ItemFont; background-color: #181B22; border-style: solid; border-color: #7E0D0E; border-width: 1px;"></input>
   <div id="folderIcon" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px">
@@ -103,10 +103,10 @@ body {
   </div>
 </div>
 <div style="margin-left: 20px; margin-right: 20px; margin-bottom: 20px; display: flex; align-items: center;">
-  <div id="b1" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px;">
+  <div id="addFolder" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px;">
     <div class="unselectable" style="color: #68D8D5; font-family: ItemFont;">Add Folder</div>
   </div>
-  <div id="b3" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px;">
+  <div id="addGame" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px;">
     <div class="unselectable" style="color: #68D8D5; font-family: ItemFont;">Add Game</div>
   </div>
   <div id="log" class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; padding: 5px; height: fit-content;"></div>
@@ -115,16 +115,17 @@ body {
 <script>
   const { ipcRenderer } = require('electron');
   
-  ipcRenderer.on('changeText', (event, actualPath) => {
-    document.getElementById('text').innerHTML = actualPath
+  ipcRenderer.on('start', (event, actualPath, dataFolder) => {
+    if (actualPath == dataFolder) document.getElementById('text').innerHTML = 'Home'
+    else document.getElementById('text').innerHTML = actualPath.slice(0,-1).substring(actualPath.slice(0,-1).lastIndexOf('\\')+1)
 
-    document.getElementById('b1').addEventListener('click', () => {
-      document.getElementById('b1').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+    document.getElementById('addFolder').addEventListener('click', () => {
+      document.getElementById('addFolder').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
 	    setTimeout(function() {
-        document.getElementById('b1').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+        document.getElementById('addFolder').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
         let name = document.getElementById('nameText').value
         if (name == '') return
-        ipcRenderer.send('b1', name)
+        ipcRenderer.send('addFolder', name)
       }, 100)
     })
 
@@ -137,6 +138,7 @@ body {
     })
 
     ipcRenderer.on('fileGotten', (event, path) => {
+      if (path != '')
       document.getElementById('pathText').value = path
     })
 
@@ -149,6 +151,7 @@ body {
     })
 
     ipcRenderer.on('fileGottenIcon', (event, path) => {
+      if (path != '')
       document.getElementById('iconText').value = path
     })
 
@@ -156,16 +159,16 @@ body {
       document.getElementById('log').innerText = text
     })
 
-    document.getElementById('b3').addEventListener('click', () => {
-      document.getElementById('b3').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+    document.getElementById('addGame').addEventListener('click', () => {
+      document.getElementById('addGame').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
 	    setTimeout(function() {
-        document.getElementById('b3').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+        document.getElementById('addGame').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
         let name = document.getElementById('nameText').value
         if (name == '') return
         let path = document.getElementById('pathText').value
         if (path == '') return
         let icon = document.getElementById('iconText').value
-        ipcRenderer.send('b3', name, path, icon)
+        ipcRenderer.send('addGame', name, path, icon)
       }, 100)
     })
   })
