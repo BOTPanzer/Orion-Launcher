@@ -7,17 +7,6 @@
   </div>
 	<div style="display: flex; justify-content: space-between;">
 	  <div id="list" style="color: var(--c3); font-family: ItemFont; margin-left: 10px">
-        
-      <!--div id="b2" style="margin-bottom: 5px; margin-right: 5px; width: 150px; height: 150px; background-image: url('./Data/Images/icon_item.png'); text-align: center;">
-          <div style="width: 150px; height: 100px;">
-		    <img id="img2" class="unselectable" style="margin: 10px; max-width: 130px; height: 90px;" src="./Data/Images/icon.png"></img>
-	      </div>
-	      <div style="width: 140px; height: 40px; padding: 5px">
-		    <div class="unselectableDiv">
-		      <div class="unselectable" style="line-height:20px; display: inline-block; max-height: 40px; width: 140px;">Theme</div>
-		    </div>
-	      </div>
-	    </div -->
 
     </div>
 	</div>
@@ -36,10 +25,12 @@
     document.getElementById(id).addEventListener('click', () => {
       document.getElementById('txtMenu').innerText = 'Loading: '+path.substring(path.lastIndexOf('\\')+1)
       document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item_clicked.png")';
-	    window.scrollTo(0, 0);
+      $("#rightBar").animate({ scrollTop: 0 }, "fast");
 	    setTimeout(function() {
         document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
-        document.getElementById('body').replaceWith(document.getElementById('body').cloneNode(true));
+        let scroll = document.getElementById('rightBar').scrollTop
+        document.body.replaceWith(document.body.cloneNode(true));
+        document.getElementById('rightBar').scrollTop = scroll
         ipcRenderer.send('copyTheme', path)
       }, 100)
     })

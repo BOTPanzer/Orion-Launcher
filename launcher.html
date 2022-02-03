@@ -1,4 +1,4 @@
-<div id="content" style="height: 100%; margin: 10px; color: white;">
+<div id="content" style="margin: 10px; color: white;">
   <div style="margin: 10px; display: flex; align-items: center;">
 	  <div id="txtMenu" style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden; width: 100%; color: var(--c4); font-size: 40px; margin-right: 10px;">Home</div>
 	  <input id='editText' placeholder="Search Games" type="text" maxlength="50" style="height: 32px; width: 250px; padding-left: 10px; padding-right: 10px; margin-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
@@ -8,7 +8,7 @@
   </div>
 	<div style="display: flex; justify-content: space-between;">
 	  <div id="list" style="color: var(--c3); font-family: ItemFont; margin-left: 10px">
-
+      
     </div>
 	</div>
 </div>
@@ -16,6 +16,7 @@
 <script>
   click = ''
   search = ''
+  cont = false
 
   ipcRenderer.on('clearList', (event) => {
     document.getElementById('list').innerHTML = '';
@@ -39,6 +40,20 @@
             const { shell } = require('electron');
             shell.openPath(gamePathArg.pathClean)
           }
+
+          if (document.getElementById('noti').style.opacity == 0) {
+            showNoti(name)
+          } else {
+            wait()
+
+            function wait() {
+              setTimeout(function() {
+                if (document.getElementById('noti').style.opacity == 0) {
+                  showNoti(name)
+                } else wait()
+              }, 500)
+            }
+          }
           click = ''
         } else {
           click = id
@@ -52,8 +67,11 @@
     })
 
     document.getElementById(id).addEventListener('contextmenu', () => {
-      document.getElementById('body').replaceWith(document.getElementById('body').cloneNode(true));
+      let scroll = document.getElementById('rightBar').scrollTop
+      document.body.replaceWith(document.body.cloneNode(true));
+      document.getElementById('rightBar').scrollTop = scroll
       ipcRenderer.send('contextFile', path, name, gamePath, iconPath)
+      cont = true
     })
   })
 
@@ -61,7 +79,7 @@
     document.getElementById(id).addEventListener('click', () => {
       document.getElementById('editText').value = ''
       document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item_clicked.png")';
-	    window.scrollTo(0, 0);
+      $("#rightBar").animate({ scrollTop: 0 }, "fast");
 	    setTimeout(function() {
         document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
         ipcRenderer.send('loadPath', path)
@@ -70,8 +88,11 @@
 
     if (id != 'backButt')
     document.getElementById(id).addEventListener('contextmenu', () => {
-      document.getElementById('body').replaceWith(document.getElementById('body').cloneNode(true));
+      let scroll = document.getElementById('rightBar').scrollTop
+      document.body.replaceWith(document.body.cloneNode(true));
+      document.getElementById('rightBar').scrollTop = scroll
       ipcRenderer.send('contextFolder', path)
+      cont = true
     })
   })
 
@@ -90,7 +111,7 @@
       if (event.keyCode === 13) {
         event.preventDefault();
         if (document.getElementById('editText').value != search) {
-          window.scrollTo(0, 0);
+          $("#rightBar").animate({ scrollTop: 0 }, "fast");
           ipcRenderer.send('loadPath', path, document.getElementById('editText').value)
         }
         return false;
@@ -104,15 +125,22 @@
       }, 100)
 
       if (document.getElementById('editText').value != search) {
-        window.scrollTo(0, 0);
+        $("#rightBar").animate({ scrollTop: 0 }, "fast");
         ipcRenderer.send('loadPath', path, document.getElementById('editText').value)
       }
     })
   })
 
   ipcRenderer.on('setbutt', (event) => {
-    setbuttons()
-
+    if (cont == true) {
+      let scroll = document.getElementById('rightBar').scrollTop
+      setbuttons()
+      document.getElementById('rightBar').scrollTop = scroll
+      cont = false
+    } else {
+      setbuttons()
+    }
+    
     document.getElementById('add').style.display = 'flex'
 
     document.getElementById('content').style.minHeight = document.getElementById('content').offsetHeight+'px'
@@ -124,4 +152,13 @@
   ipcRenderer.on('setSearch', (event, s) => {
     search = s
   })
+
+  function showNoti(name) {
+    document.getElementById('notiName').innerText = name
+    $( "#noti" ).fadeTo( "fast" , 1, function() {
+      setTimeout(function() {
+        $( "#noti" ).fadeTo( "fast" , 0)
+      }, 1500)
+    })
+  }
 </script>

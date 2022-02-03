@@ -1,8 +1,8 @@
-const { app, ipcMain, BrowserWindow, dialog, Tray, Menu } = require('electron')
+const { app, ipcMain, BrowserWindow, Tray, Menu } = require('electron')
 const fs = require('fs');
 let closing = false
 let tray = null
-let window = 'launcher'
+let window = ''
 let win = null
 let win2 = null
 let dataFolder = null
@@ -68,9 +68,7 @@ if (!app.requestSingleInstanceLock()) {
   })
 
   ipcMain.on('loaded', (event) => {
-    updateTheme()
     win.webContents.send('theme', theme)
-    //win.webContents.send('start', window)
     if (window == 'launcher') {
       createList(actualPath)
     } else if (window == 'store') {
@@ -82,12 +80,33 @@ if (!app.requestSingleInstanceLock()) {
     }
   })
 
-  win.webContents.on('dom-ready', () => {
+  win.webContents.on('dom-ready', function() {
+    updateTheme()
     if (window == '') {
       win.webContents.send('load', 'launcher.html')
       window = 'launcher'
     }
   });
+
+  ipcMain.on('mini', (event) => {
+    win.minimize();
+  })
+
+  ipcMain.on('maxi', (event) => {
+    if (!win.isMaximized()) {
+      win.maximize();          
+    } else {
+      win.unmaximize();
+    }
+  })
+
+  ipcMain.on('exit', (event) => {
+    win.close();
+  })
+
+  ipcMain.on('exitContext', (event) => {
+    closeWin2();
+  })
 
 
   //FUNCTIONS LAUNCHER
@@ -248,6 +267,7 @@ if (!app.requestSingleInstanceLock()) {
       minWidth: 404,
       maxHeight: 500,
       maxWidth: 404,
+      frame: false,
       webPreferences: {
         nodeIntegration: true,
         contextIsolation: false,
@@ -264,8 +284,10 @@ if (!app.requestSingleInstanceLock()) {
     });
   }
 
-  ipcMain.on('getFileContext', async function() {
-    win2.webContents.send('fileGotten', await getFile("Choose a Game"));
+  ipcMain.on('getFileContext', async function(event, path) {
+    let apath = path.substring(0, path.lastIndexOf('\\')+1)
+    if (!fs.existsSync(apath)) win2.webContents.send('fileGotten', await getFile("Choose a Game"))
+    else win2.webContents.send('fileGotten', await getFile("Choose a Game", `${apath}`))
   })
 
   ipcMain.on('getFileIconContext', async function(event, path) {
@@ -276,7 +298,7 @@ if (!app.requestSingleInstanceLock()) {
 
   ipcMain.on('move', async function(event, path) {
     if (fs.existsSync(path)) {
-      let newFilePath = await getFolder("Choose a Folder")+'\\'
+      let newFilePath = await getFolder("Choose a Folder", launcherFolder)+'\\'
       if (!newFilePath.includes(launcherFolder)) return
       let oldFilePath = path
       if (path.endsWith('\\')) oldFilePath = path.slice(0,-1)
@@ -297,6 +319,7 @@ if (!app.requestSingleInstanceLock()) {
   })
 
   function delFile(path) {
+    const { dialog } = require('electron')
     let name = path.substring(path.lastIndexOf("\\")+1)
     if (name.includes('.')) name = name.substring(0, name.lastIndexOf('.'))
     const options = {
@@ -323,6 +346,7 @@ if (!app.requestSingleInstanceLock()) {
   }
 
   function delFolder(path) {
+    const { dialog } = require('electron')
     let name = path.substring(path.lastIndexOf("\\")+1)
     const options = {
       icon: __dirname+'.\\Data\\Images\\icon.ico',
@@ -388,8 +412,10 @@ if (!app.requestSingleInstanceLock()) {
 
   
   //FUNCTIONS LAUNCHER CREATOR
-  ipcMain.on('getFile', async function() {
-    win.webContents.send('fileGotten', await getFile("Choose a Game"));
+  ipcMain.on('getFile', async function(event, path) {
+    let apath = path.substring(0, path.lastIndexOf('\\')+1)
+    if (!fs.existsSync(apath)) win.webContents.send('fileGotten', await getFile("Choose a Game"))
+    else win.webContents.send('fileGotten', await getFile("Choose a Game", `${apath}`))
   })
 
   ipcMain.on('getFileIcon', async function(event, path) {
@@ -742,9 +768,10 @@ if (!app.requestSingleInstanceLock()) {
 function createWindow() {
   win = new BrowserWindow({
     height: 550,
-    width: 988,
+    width: 970,
     minHeight: 490,
-    minWidth: 833,
+    minWidth: 815,
+    frame: false,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -755,8 +782,6 @@ function createWindow() {
   win.loadFile('main.html')
   win.removeMenu()
   //win.openDevTools()
-  win.webContents.send('load', 'launcher.html')
-  window = 'launcher'
 
   win.on('close', function (event) {
     if (!closing) {
@@ -772,20 +797,20 @@ function createTray() {
   let appIcon = new Tray(dataFolder+"Images/icon.ico");
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: 'Library', click: function () {
-        if (window != 'launcher') {
-          win.webContents.send('load', 'launcher.html')
-          window = 'launcher'
+      label: 'Store', click: function () {
+        if (window != 'store') {
+          win.webContents.send('load', 'store.html')
+          window = 'store'
         }
         if (win.isMinimized() || !win.isVisible())
         win.show();
       }
     },
     {
-      label: 'Store', click: function () {
-        if (window != 'store') {
-          win.webContents.send('load', 'store.html')
-          window = 'store'
+      label: 'Library', click: function () {
+        if (window != 'launcher') {
+          win.webContents.send('load', 'launcher.html')
+          window = 'launcher'
         }
         if (win.isMinimized() || !win.isVisible())
         win.show();
@@ -864,13 +889,22 @@ function getFileInfo(argPath) {
 }
 
 function getPathInfo(gamePath) {
+  //update add and context aswell
+  gamePath = gamePath.trim()
   let pathClean = gamePath
   let argsClean = ''
-  if (gamePath.includes('"')) {
-    pathClean = gamePath.substring(1, gamePath.lastIndexOf('"'))
-    let args = gamePath.substring(pathClean.length+2).trim()
-    argsClean = args.split(' ')
-    argsClean.unshift("/c", pathClean)
+  if (gamePath.includes('--') && gamePath.includes(' ') && !gamePath.endsWith('"')) {
+    if (gamePath.startsWith('"') ) {
+      pathClean = gamePath.substring(1, gamePath.lastIndexOf('"'))
+      let args = gamePath.substring(pathClean.length+2).trim()
+      argsClean = args.split(' ')
+      argsClean.unshift("/c", pathClean)
+    } else {
+      pathClean = gamePath.substring(0, gamePath.lastIndexOf(' '))
+      let args = gamePath.substring(pathClean.length+2).trim()
+      argsClean = args.split(' ')
+      argsClean.unshift("/c", pathClean)
+    }
   }
   let data = {pathClean, argsClean}
   return data
@@ -925,35 +959,65 @@ function closeWin2() {
 }
 
 async function getFile(title, path) {
-  let defpath = path
-  if (defpath == undefined) defpath = launcherFolder
-  let result = await dialog.showOpenDialog({
-    title: title,
-    defaultPath: defpath,
-    properties: ['openFile'],
-  }).then(function(files) {
-    let file = files.filePaths[0]
-    if (file == undefined) {
-      return ''
-    } else {
-      return file
-    }
-  })
-  return result
+  const { dialog } = require('electron')
+  if (path == undefined) {
+    let result = await dialog.showOpenDialog({
+      title: title,
+      properties: ['openFile'],
+    }).then(function(files) {
+      let file = files.filePaths[0]
+      if (file == undefined) {
+        return ''
+      } else {
+        return file
+      }
+    })
+    return result
+  } else {
+    let result = await dialog.showOpenDialog({
+      title: title,
+      defaultPath: path,
+      properties: ['openFile'],
+    }).then(function(files) {
+      let file = files.filePaths[0]
+      if (file == undefined) {
+        return ''
+      } else {
+        return file
+      }
+    })
+    return result
+  }
 }
 
-async function getFolder(title) {
-  let result = await dialog.showOpenDialog({
-    title: title,
-    defaultPath: launcherFolder,
-    properties: ['openDirectory'],
-  }).then(function(files) {
-    let file = files.filePaths[0]
-    if (file == undefined) {
-      return ''
-    } else {
-      return file
-    }
-  })
-  return result
+async function getFolder(title, path) {
+  const { dialog } = require('electron')
+  if (path == undefined) {
+    let result = await dialog.showOpenDialog({
+      title: title,
+      properties: ['openDirectory'],
+    }).then(function(files) {
+      let file = files.filePaths[0]
+      if (file == undefined) {
+        return ''
+      } else {
+        return file
+      }
+    })
+    return result
+  } else {
+    let result = await dialog.showOpenDialog({
+      title: title,
+      defaultPath: path,
+      properties: ['openDirectory'],
+    }).then(function(files) {
+      let file = files.filePaths[0]
+      if (file == undefined) {
+        return ''
+      } else {
+        return file
+      }
+    })
+    return result
+  }
 }
