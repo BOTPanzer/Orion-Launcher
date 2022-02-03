@@ -663,10 +663,12 @@ if (!app.requestSingleInstanceLock()) {
       let path = argPath+allPaths[i]
       let data = getFileInfo(path)
       let name = data.name
+      let image = "./Data/Images/icon_file.png"
+      if (fs.existsSync(path+'\\Data\\Images\\icon_file.png')) image = path+'\\Data\\Images\\icon_file.png'
       //Id
       let id = path+i
       //HTML
-      let html = createHTML(id, null, "./Data/Images/icon.png", name)
+      let html = createHTML(id, null, image, name)
       //Create
       win.webContents.send('add1ToList', html);
       win.webContents.send('addListener', id, path);
