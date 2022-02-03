@@ -35,14 +35,11 @@ body {
 <body>
   <div style="height: 20px; width: 100%; display: flex; background-color: var(--c1);">
     <div style="height: 15px; width: 100%; margin-left: 5px; margin-top: 5px; -webkit-app-region: drag; align-items: center;">
-      <div style="height: 16px; position: absolute; font-family: ItemFont; font-size: 16px; color: var(--c4);">Oriøn: Add Game</div>
+      <div style="height: 16px; position: absolute; font-family: ItemFont; font-size: 16px; color: var(--c4);">Oriøn: Properties</div>
     </div>
     <div style="display: flex; font-family: Franklin Gothic Medium">
       <div style="display: flex; align-items: center;">
-        <div id="exitb" style="height: 20px; width: 30px; background-color: #690108; opacity: 0;"></div>
-      </div>
-      <div style="display: flex; position: absolute;">
-        <div id="exit" style="height: 20px; width: 30px; color: var(--c3); border-radius: 5px; text-align: center; align-items: center;">x</div>
+        <div id="exit" style="height: 20px; width: 30px; color: var(--c3); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">x</div>
       </div>
     </div>
   </div>
@@ -89,10 +86,10 @@ body {
     //EXIT
     document.getElementById('exit').addEventListener('mousedown', (event) => {
       if (event.which != 1) return
-      document.getElementById('exitb').style.opacity = '1';
+      document.getElementById('exit').style.backgroundColor = '#690108';
     
       document.addEventListener('mouseup', () => {
-        document.getElementById('exitb').style.opacity = '0';
+        document.getElementById('exit').style.backgroundColor = 'rgba(0, 0, 0, 0)';
       })
     })
 

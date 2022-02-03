@@ -39,10 +39,7 @@ body {
     </div>
     <div style="display: flex; font-family: Franklin Gothic Medium">
       <div style="display: flex; align-items: center;">
-        <div id="exitb" style="height: 20px; width: 30px; background-color: #690108; opacity: 0;"></div>
-      </div>
-      <div style="display: flex; position: absolute;">
-        <div id="exit" style="height: 20px; width: 30px; color: var(--c3); border-radius: 5px; text-align: center; align-items: center;">x</div>
+        <div id="exit" style="height: 20px; width: 30px; color: var(--c3); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">x</div>
       </div>
     </div>
   </div>
@@ -81,12 +78,15 @@ body {
   <div>
     <div id="log" style="color: var(--c4); font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;"></div>
     <div style="width: 100%; position: absolute; bottom: 0; display: block;">
-      <div id="showblock" style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
-        <div style="height: 36px; width: 107px; margin-right: 10px; opacity: 0;"></div>   
+      <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+        <div></div> 
         <div id="show" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px; color: var(--c3);">
           <div style="font-family: ItemFont;">Show</div>
-        </div>   
-        <div style="height: 36px; width: 107px; opacity: 0;"></div>
+        </div>
+        <div id="showstore" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
+          <div style="font-family: ItemFont;">Store</div>
+        </div>
+        <div></div>
       </div>
 
       <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
@@ -115,10 +115,10 @@ body {
   //EXIT
   document.getElementById('exit').addEventListener('mousedown', (event) => {
     if (event.which != 1) return
-    document.getElementById('exitb').style.opacity = '1';
+    document.getElementById('exit').style.backgroundColor = '#690108';
     
     document.addEventListener('mouseup', () => {
-      document.getElementById('exitb').style.opacity = '0';
+      document.getElementById('exit').style.backgroundColor = 'rgba(0, 0, 0, 0)';
     })
   })
 
@@ -139,7 +139,8 @@ body {
   
   ipcRenderer.on('setLocation', (event, path, img) => {
     actualPath = path
-    document.getElementById('showblock').style.display = 'none'
+    document.getElementById('show').style.display = 'none'
+    if (img == "./Data/Images/icon_folder.png") document.getElementById('showstore').style.display = 'none'
     document.getElementById('img').src = img
   })
 
@@ -158,9 +159,9 @@ body {
       let gamePathArg = getPathInfo(path)
       showPath = gamePathArg.pathClean
       if (fs.existsSync(showPath)) {
-        document.getElementById('showblock').style.display = 'flex'
+        document.getElementById('show').style.display = 'flex'
       } else {
-        document.getElementById('showblock').style.display = 'none'
+        document.getElementById('show').style.display = 'none'
       } 
     }
   })
@@ -173,7 +174,7 @@ body {
       oldIcon = path
     }
   })
-  
+
   //FOLDER
   document.getElementById('folder').addEventListener('mousedown', (event) => {
     if (event.which != 1) return
@@ -234,6 +235,23 @@ body {
   document.getElementById('show').addEventListener('click', (event) => {
     if (event.which != 1) return
     ipcRenderer.send('showOnExplorer', showPath)
+  })
+    
+  //SHOWSTORE
+  document.getElementById('showstore').addEventListener('mousedown', (event) => {
+    if (event.which != 1) return
+    document.getElementById('showstore').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+    
+    document.addEventListener('mouseup', () => {
+      document.getElementById('showstore').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+    })
+  })
+
+  document.getElementById('showstore').addEventListener('click', (event) => {
+    if (event.which != 1) return
+    ipcRenderer.send('store', document.getElementById('nameText').value)
+    ipcRenderer.send('resume')
+    ipcRenderer.send('exitContext')
   })
   
   //MOVE

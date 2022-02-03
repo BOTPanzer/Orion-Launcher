@@ -1,15 +1,22 @@
 const { app, ipcMain, BrowserWindow, Tray, Menu } = require('electron')
 const fs = require('fs');
 let closing = false
+let paused = false
+
 let tray = null
+
 let window = ''
+
 let win = null
 let win2 = null
 let win3 = null
+
 let dataFolder = null
 let launcherFolder = null
 let actualPath = null
+
 var theme = []
+let tempsearch = undefined
 
 
 app.on('window-all-closed', () => {
@@ -24,7 +31,6 @@ if (!app.requestSingleInstanceLock()) {
 } else app.whenReady().then(() => {
   //SECOND INSTANCES
   app.on('second-instance', (event, commandLine, workingDirectory) => {
-    // Someone tried to run a second instance, we should focus our window.
     if (win) {
       if (win.isMinimized() || !win.isVisible())
       win.show();
@@ -37,11 +43,14 @@ if (!app.requestSingleInstanceLock()) {
   startArg = startArg.replaceAll('|', ' ')
 
 
-  //WINDOWS
+  //MAIN
+  dataFolder = app.getAppPath()+'\\Data\\'
   createWindow()
+  createTray()
 
   win.on('close', function() {
     closeWin2()
+    closeWin3()
   })
 
   ipcMain.on('launcher', (event) => {
@@ -50,8 +59,9 @@ if (!app.requestSingleInstanceLock()) {
     window = 'launcher'
   })
 
-  ipcMain.on('store', (event) => {
+  ipcMain.on('store', (event, search) => {
     if (window == 'store') return
+    tempsearch = search
     win.webContents.send('load', 'store.html')
     window = 'store'
   })
@@ -67,7 +77,8 @@ if (!app.requestSingleInstanceLock()) {
     if (window == 'launcher') {
       createList(actualPath)
     } else if (window == 'store') {
-      searchGames('')
+      if (tempsearch != undefined) searchGames(tempsearch)
+      else searchGames('')
     } else if (window == 'add') {
       win.webContents.send('start', actualPath, launcherFolder);
     } else if (window == 'themes') {
@@ -99,6 +110,16 @@ if (!app.requestSingleInstanceLock()) {
     win.close();
   })
 
+  ipcMain.on('pause', (event) => {
+    win.webContents.send('pause')
+    paused = true
+  })
+
+  ipcMain.on('resume', (event) => {
+    paused = false
+    win.webContents.send('resume')
+  })
+
   ipcMain.on('exitContext', (event) => {
     closeWin2();
   })
@@ -111,14 +132,12 @@ if (!app.requestSingleInstanceLock()) {
 
 
   //FUNCTIONS LAUNCHER
-  dataFolder = app.getAppPath()+'\\Data\\'
   launcherFolder = app.getAppPath()+'\\Launcher\\'
   actualPath = launcherFolder
   if (startArg != '') {
     actualPath = launcherFolder+startArg
     if (!fs.existsSync(actualPath)) actualPath = launcherFolder
   }
-  tray = createTray()
   
   ipcMain.on('loadPath', (event, path, search) => {
     createList(path, search)
@@ -133,12 +152,8 @@ if (!app.requestSingleInstanceLock()) {
     win.webContents.send('setLocPath', argPath, launcherFolder, search)
     win.webContents.send('clearList')
     createBackButt(argPath, search)
-    //FIRST FOLDERS THEN FILES
-    let folders = []
-    let files = []
-    let paths = []
-    let tmpfiles = []
 
+    let paths = []
     if (search == '') {
       paths = fs.readdirSync(argPath)
       rest()
@@ -147,21 +162,25 @@ if (!app.requestSingleInstanceLock()) {
       recursive(argPath, function (err, files) {
         for(i in files) {
           let tmp = files[i].substring(argPath.length)
-          paths.push(tmp)
+          let tmp2 = files[i].substring(files[i].lastIndexOf('\\')+1)
+          if (tmp2.endsWith('.txt')) tmp2 = tmp2.slice(0,-4)
+          if (tmp2.toLowerCase().includes(search.toLowerCase()))
+            paths.push(tmp)
         }
         rest()
       })
     }
 
     function rest() {
+      //FIRST FOLDERS THEN FILES
+      let folders = []
+      let files = []
       for(i in paths) {
         let path = argPath+paths[i]
         if (fs.statSync(path).isFile()) {
-          if (paths[i].toLowerCase().includes(search.toLowerCase()))
-            files.push(paths[i])
+          files.push(paths[i])
         } else {
-          if (paths[i].toLowerCase().includes(search.toLowerCase()))
-            folders.push(paths[i])
+          folders.push(paths[i])
         }
       }
       let allPaths = []
@@ -232,11 +251,7 @@ if (!app.requestSingleInstanceLock()) {
   ipcMain.on('contextFile', (event, path, name, filePath, iconPath, img) => {
     let gamePathArg = getPathInfo(filePath)
     showPath = gamePathArg.pathClean
-    if (fs.existsSync(showPath)) {
-      createWin2('context.html', 420)//421
-    } else {
-      createWin2('context.html', 375)//375
-    }
+    createWin2('context.html', 420)
 
     win2.on('close', function() {
       createList(actualPath)
@@ -251,6 +266,7 @@ if (!app.requestSingleInstanceLock()) {
   })
 
   ipcMain.on('contextFolder', (event, path) => {
+    console.log(path);
     createWin2('context.html', 189)
 
     win2.on('close', function() {
@@ -428,12 +444,13 @@ if (!app.requestSingleInstanceLock()) {
 
   function searchGames(orSearch) {
     win.webContents.send('clearList');
+    win.webContents.send('changeText', orSearch);
     win.webContents.send('searchingResults', 'Elamigos');
     win.webContents.send('searchingResults', 'Fitgirl');
     win.webContents.send('searchingResults', 'Pivi');
     win.webContents.send('searchingResults', 'SteamUnlocked');
 
-    let search = orSearch.replaceAll(' ', '+')
+    let search = orSearch.toLowerCase().replaceAll(' ', '+')
 
     let fullURL = 'https://www.elamigos-games.com/?q='+search
     if (search == '') fullURL = 'https://www.elamigos-games.com/'
@@ -688,7 +705,8 @@ if (!app.requestSingleInstanceLock()) {
   async function getHTMLAgent(url) {
     const superagent = require('superagent');
     const response = await superagent.get(url).set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36').catch(function(err){})
-    return response.text
+    if (response != undefined) return response.text
+    else console.log('no va '+url)
   }
 
   function titleCase(str) {
@@ -775,6 +793,7 @@ function createTray() {
   const contextMenu = Menu.buildFromTemplate([
     {
       label: 'Store', click: function () {
+        if (paused) return
         if (window != 'store') {
           win.webContents.send('load', 'store.html')
           window = 'store'
@@ -785,6 +804,7 @@ function createTray() {
     },
     {
       label: 'Library', click: function () {
+        if (paused) return
         if (window != 'launcher') {
           win.webContents.send('load', 'launcher.html')
           window = 'launcher'
@@ -795,6 +815,7 @@ function createTray() {
     },
     {
       label: 'Themes', click: function () {
+        if (paused) return
         if (window != 'themes') {
           win.webContents.send('load', 'themes.html')
           window = 'themes'
@@ -809,14 +830,14 @@ function createTray() {
         app.quit();
       }
     }
-  ]);
+  ])
 
   appIcon.on('double-click', function (event) {
-      win.show();
-  });
-  appIcon.setToolTip('Oriøn Launcher');
-  appIcon.setContextMenu(contextMenu);
-  return appIcon;
+    win.show();
+  })
+  appIcon.setToolTip('Oriøn Launcher')
+  appIcon.setContextMenu(contextMenu)
+  tray = appIcon
 }
 
 function updateTheme() {

@@ -64,20 +64,16 @@ body {
 </style>
 </head>
 
+<div id="wall" style="position: absolute; display: block; height: 100%; width: 100%; display: none; -webkit-app-region: drag;"></div>
 
 <body style="display: block; height: 100%; width: 100%;">
   <div style="height: 20px; width: 100%; display: flex; background-color: var(--c1);">
     <div style="height: 15px; width: 100%; margin-left: 5px; margin-top: 5px; -webkit-app-region: drag;"></div>
     <div style="display: flex; font-family: Franklin Gothic Medium">
       <div style="display: flex; align-items: center;">
-        <div id="minib" style="height: 20px; width: 30px; background-color: var(--c2); opacity: 0;"></div>
-        <div id="maxib" style="height: 20px; width: 30px; background-color: var(--c2); opacity: 0;"></div>
-        <div id="exitb" style="height: 20px; width: 30px; background-color: #690108; opacity: 0;"></div>
-      </div>
-      <div style="display: flex; position: absolute;">
-        <div id="mini" style="height: 20px; width: 30px; color: var(--c3); border-radius: 5px; text-align: center; align-items: center;">–</div>
-        <div id="maxi" style="height: 20px; width: 30px; color: var(--c3); border-radius: 5px; text-align: center; align-items: center;">o</div>
-        <div id="exit" style="height: 20px; width: 30px; color: var(--c3); border-radius: 5px; text-align: center; align-items: center;">x</div>
+        <div id="mini" style="height: 20px; width: 30px; color: var(--c3); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">–</div>
+        <div id="maxi" style="height: 20px; width: 30px; color: var(--c3); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">o</div>
+        <div id="exit" style="height: 20px; width: 30px; color: var(--c3); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">x</div>
       </div>
     </div>
   </div>
@@ -120,7 +116,7 @@ body {
     </div>
   </div>
 </body>
-	
+
 <script>
   const { ipcRenderer } = require('electron');
   window.$ = window.jQuery = require('jquery');
@@ -135,7 +131,8 @@ body {
       lastWin = html
       $(function(){
         ipcRenderer.removeAllListeners()
-        setbuttons()
+        document.getElementById('add').style.display = 'none'
+        document.getElementById('window').scrollTop = 0
         var result = $("#window").load(html, function () {
           ipcRenderer.send('loaded')
           a2()
@@ -152,6 +149,14 @@ body {
       document.body.style.background = theme.background
       document.body.style.backgroundAttachment = 'fixed'
     })
+
+    ipcRenderer.on('pause', (event) => {
+      document.getElementById('wall').style.display = 'block'
+    })
+
+    ipcRenderer.on('resume', (event) => {
+      document.getElementById('wall').style.display = 'none'
+    })
   }
 
   function a2() {
@@ -159,8 +164,6 @@ body {
   }
 
   function setbuttons() {
-    document.body.replaceWith(document.body.cloneNode(true));
-
     //ORIONLOGO
     document.getElementById('orionLogo').addEventListener('click', (event) => {
       if (event.which != 1) return
@@ -198,10 +201,10 @@ body {
     //MINI
     document.getElementById('mini').addEventListener('mousedown', (event) => {
       if (event.which != 1) return
-      document.getElementById('minib').style.opacity = '1';
+      document.getElementById('mini').style.backgroundColor = 'var(--c2)';
 
       document.addEventListener('mouseup', () => {
-        document.getElementById('minib').style.opacity = '0';
+        document.getElementById('mini').style.backgroundColor = 'rgba(0, 0, 0, 0)';
       })
     })
 
@@ -213,10 +216,10 @@ body {
     //MAXI
     document.getElementById('maxi').addEventListener('mousedown', (event) => {
       if (event.which != 1) return
-      document.getElementById('maxib').style.opacity = '1';
+      document.getElementById('maxi').style.backgroundColor = 'var(--c2)';
     
       document.addEventListener('mouseup', () => {
-        document.getElementById('maxib').style.opacity = '0';
+        document.getElementById('maxi').style.backgroundColor = 'rgba(0, 0, 0, 0)';
       })
     })
 
@@ -228,10 +231,10 @@ body {
     //EXIT
     document.getElementById('exit').addEventListener('mousedown', (event) => {
       if (event.which != 1) return
-      document.getElementById('exitb').style.opacity = '1';
+      document.getElementById('exit').style.backgroundColor = '#690108';
     
       document.addEventListener('mouseup', () => {
-        document.getElementById('exitb').style.opacity = '0';
+        document.getElementById('exit').style.backgroundColor = 'rgba(0, 0, 0, 0)';
       })
     })
 
@@ -285,9 +288,6 @@ body {
       ipcRenderer.send('themes')
     })
 
-
-    document.getElementById('add').style.display = 'none'
-
     //ADDFOLDER
     document.getElementById('addfolder').addEventListener('mousedown', (event) => {
       if (event.which != 1) return
@@ -301,11 +301,8 @@ body {
     document.getElementById('addfolder').addEventListener('click', (event) => {
       if (event.which != 1) return
       window.scrollTo(0, 0);
-      let scroll = document.getElementById('rightBar').scrollTop
-      document.body.replaceWith(document.body.cloneNode(true));
-      document.getElementById('rightBar').scrollTop = scroll
+      ipcRenderer.send('pause')
       ipcRenderer.send('addfolder')
-      cont = true
     })
 
     //ADDGAME
@@ -321,11 +318,8 @@ body {
     document.getElementById('addgame').addEventListener('click', (event) => {
       if (event.which != 1) return
       window.scrollTo(0, 0);
-      let scroll = document.getElementById('rightBar').scrollTop
-      document.body.replaceWith(document.body.cloneNode(true));
-      document.getElementById('rightBar').scrollTop = scroll
+      ipcRenderer.send('pause')
       ipcRenderer.send('addgame')
-      cont = true
     })
   }
 </script>
