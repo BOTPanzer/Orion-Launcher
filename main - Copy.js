@@ -1,9 +1,7 @@
 const { app, ipcMain, BrowserWindow, dialog } = require('electron')
 const fs = require('fs');
 let window = 'launcher'
-let window2 = null
 let win = null
-let win2 = null
 
 
 function createWindow(_height, _width) {
@@ -33,15 +31,6 @@ app.on('window-all-closed', () => {
 
 app.whenReady().then(() => {
   createWindow()
-
-  win.on('close', function() {
-    closeWin2()
-  });
-
-  function closeWin2() {
-    if (window2 != null)
-    win2.close()
-  }
 
   ipcMain.on('launcher', (event) => {
     win.loadFile('main.html')
@@ -76,6 +65,74 @@ app.whenReady().then(() => {
   ipcMain.on('load', (event, path) => {
     createList(path)
   })
+
+  ipcMain.on('delFile', (event, path) => {
+    delFile(path)
+  })
+
+  ipcMain.on('delFolder', (event, path) => {
+    delFolder(path)
+  })
+
+  function delFile(path) {
+    let name = path.substring(0, path.lastIndexOf("\\"))
+    name = name.substring(name.lastIndexOf("\\")+1)
+    if (name.includes('.')) name = name.substring(0, name.lastIndexOf('.'))
+    const options = {
+      icon: __dirname+'.\\Data\\Images\\icon.ico',
+      buttons: ['Yes', 'No'],
+      title: 'Oriøn: Launcher',
+      message: 'Remove Game?',
+      detail: 'Game: '+name,
+    };
+
+    const delWin = async () => {
+      let response = await dialog.showMessageBox(options)
+      if (response.response == 0) {
+        if (fs.existsSync(path)) {
+          fs.unlink(path, (err) => {
+            if (err) {
+              console.error(err)
+              return
+            }
+            createList(actualPath)
+          })
+        }
+      } else createList(actualPath)
+    }
+
+    delWin()
+  }
+
+  function delFolder(path) {
+    let name = path.substring(0, path.lastIndexOf("\\"))
+    name = name.substring(name.lastIndexOf("\\")+1)
+    const options = {
+      icon: __dirname+'.\\Data\\Images\\icon.ico',
+      buttons: ['Yes', 'No'],
+      title: 'Oriøn: Launcher',
+      message: 'Remove Folder?',
+      detail: 'Folder: '+name,
+    };
+
+    const delWin = async () => {
+      const rimraf = require("rimraf");
+      let response = await dialog.showMessageBox(options)
+      if (response.response == 0) {
+        if (fs.existsSync(path)) {
+          rimraf(path, (err) => {
+            if (err) {
+              console.error(err)
+              return
+            }
+            createList(actualPath)
+          })
+        }
+      } else createList(actualPath)
+    }
+
+    delWin()
+  }
 
   function createList(argPath) {
     win.webContents.send('setbutt');
@@ -124,19 +181,15 @@ app.whenReady().then(() => {
         if (filePath.endsWith('\r')) filePath = filePath.slice(0,-1)
         if (filePath.startsWith('?:')) filePath = filePath.replace('?:', dataFolder.substring(0, 2))
         //if (filePath.startsWith('?:')) filePath = filePath.replace('?:', 'E:')
+        win.webContents.send('addListener', id, path, filePath, name, img);
         //Image
         var iconPath = si[1]
         if (iconPath != undefined) {
           if (iconPath.endsWith('\r')) iconPath = iconPath.slice(0,-1)
-          win.webContents.send('addListener', id, path, filePath, name, img, iconPath);
           app.getFileIcon(iconPath, {size:"large"}).then((fileIcon) =>{ 
             win.webContents.send('changeIcon', img, fileIcon.toDataURL()) 
           })
         } else {
-          win.webContents.send('addListener', id, path, filePath, name, img, '');
-          if (filePath.startsWith('"') && !filePath.endsWith('"')) {
-            filePath = filePath.substring(1, filePath.lastIndexOf('"'))
-          }
           app.getFileIcon(filePath, {size:"large"}).then((fileIcon) =>{ 
             win.webContents.send('changeIcon', img, fileIcon.toDataURL()) 
           })
@@ -168,185 +221,42 @@ app.whenReady().then(() => {
       shell.showItemInFolder(path)
     }
   })
-
-  ipcMain.on('contextFile', (event, path, name, filePath, iconPath) => {
-    win2 = new BrowserWindow({
-      height: 400,
-      width: 404,
-      minHeight: 500,
-      minWidth: 404,
-      maxHeight: 500,
-      maxWidth: 404,
-      webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: false,
-        enableRemoteModule: true
-      }
-    })
-  
-    win2.loadFile('context.html')
-    win2.removeMenu()
-    //win2.openDevTools()
-    window2 = 'folder'
-
-    win2.on('close', function() {
-      createList(actualPath)
-      window2 = null
-    });
-
-    win2.webContents.send('setLocation', path);
-    //Name
-    win2.webContents.send('setName', name);
-    win2.webContents.send('setPath', filePath);
-    win2.webContents.send('setIconPath', iconPath);
-  })
-
-  ipcMain.on('contextFolder', (event, path) => {
-    win2 = new BrowserWindow({
-      height: 400,
-      width: 404,
-      minHeight: 500,
-      minWidth: 404,
-      maxHeight: 500,
-      maxWidth: 404,
-      webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: false,
-        enableRemoteModule: true
-      }
-    })
-  
-    win2.loadFile('context.html')
-    win2.removeMenu()
-    //win2.openDevTools()
-    window2 = 'folder'
-
-    win2.on('close', function() {
-      createList(actualPath)
-      window2 = null
-    });
-
-    win2.webContents.send('setLocation', path);
-    //Name
-    let name = path.substring(0, path.lastIndexOf("\\"))
-    name = name.substring(name.lastIndexOf("\\")+1)
-    if (name.includes('.')) name = name.substring(0, name.lastIndexOf('.'))
-    win2.webContents.send('setName', name);
-    win2.webContents.send('setPath', undefined);
-    win2.webContents.send('setIconPath', undefined);
-  })
-
-  ipcMain.on('getFileContext', async function() {
-    win2.webContents.send('fileGotten', await getFile("Choose a Game"));
-  })
-
-  ipcMain.on('getFileIconContext', async function() {
-    win2.webContents.send('fileGottenIcon', await getFile("Choose a Game"));
-  })
-
-  ipcMain.on('remove', (event, path) => {
-    if (fs.statSync(path).isFile()) {
-      delFile(path)
-    } else {
-      delFolder(path)
-    }
-  })
-
-  function delFile(path) {
-    let name = path.substring(0, path.lastIndexOf("\\"))
-    name = name.substring(name.lastIndexOf("\\")+1)
-    if (name.includes('.')) name = name.substring(0, name.lastIndexOf('.'))
-    const options = {
-      icon: __dirname+'.\\Data\\Images\\icon.ico',
-      buttons: ['Yes', 'No'],
-      title: 'Oriøn: Launcher',
-      message: 'Remove Game?',
-      detail: 'Game: '+name,
-    };
-
-    const delWin = async () => {
-      let response = await dialog.showMessageBox(options)
-      if (response.response == 0) {
-        if (fs.existsSync(path)) {
-          fs.unlink(path, (err) => {
-            closeWin2()
-            createList(actualPath)
-          })
-        }
-      }
-    }
-
-    delWin()
-  }
-
-  function delFolder(path) {
-    let name = path.substring(0, path.lastIndexOf("\\"))
-    name = name.substring(name.lastIndexOf("\\")+1)
-    const options = {
-      icon: __dirname+'.\\Data\\Images\\icon.ico',
-      buttons: ['Yes', 'No'],
-      title: 'Oriøn: Launcher',
-      message: 'Remove Folder?',
-      detail: 'Folder: '+name,
-    };
-
-    const delWin = async () => {
-      const rimraf = require("rimraf");
-      let response = await dialog.showMessageBox(options)
-      if (response.response == 0) {
-        if (fs.existsSync(path)) {
-          rimraf(path, (err) => {
-            closeWin2()
-            createList(actualPath)
-          })
-        }
-      }
-    }
-
-    delWin()
-  }
-
-  ipcMain.on('save', (event, path, newName, newPath, newIcon) => {
-    if (fs.existsSync(path)) {
-      fs.writeFile(path, newPath+'\n'+newIcon, (err) => {
-        if (newName != undefined) {
-          if (fs.statSync(path).isFile()) {
-            let newFilePath = actualPath+newName+'.txt'
-            fs.rename(path, newFilePath, function(err) {
-              closeWin2()
-              createList(actualPath)
-            })
-          } else {
-            let newFilePath = actualPath+newName
-            fs.rename(path, newFilePath, function(err) {
-              closeWin2()
-              createList(actualPath)
-            })
-          }
-        } else {
-          closeWin2()
-          createList(actualPath)
-        }
-      })
-    }
-  })
-
   
   //FUNCTIONS LAUNCHER CREATOR
   ipcMain.on('b1', (event, name) => {
     let fullName = actualPath+name.trim()
     if (!fs.existsSync(fullName)) {
       fs.mkdirSync(fullName);
-      win.webContents.send('log', `Folder "${name}" Added`);
+      win.webContents.send('log', `Game "${name}" Added`);
     }
   })
 
-  ipcMain.on('getFile', async function() {
-    win.webContents.send('fileGotten', await getFile("Choose a Game"));
+  ipcMain.on('getFile', (event) => {
+    dialog.showOpenDialog({
+      title: "Choose a Game",
+      properties: ['openFile'],
+    }).then((files)=>{
+      let file = files.filePaths[0]
+      if (file == undefined) {
+        console.log("No file selected");
+      } else {
+        win.webContents.send('fileGotten', file);
+      }
+    }).catch(err=>console.log('Handle Error',err))
   })
 
-  ipcMain.on('getFileIcon', async function() {
-    win.webContents.send('fileGottenIcon', await getFile("Choose a Game"));
+  ipcMain.on('getFileIcon', (event) => {
+    dialog.showOpenDialog({
+      title: "Choose a Game",
+      properties: ['openFile'],
+    }).then((files)=>{
+      let file = files.filePaths[0]
+      if (file == undefined) {
+        console.log("No file selected");
+      } else {
+        win.webContents.send('fileGottenIcon', file);
+      }
+    }).catch(err=>console.log('Handle Error',err))
   })
 
   ipcMain.on('b3', (event, name, path, icon) => {
@@ -583,20 +493,5 @@ app.whenReady().then(() => {
                   </div>
                 </div>`
     return html
-  }
-
-  async function getFile(title) {
-    let result = await dialog.showOpenDialog({
-      title: title,
-      properties: ['openFile'],
-    }).then(function(files) {
-      let file = files.filePaths[0]
-      if (file == undefined) {
-        return ''
-      } else {
-        return file
-      }
-    })
-    return result
   }
 })

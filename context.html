@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>Oriøn: Description</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=0">
+<style>
+/* Style the body */
+	
+@font-face { font-family: BodyFont; src: url('Data/Fonts/font_body.ttf'); } 
+@font-face { font-family: ItemFont; src: url('Data/Fonts/font_item.ttf'); } 
+	
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: BodyFont;
+  margin: 0px;
+  vertical-align: baseline;
+  background: url('./Data/Images/lines.png'), linear-gradient(#38151C, #070B14 75%);
+  background-attachment: fixed;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #181B22; 
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #7E0D0E; 
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #572629; 
+}
+
+.list {
+  color: #68D8D5; 
+  font-family: ItemFont; 
+  margin-left: 10px; 
+  margin-right: 10px; 
+  padding-bottom: 5px; 
+  overflow-x: auto;
+  white-space: nowrap;
+}
+	
+.unselectableDiv {
+  vertical-align: middle;
+  height: 40px;
+  width: 140px;
+  display: table-cell;
+  align-items: center;
+}
+
+.unselectable {
+  overflow: hidden;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+</style>
+</head>
+	
+<body>
+<!--div id="locationText" class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; margin: 10px; margin-bottom: 20px; padding: 5px; padding-left: 10px;">Texto</div-->
+
+<div id="name">
+  <div class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Name:</div>
+  <div style="align-items: center; margin: 20px; margin-top: 0px;">
+    <input id='nameText' type="text" size="38" maxlength="50" style="height: 32px; padding-left: 10px; padding-right: 10px; color: #68D8D5; font-size: 16px; font-family: ItemFont; background-color: #181B22; border-style: solid; border-color: #7E0D0E; border-width: 1px;"></input>
+  </div>
+</div>
+
+<div id="path">
+  <div class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Game Path:</div>
+  <div style="align-items: center; margin: 20px; margin-top: 0px; display: flex;">
+    <input id='pathText' type="text" size="32" style="height: 32px; padding-left: 10px; padding-right: 10px; color: #68D8D5; font-size: 16px; font-family: ItemFont; background-color: #181B22; border-style: solid; border-color: #7E0D0E; border-width: 1px;"></input>
+    <div id="folder" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px">
+      <img class="unselectable" style="height: 30px; min-width: 30px; margin: 3px;" src="./Data/Images/icon_folder.png"></img>
+    </div>
+  </div>
+</div>
+
+<div id="iconPath">
+  <div class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Game Icon Path:</div>
+  <div style="align-items: center; margin: 20px; margin-top: 0px; display: flex;">
+    <input id='iconText' type="text" size="32" style="height: 32px; padding-left: 10px; padding-right: 10px; color: #68D8D5; font-size: 16px; font-family: ItemFont; background-color: #181B22; border-style: solid; border-color: #7E0D0E; border-width: 1px;"></input>
+    <div id="folderIcon" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px">
+      <img class="unselectable" style="height: 30px; min-width: 30px; margin: 3px;" src="./Data/Images/icon_folder.png"></img>
+    </div>
+  </div>
+</div>
+
+<div style="margin-left: 20px; margin-right: 20px; margin-bottom: 20px; display: flex; align-items: center; position: absolute; bottom: 0; right: 0;">
+  <div id="remove" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px;">
+    <div class="unselectable" style="color: #68D8D5; font-family: ItemFont;">Remove</div>
+  </div>
+  <div id="save" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png');">
+    <div class="unselectable" style="color: #68D8D5; font-family: ItemFont;">Save</div>
+  </div>
+</div>
+
+
+<script>
+  const { ipcRenderer } = require('electron');
+  let actualPath = ''
+  let oldName = ''
+  let oldPath = ''
+  let oldIcon = ''
+
+  
+  ipcRenderer.on('setLocation', (event, path) => {
+    //document.getElementById('locationText').innerText = path
+    actualPath = path
+  })
+
+  ipcRenderer.on('setName', (event, name) => {
+    document.getElementById('nameText').value = name
+    oldName = name
+  })
+
+  ipcRenderer.on('setPath', (event, path) => {
+    if (path == undefined) {
+      document.getElementById('path').style.display = 'none'
+    } else {
+      document.getElementById('pathText').value = path
+      oldPath = path
+    }
+  })
+
+  ipcRenderer.on('setIconPath', (event, path) => {
+    if (path == undefined) {
+      document.getElementById('iconPath').style.display = 'none'
+    } else {
+      document.getElementById('iconText').value = path
+      oldIcon = path
+    }
+  })
+
+  document.getElementById('folder').addEventListener('click', () => {
+    document.getElementById('folder').style.backgroundImage = 'url("./Data/Images/icon_description_folder_clicked")';
+	  setTimeout(function() {
+      document.getElementById('folder').style.backgroundImage = 'url("./Data/Images/icon_description_folder.png")';
+      ipcRenderer.send('getFileContext')
+    }, 100)
+  })
+
+  ipcRenderer.on('fileGotten', (event, path) => {
+    document.getElementById('pathText').value = path
+  })
+
+  document.getElementById('folderIcon').addEventListener('click', () => {
+    document.getElementById('folderIcon').style.backgroundImage = 'url("./Data/Images/icon_description_folder_clicked")';
+	  setTimeout(function() {
+      document.getElementById('folderIcon').style.backgroundImage = 'url("./Data/Images/icon_description_folder.png")';
+      ipcRenderer.send('getFileIconContext')
+    }, 100)
+  })
+
+  ipcRenderer.on('fileGottenIcon', (event, path) => {
+    document.getElementById('iconText').value = path
+  })
+
+  document.getElementById('remove').addEventListener('click', () => {
+    document.getElementById('remove').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+	  setTimeout(function() {
+      document.getElementById('remove').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+      ipcRenderer.send('remove', actualPath)
+    }, 100)
+  })
+
+  document.getElementById('save').addEventListener('click', () => {
+    document.getElementById('save').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+	  setTimeout(function() {
+      document.getElementById('save').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+      //Save
+      let newName = undefined
+      if (oldName != document.getElementById('nameText').value) newName = document.getElementById('nameText').value
+      let newPath = oldPath
+      if (document.getElementById('path').style.display != 'none') {
+        if (oldPath != document.getElementById('pathText').value) newPath = document.getElementById('pathText').value
+      }
+      let newIcon = oldIcon
+      if (document.getElementById('iconPath').style.display != 'none') {
+        if (oldIcon != document.getElementById('iconText').value) newIcon = document.getElementById('iconText').value
+      }
+      ipcRenderer.send('save', actualPath, newName, newPath, newIcon)
+    }, 100)
+  })
+</script>
+</body>
+</html>

@@ -123,8 +123,7 @@ body {
 </div>
 
 <script>
-  const { app, shell, ipcRenderer } = require('electron');
-  const fs = require('fs');
+  const { ipcRenderer } = require('electron');
 
   ipcRenderer.on('clearList', (event, list) => {
     let infoDiv = document.getElementById('list')
@@ -136,7 +135,7 @@ body {
     infoDiv.insertAdjacentHTML('beforeend', item)
   })
 
-  ipcRenderer.on('addListener', (event, id, path, filePath, name, img) => {
+  ipcRenderer.on('addListener', (event, id, path, filePath, name, img, iconPath) => {
     document.getElementById(id).addEventListener('click', () => {
       document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item_clicked.png")';
 	    window.scrollTo(0, 0);
@@ -148,7 +147,7 @@ body {
 
     document.getElementById(id).addEventListener('contextmenu', () => {
       document.getElementById('body').replaceWith(document.getElementById('body').cloneNode(true));
-      ipcRenderer.send('delFile', path)
+      ipcRenderer.send('contextFile', path, name, filePath, iconPath)
     })
   })
 
@@ -159,13 +158,12 @@ body {
 	    setTimeout(function() {
         document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
         load(path)
-        document.getElementById('description').style.display = 'none'
       }, 100)
     })
 
     document.getElementById(id).addEventListener('contextmenu', () => {
       document.getElementById('body').replaceWith(document.getElementById('body').cloneNode(true));
-      ipcRenderer.send('delFolder', path)
+      ipcRenderer.send('contextFolder', path)
     })
   })
 
@@ -186,6 +184,8 @@ body {
   })
 
   ipcRenderer.on('setbutt', (event, path, homePath) => {
+    document.getElementById('description').style.display = 'none'
+
     document.getElementById('store').addEventListener('click', () => {
       document.getElementById('store').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
 	    setTimeout(function() {
@@ -217,13 +217,14 @@ body {
       setTimeout(function() {
         document.getElementById('launchDescription').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
         if (path.startsWith('"') && !path.endsWith('"')) {
+          let spawn = require("child_process").spawn;
           let pathClean = path.substring(1, path.lastIndexOf('"'))
           let args = path.substring(pathClean.length+2).trim()
           let argsClean = args.split(' ')
           argsClean.unshift("/c", pathClean)
-          let spawn = require("child_process").spawn;
           let bat = spawn("cmd.exe", argsClean)
         } else {
+          const { shell } = require('electron');
           shell.openPath(path)
         }
       }, 100)
@@ -233,7 +234,12 @@ body {
       document.getElementById('folderDescription').style.backgroundImage = 'url("./Data/Images/icon_description_folder_clicked.png")';
       setTimeout(function() {
         document.getElementById('folderDescription').style.backgroundImage = 'url("./Data/Images/icon_description_folder.png")';
-        shell.showItemInFolder(path)
+        if (path.startsWith('"') && !path.endsWith('"')) {;
+          let pathClean = path.substring(1, path.lastIndexOf('"'))
+          ipcRenderer.send('showOnExplorer', pathClean)
+        } else {
+          ipcRenderer.send('showOnExplorer', path)
+        }
       }, 100)
     })
     //Show

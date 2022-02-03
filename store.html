@@ -100,7 +100,7 @@ body {
 </div>
 
 <script>
-  const { shell, ipcRenderer } = require('electron');
+  const { ipcRenderer } = require('electron');
   window.$ = window.jQuery = require('jquery');
   var user = true
 
@@ -133,6 +133,7 @@ body {
       document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item_clicked.png")';
 	    setTimeout(function() {
         document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
+        const { shell } = require('electron');
         shell.openExternal(link)
       }, 100)
     })

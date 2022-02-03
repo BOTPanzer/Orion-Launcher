@@ -102,18 +102,18 @@ body {
     <img class="unselectable" style="height: 30px; min-width: 30px; margin: 3px;" src="./Data/Images/icon_folder.png"></img>
   </div>
 </div>
-<div style="margin-left: 20px; margin-right: 20px; margin-bottom: 20px; display: flex;">
+<div style="margin-left: 20px; margin-right: 20px; margin-bottom: 20px; display: flex; align-items: center;">
   <div id="b1" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px;">
     <div class="unselectable" style="color: #68D8D5; font-family: ItemFont;">Add Folder</div>
   </div>
   <div id="b3" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px;">
     <div class="unselectable" style="color: #68D8D5; font-family: ItemFont;">Add Game</div>
   </div>
+  <div id="log" class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; padding: 5px; height: fit-content;"></div>
 </div>
 
 <script>
-  const { shell, ipcRenderer } = require('electron');
-  const fs = require('fs');
+  const { ipcRenderer } = require('electron');
   
   ipcRenderer.on('changeText', (event, actualPath) => {
     document.getElementById('text').innerHTML = actualPath
@@ -150,6 +150,10 @@ body {
 
     ipcRenderer.on('fileGottenIcon', (event, path) => {
       document.getElementById('iconText').value = path
+    })
+
+    ipcRenderer.on('log', (event, text) => {
+      document.getElementById('log').innerText = text
     })
 
     document.getElementById('b3').addEventListener('click', () => {
