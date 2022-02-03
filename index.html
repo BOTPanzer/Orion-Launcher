@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-<title>Orion Launcher v1.2.0</title>
+<title>Orion Launcher v1.2.6</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=0">
 <style>
@@ -76,22 +76,38 @@ body {
 </div>
 	
 <div class="content">
-  <h1 id="txtMenu" class="unselectable" path="" style="color: white; margin: 10px">Home</h1>
-  <div id="list" style="color: #68D8D5; font-family: ItemFont; margin-top: 10px; display: inline-block">
-	  
-	<div id="b2" style="margin-top: 5px; margin-right: 5px; width: 150px; height: 150px; background-image: url('./icon_item.png'); text-align: center; display: inline-block;">
-    <div style="width: 150px; height: 100px;">
-		  <img id="img2" class="unselectable" style="margin: 10px; width: 90px; height: 90px;" src="./icon_folder.png"></img>
-	  </div>
-	  <div style="width: 140px; height: 40px; padding: 5px">
-		  <div class="unselectableDiv">
-		    <div class="unselectable" style="line-height:20px; display: inline-block; max-height: 40px; width: 140px;">Game</div>
+    <h1 id="txtMenu" class="unselectable" style="color: white; margin: 10px; margin-bottom: 20px;">Home</h1>
+	<div style="display: flex; justify-content: space-between;">
+	  <div id="list" style="color: #68D8D5; font-family: ItemFont;">
+        <div id="b2" style="margin-bottom: 5px; margin-right: 5px; width: 150px; height: 150px; background-image: url('./icon_item.png'); text-align: center;">
+          <div style="width: 150px; height: 100px;">
+		    <img id="img2" class="unselectable" style="margin: 10px; width: 90px; height: 90px;" src="./icon_folder.png"></img>
+	      </div>
+	      <div style="width: 140px; height: 40px; padding: 5px">
+		    <div class="unselectableDiv">
+		      <div class="unselectable" style="line-height:20px; display: inline-block; max-height: 40px; width: 140px;">Game</div>
+		    </div>
+	      </div>
+	    </div>
+      </div>
+	  <div id="description" style="height: 150px; min-width: 350px; max-width: 350px; display: none; margin-top: 5px; background-image: url('./icon_description.png');">
+        <img id="imgDescription" class="unselectable" style="height: 90px; min-width: 90px; margin: 30px; margin-left: 20px; margin-right: 20px;" src="./icon_file.png"></img>
+		<div style="padding-left: 10px; font-family: ItemFont; align-items: center;">
+			<div style="height: 10%"></div>
+		  <div style="min-height: 55%; max-height: 55%; display: flex; align-items: center">
+			  <div id="txtDescription" class="unselectable" style="margin-right: 10px; line-height: 21px; font-size: 20px; display: inline-block; max-height: 42px;">Game</div>
 		  </div>
-	  </div>
+		  <div style="height: 35%; width: 195px; display: flex; align-items: flex-start; justify-content: space-between;">
+			<div id="launchDescription" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./icon_description_launch.png');">
+		      <div class="unselectable" style="color: #68D8D5;">Launch</div>
+		    </div>
+			<img id="folderDescription" class="unselectable" style="height: 36px; min-width: 36px; background-image: url('./icon_description_folder.png');" src="./icon_folder.png"></img>
+		  </div>
+		</div>
+      </div>
 	</div>
-	
-  </div>
 </div>
+
 <script>
   const { app, shell, ipcRenderer } = require('electron');
   const fileIcon = require("extract-file-icon");
@@ -106,12 +122,35 @@ body {
     infoDiv.insertAdjacentHTML('beforeend', item)
   })
 
-  ipcRenderer.on('addListener', (event, id, path) => {
+  ipcRenderer.on('addListener', (event, id, path, img) => {
     document.getElementById(id).addEventListener('click', () => {
       document.getElementById(id).style.backgroundImage = 'url("./icon_item_clicked.png")';
       setTimeout(function() {
         document.getElementById(id).style.backgroundImage = 'url("./icon_item.png")';
-        shell.openPath(path)
+        //Name
+        let name = path.substring(0, path.lastIndexOf("\\"))
+        name = name.substring(name.lastIndexOf("\\")+1)
+        //Description
+        document.getElementById('imgDescription').src = document.getElementById(img).src
+        document.getElementById('txtDescription').innerHTML = name
+        document.getElementById('launchDescription').replaceWith(document.getElementById('launchDescription').cloneNode(true));
+        document.getElementById('launchDescription').addEventListener('click', () => {
+          document.getElementById('launchDescription').style.backgroundImage = 'url("./icon_description_launch_clicked.png")';
+          setTimeout(function() {
+            document.getElementById('launchDescription').style.backgroundImage = 'url("./icon_description_launch.png")';
+            shell.openPath(path)
+          }, 100)
+        })
+        document.getElementById('folderDescription').replaceWith(document.getElementById('folderDescription').cloneNode(true));
+        document.getElementById('folderDescription').addEventListener('click', () => {
+          document.getElementById('folderDescription').style.backgroundImage = 'url("./icon_description_folder_clicked.png")';
+          setTimeout(function() {
+            document.getElementById('folderDescription').style.backgroundImage = 'url("./icon_description_folder.png")';
+            shell.showItemInFolder(path)
+          }, 100)
+        })
+        //Show
+        document.getElementById('description').style.display = 'flex'
       }, 100)
     })
   })
@@ -122,19 +161,13 @@ body {
       setTimeout(function() {
         document.getElementById(id).style.backgroundImage = 'url("./icon_item.png")';
         load(path)
+        document.getElementById('description').style.display = 'none'
       }, 100)
     })
   })
 
   ipcRenderer.on('changeIcon', (event, img, icon) => {
     document.getElementById(img).src = icon
-  })
-
-  ipcRenderer.on('changeIcon2', (event, img, path) => {
-    //slower but better quality
-    let base64data = new Buffer.from(fileIcon(path, 32)).toString('base64');
-    if (base64data == "") return 
-    document.getElementById(img).src = 'data:image/png;base64,'+base64data
   })
 
   ipcRenderer.on('setLocPath', (event, path, homePath) => {

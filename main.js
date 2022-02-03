@@ -1,15 +1,11 @@
 const { app, ipcMain, BrowserWindow } = require('electron')
-const fileIcon = require("extract-file-icon");
-const path = require('path')
 const fs = require('fs');
-const readline = require('readline');
-const { get } = require('https');
 let win = null
 
 function createWindow () {
   win = new BrowserWindow({
-    width: 990,
-    height: 517,
+    width: 1025,
+    height: 550,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
@@ -17,6 +13,7 @@ function createWindow () {
   })
 
   win.loadFile('index.html')
+  //win.openDevTools()
 }
 
 app.whenReady().then(() => {
@@ -60,7 +57,7 @@ app.whenReady().then(() => {
       let html = createHTML(id, img, "./icon_file.png", name)
       //Create
       win.webContents.send('add1ToList', html);
-      win.webContents.send('addListener', id, path);
+      win.webContents.send('addListener', id, path, img);
       app.getFileIcon(path, {size:"large"}).then((fileIcon) =>{
         win.webContents.send('changeIcon', img, fileIcon.toDataURL());
       })
