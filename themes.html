@@ -1,6 +1,6 @@
 <div id="content" style="height: 100%; margin: 10px; margin-bottom: 20px; color: white;">
   <div style="display: flex; align-items: center; margin: 10px;">
-    <div id="txtMenu" style="color: var(--c4); font-size: 40px; margin: 0px;">Theme Manager</div>
+    <div id="title" style="color: var(--c4); font-size: 40px; margin: 0px;">Theme Manager</div>
     <div id="folder" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px;">
       <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/icon_folder.png"></img>
     </div>
@@ -22,19 +22,12 @@
   })
 
   ipcRenderer.on('addListener', (event, id, path) => {
-    document.getElementById(id).addEventListener('mousedown', (event) => {
-      if (event.which != 1) return
+    addButtonListener(id, function() {
       document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item_clicked.png")';
-    
-      document.addEventListener('mouseup', () => {
-        if (document.getElementById(id) == undefined) return
-        document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
-      })
-    })
-
-    document.getElementById(id).addEventListener('mouseup', (event) => {
-      if (event.which != 1) return
-      document.getElementById('txtMenu').innerText = 'Loading: '+path.substring(path.lastIndexOf('\\')+1)
+    }, function() {
+      document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
+    }, function() {
+      document.getElementById('title').innerText = 'Loading: '+path.substring(path.lastIndexOf('\\')+1)
       $("#rightBar").animate({ scrollTop: 0 }, "fast");
       ipcRenderer.send('pause')
 	    setTimeout(function() {
@@ -43,19 +36,11 @@
     })
   })
 
-
-  document.getElementById('folder').addEventListener('mousedown', (event) => {
-    if (event.which != 1) return
+  addButtonListener('folder', function() {
     document.getElementById('folder').style.backgroundImage = 'url("./Data/Images/icon_description_folder_clicked.png")';
-    
-    document.addEventListener('mouseup', () => {
-      if (document.getElementById('folder') == undefined) return
-      document.getElementById('folder').style.backgroundImage = 'url("./Data/Images/icon_description_folder.png")';
-    })
-  })
-
-  document.getElementById('folder').addEventListener('mouseup', (event) => {
-    if (event.which != 1) return
+  }, function() {
+    document.getElementById('folder').style.backgroundImage = 'url("./Data/Images/icon_description_folder.png")';
+  }, function() {
     ipcRenderer.send('openThemeFolder')
   })
 </script>

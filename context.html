@@ -31,7 +31,7 @@ body {
 }
 </style>
 </head>
-	
+
 <body>
   <div style="height: 20px; width: 100%; display: flex; background-color: var(--c1);">
     <div style="height: 15px; width: 100%; margin-left: 5px; margin-top: 5px; -webkit-app-region: drag; align-items: center;">
@@ -75,8 +75,9 @@ body {
     </div>
   </div>
 
+  <div id="log" style="color: var(--c4); font-family: ItemFont; font-size: 16px; margin: 10px; margin-top: 0px; padding: 5px; padding-left: 10px;"></div>
+
   <div>
-    <div id="log" style="color: var(--c4); font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;"></div>
     <div style="width: 100%; position: absolute; bottom: 0; display: block;">
       <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
         <div></div> 
@@ -112,18 +113,11 @@ body {
   let oldIcon = ''
   let showPath = ''
 
-  //EXIT
-  document.getElementById('exit').addEventListener('mousedown', (event) => {
-    if (event.which != 1) return
+  addButtonListener('exit', function() {
     document.getElementById('exit').style.backgroundColor = '#690108';
-    
-    document.addEventListener('mouseup', () => {
-      document.getElementById('exit').style.backgroundColor = 'rgba(0, 0, 0, 0)';
-    })
-  })
-
-  document.getElementById('exit').addEventListener('click', (event) => {
-    if (event.which != 1) return
+  }, function() {
+    document.getElementById('exit').style.backgroundColor = 'rgba(0, 0, 0, 0)';
+  }, function() {
     ipcRenderer.send('exitContext')
   })
 
@@ -175,18 +169,11 @@ body {
     }
   })
 
-  //FOLDER
-  document.getElementById('folder').addEventListener('mousedown', (event) => {
-    if (event.which != 1) return
+  addButtonListener('folder', function() {
     document.getElementById('folder').style.backgroundImage = 'url("./Data/Images/icon_description_folder_clicked.png")';
-    
-    document.addEventListener('mouseup', () => {
-      document.getElementById('folder').style.backgroundImage = 'url("./Data/Images/icon_description_folder.png")';
-    })
-  })
-
-  document.getElementById('folder').addEventListener('click', (event) => {
-    if (event.which != 1) return
+  }, function() {
+    document.getElementById('folder').style.backgroundImage = 'url("./Data/Images/icon_description_folder.png")';
+  }, function() {
     let a = document.getElementById('pathText').value
     let gamePathArg = getPathInfo(a)
     ipcRenderer.send('getFileContext', gamePathArg.pathClean)
@@ -199,18 +186,11 @@ body {
     document.getElementById('nameText').value = path.substring(path.lastIndexOf('\\')+1)
   })
   
-  //ICONFOLDER
-  document.getElementById('folderIcon').addEventListener('mousedown', (event) => {
-    if (event.which != 1) return
+  addButtonListener('folderIcon', function() {
     document.getElementById('folderIcon').style.backgroundImage = 'url("./Data/Images/icon_description_folder_clicked.png")';
-    
-    document.addEventListener('mouseup', () => {
-      document.getElementById('folderIcon').style.backgroundImage = 'url("./Data/Images/icon_description_folder.png")';
-    })
-  })
-
-  document.getElementById('folderIcon').addEventListener('click', (event) => {
-    if (event.which != 1) return
+  }, function() {
+    document.getElementById('folderIcon').style.backgroundImage = 'url("./Data/Images/icon_description_folder.png")';
+  }, function() {
     let a = document.getElementById('pathText').value
     if (document.getElementById('iconText').value != '') a = document.getElementById('iconText').value
     let gamePathArg = getPathInfo(a)
@@ -222,80 +202,47 @@ body {
     document.getElementById('iconText').value = path
   })
 
-  //SHOW
-  document.getElementById('show').addEventListener('mousedown', (event) => {
-    if (event.which != 1) return
+  addButtonListener('show', function() {
     document.getElementById('show').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-    
-    document.addEventListener('mouseup', () => {
-      document.getElementById('show').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-    })
-  })
-
-  document.getElementById('show').addEventListener('click', (event) => {
-    if (event.which != 1) return
+  }, function() {
+    document.getElementById('show').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+  }, function() {
     ipcRenderer.send('showOnExplorer', showPath)
   })
     
-  //SHOWSTORE
-  document.getElementById('showstore').addEventListener('mousedown', (event) => {
-    if (event.which != 1) return
+  addButtonListener('showstore', function() {
     document.getElementById('showstore').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-    
-    document.addEventListener('mouseup', () => {
-      document.getElementById('showstore').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-    })
-  })
-
-  document.getElementById('showstore').addEventListener('click', (event) => {
-    if (event.which != 1) return
+  }, function() {
+    document.getElementById('showstore').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+  }, function() {
     ipcRenderer.send('store', document.getElementById('nameText').value)
     ipcRenderer.send('resume')
     ipcRenderer.send('exitContext')
   })
   
-  //MOVE
-  document.getElementById('move').addEventListener('mousedown', (event) => {
-    if (event.which != 1) return
+  addButtonListener('move', function() {
     document.getElementById('move').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-    
-    document.addEventListener('mouseup', () => {
-      document.getElementById('move').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-    })
-  })
-
-  document.getElementById('move').addEventListener('click', (event) => {
-    if (event.which != 1) return
-    ipcRenderer.send('move', actualPath)
+  }, function() {
+    document.getElementById('move').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+  }, function() {
+    let paths = [actualPath]
+    ipcRenderer.send('move', paths)
   })
   
-  //REMOVE
-  document.getElementById('remove').addEventListener('mousedown', (event) => {
-    if (event.which != 1) return
+  addButtonListener('remove', function() {
     document.getElementById('remove').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-    
-    document.addEventListener('mouseup', () => {
-      document.getElementById('remove').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-    })
-  })
-
-  document.getElementById('remove').addEventListener('click', (event) => {
-    if (event.which != 1) return
-    ipcRenderer.send('remove', actualPath)
+  }, function() {
+    document.getElementById('remove').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+  }, function() {
+    let paths = [actualPath]
+    ipcRenderer.send('remove', paths)
   })
   
-  //SAVE
-  document.getElementById('save').addEventListener('mousedown', (event) => {
-    if (event.which != 1) return
+  addButtonListener('save', function() {
     document.getElementById('save').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-    
-    document.addEventListener('mouseup', () => {
-      document.getElementById('save').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-    })
-  })
-
-  document.getElementById('save').addEventListener('click', (event) => {
-    if (event.which != 1) return
+  }, function() {
+    document.getElementById('save').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+  }, function() {
     let newName = undefined
     if (oldName != document.getElementById('nameText').value) newName = document.getElementById('nameText').value
     let newPath = document.getElementById('pathText').value
@@ -326,6 +273,24 @@ body {
     }
     let data = {pathClean, argsClean}
     return data
+  }
+
+  function addButtonListener(id, mousedown, mouseup, click) {
+    document.getElementById(id).addEventListener('mousedown', (event) => {
+      if (event.which != 1) return
+      mousedown()
+    })
+
+    document.addEventListener('mouseup', () => {
+      if (event.which != 1) return
+      if (document.getElementById(id) == undefined) return
+      mouseup()
+    })
+    
+    document.getElementById(id).addEventListener('click', (event) => {
+      if (event.which != 1) return
+      click()
+    })
   }
 </script>
 </html>

@@ -54,8 +54,6 @@
 </div>
 
 <script>
-  var user = true
-
   ipcRenderer.on('changeText', (event, text) => {
     document.getElementById('editText').value = text
   })
@@ -101,18 +99,11 @@
   })
 
   ipcRenderer.on('addListener', (event, id, link) => {
-    document.getElementById(id).addEventListener('mousedown', (event) => {
-      if (event.which != 1) return
+    addButtonListener(id, function() {
       document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_store_item_clicked.png")';
-    
-      document.addEventListener('mouseup', () => {
-        if (document.getElementById(id) == undefined) return
-        document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_store_item.png")';
-      })
-    })
-
-    document.getElementById(id).addEventListener('click', (event) => {
-      if (event.which != 1) return
+    }, function() {
+      document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_store_item.png")';
+    }, function() {
       const { shell } = require('electron');
       shell.openExternal(link)
     })
@@ -123,92 +114,75 @@
   })
 
 
-  document.getElementById('discover').addEventListener('mousedown', (event) => {
-    if (event.which != 1) return
+  addButtonListener('discover', function() {
     document.getElementById('discover').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-
-    document.addEventListener('mouseup', () => {
-      if (document.getElementById('discover') == undefined) return
-      document.getElementById('discover').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-    })
-  })
-
-  document.getElementById('discover').addEventListener('click', (event) => {
-    if (event.which != 1) return
+  }, function() {
+    document.getElementById('discover').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+  }, function() {
     ipcRenderer.send('searchGames', '')
   })
 
-  document.getElementById('editText').addEventListener("keydown", (event) => {
+  $('#editText').bind('keydown', function(event) {
     if (event.keyCode === 13) {
       event.preventDefault();
-      user = false
-      document.getElementById('search').click()
+      let search = document.getElementById('editText').value
+      ipcRenderer.send('searchGames', search)
       return false;
     }
   })
- 
-  document.getElementById('search').addEventListener('mousedown', (event) => {
-    if (event.which != 1) return
-    if (user) {
-      document.getElementById('search').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-    
-      document.addEventListener('mouseup', () => {
-        if (document.getElementById('search') == undefined) return
-        document.getElementById('search').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-      })
-    } else user = true
-  })
 
-  document.getElementById('search').addEventListener('click', (event) => {
-    if (event.which != 1) return
+  addButtonListener('search', function() {
+    document.getElementById('search').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+  }, function() {
+    document.getElementById('search').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+  }, function() {
     let search = document.getElementById('editText').value
     ipcRenderer.send('searchGames', search)
   })
 
-
-  document.getElementById('moreFitgirl').addEventListener('click', () => {
+  addButtonListener('moreFitgirl', function() {}, function() {}, function() {
     const { shell } = require('electron');
     shell.openExternal('https://fitgirl-repacks.site/')
   })
 
-  document.getElementById('moreElamigos').addEventListener('click', () => {
+  addButtonListener('moreElamigos', function() {}, function() {}, function() {
     const { shell } = require('electron');
     shell.openExternal('https://www.elamigos-games.com/')
   })
 
-  document.getElementById('morePivi').addEventListener('click', () => {
+  addButtonListener('morePivi', function() {}, function() {}, function() {
     const { shell } = require('electron');
     shell.openExternal('https://pivigames.blog/')
   })
 
-  document.getElementById('moreSteamUnlocked').addEventListener('click', () => {
+  addButtonListener('moreSteamUnlocked', function() {}, function() {}, function() {
     const { shell } = require('electron');
     shell.openExternal('https://steamunlocked.net/')
   })
   
   //HORIZONTAL SCROLL
-  document.getElementById('listElamigos').addEventListener("wheel", function (event) {
+  $('#listElamigos').bind('wheel', function() {
     if ($('#listElamigos').hasScrollBar()) {
       this.scrollLeft -= (event.wheelDelta/2);
       event.preventDefault();
     }
   })
 
-  document.getElementById('listFitgirl').addEventListener("wheel", function (event) {
+  $('#listFitgirl').bind('wheel', function() {
     if ($('#listFitgirl').hasScrollBar()) {
       this.scrollLeft -= (event.wheelDelta/2);
       event.preventDefault();
     }
   })
 
-  document.getElementById('listPivi').addEventListener("wheel", function (event) {
+  $('#listPivi').bind('wheel', function() {
     if ($('#listPivi').hasScrollBar()) {
       this.scrollLeft -= (event.wheelDelta/2);
       event.preventDefault();
     }
   })
 
-  document.getElementById('listSteamUnlocked').addEventListener("wheel", function (event) {
+  $('#listSteamUnlocked').bind('wheel', function() {
     if ($('#listSteamUnlocked').hasScrollBar()) {
       this.scrollLeft -= (event.wheelDelta/2);
       event.preventDefault();

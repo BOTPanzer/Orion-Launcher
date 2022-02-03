@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>Oriøn: Selected</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=0">
+
+<style>
+@font-face { font-family: BodyFont; src: url('Data/Fonts/font_body.ttf'); } 
+@font-face { font-family: ItemFont; src: url('Data/Fonts/font_item.ttf'); } 
+
+body {
+  font-family: BodyFont;
+  margin: 0px;
+  vertical-align: baseline;
+  background: url('./Data/Images/lines.png'), linear-gradient(#38151C, #070B14 75%);
+  background-attachment: fixed;
+  --c1: #181B22;
+  --c2: #7E0D0E;
+  --c3: #68D8D5;
+  --c4: white;
+
+  overflow: hidden;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--c1); 
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+  background: var(--c2); 
+}
+</style>
+</head>
+
+<body>
+  <div style="height: 20px; width: 100%; display: flex; background-color: var(--c1);">
+    <div style="height: 15px; width: 100%; margin-left: 5px; margin-top: 5px; -webkit-app-region: drag; align-items: center;">
+      <div style="height: 16px; position: absolute; font-family: ItemFont; font-size: 16px; color: var(--c4);">Oriøn: Selected</div>
+    </div>
+    <div style="display: flex; font-family: Franklin Gothic Medium">
+      <div style="display: flex; align-items: center;">
+        <div id="exit" style="height: 20px; width: 30px; color: var(--c3); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">x</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="color: var(--c4);">
+    <div id="title" style="height: 20px; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 15px; padding: 5px; padding-left: 10px;">Games/Folders Selected:</div>
+    <div id="list" style="height: 60px; font-family: ItemFont; font-size: 16px; margin-left: 20px; margin-right: 20px; padding-left: 5px; padding-right: 5px; overflow-y: auto;">
+      
+    </div>
+  </div>
+
+  <div style="width: 100%; position: absolute; bottom: 0; display: block;">
+    <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+      <div id="move" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px; color: var(--c3);">
+        <div style="font-family: ItemFont;">Move</div>
+      </div>
+      <div id="remove" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px; color: var(--c3);">
+        <div style="font-family: ItemFont;">Remove</div>
+      </div>
+    </div>
+  </div>
+</body>
+
+<script>
+  const { ipcRenderer } = require('electron')
+  let paths = []
+
+  addButtonListener('exit', function() {
+    document.getElementById('exit').style.backgroundColor = '#690108';
+  }, function() {
+    document.getElementById('exit').style.backgroundColor = 'rgba(0, 0, 0, 0)';
+  }, function() {
+    ipcRenderer.send('exitContext')
+  })
+
+  ipcRenderer.on('theme', (event, theme) => {
+    document.body.style.setProperty('--c1', theme.c1);
+    document.body.style.setProperty('--c2', theme.c2);
+    document.body.style.setProperty('--c3', theme.c3);
+    document.body.style.setProperty('--c4', theme.c4);
+    //BACKGROUND
+    document.body.style.background = theme.background
+    document.body.style.backgroundAttachment = 'fixed'
+  })
+
+  ipcRenderer.on('setPaths', (event, argPaths) => {
+    paths = argPaths
+    document.getElementById('title').innerText = argPaths.length+' Games/Folders Selected:'
+    for(i in paths) {
+      let text = paths[i].substring(paths[i].lastIndexOf('\\')+1)
+      if (text.endsWith('.txt')) text = text.slice(0,-4)
+      let item = `<div style="height: 20px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">${text}</div>`
+      document.getElementById('list').insertAdjacentHTML('beforeend', item)
+    }
+  })
+  
+  addButtonListener('move', function() {
+    document.getElementById('move').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+  }, function() {
+    document.getElementById('move').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+  }, function() {
+    ipcRenderer.send('move', paths)
+  })
+  
+  addButtonListener('remove', function() {
+    document.getElementById('remove').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+  }, function() {
+    document.getElementById('remove').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+  }, function() {
+    ipcRenderer.send('remove', paths)
+  })
+  
+  addButtonListener('save', function() {
+    document.getElementById('save').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+  }, function() {
+    document.getElementById('save').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+  }, function() {
+    let newName = undefined
+    if (oldName != document.getElementById('nameText').value) newName = document.getElementById('nameText').value
+    let newPath = document.getElementById('pathText').value
+    let newIcon = document.getElementById('iconText').value
+    ipcRenderer.send('save', actualPath, newName, newPath, newIcon)
+  })
+
+  function getPathInfo(gamePath) {
+    gamePath = gamePath.trim()
+    let pathClean = gamePath
+    let argsClean = ''
+    if (gamePath.includes('--') && gamePath.includes(' ') && !gamePath.endsWith('"')) {
+      if (gamePath.startsWith('"') ) {
+        pathClean = gamePath.substring(1, gamePath.lastIndexOf('"'))
+        let args = gamePath.substring(pathClean.length+2).trim()
+        argsClean = args.split(' ')
+        argsClean.unshift("/c", pathClean)
+      } else {
+        pathClean = gamePath.substring(0, gamePath.lastIndexOf(' '))
+        let args = gamePath.substring(pathClean.length+2).trim()
+        argsClean = args.split(' ')
+        argsClean.unshift("/c", pathClean)
+      }
+    }
+    let data = {pathClean, argsClean}
+    return data
+  }
+
+  function addButtonListener(id, mousedown, mouseup, click) {
+    document.getElementById(id).addEventListener('mousedown', (event) => {
+      if (event.which != 1) return
+      mousedown()
+    })
+
+    document.addEventListener('mouseup', () => {
+      if (event.which != 1) return
+      if (document.getElementById(id) == undefined) return
+      mouseup()
+    })
+    
+    document.getElementById(id).addEventListener('click', (event) => {
+      if (event.which != 1) return
+      click()
+    })
+  }
+</script>
+</html>

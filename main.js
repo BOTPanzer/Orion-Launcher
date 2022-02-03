@@ -147,10 +147,8 @@ if (!app.requestSingleInstanceLock()) {
     if (search == undefined) search = ''
     if (!argPath.endsWith('\\')) argPath = argPath+'\\'
     if (!fs.existsSync(argPath)) return
-    win.webContents.send('setbutt')
-    win.webContents.send('setSearch', search)
+    win.webContents.send('startLauncher', search)
     win.webContents.send('setLocPath', argPath, launcherFolder, search)
-    win.webContents.send('clearList')
     createBackButt(argPath, search)
 
     let paths = []
@@ -197,13 +195,14 @@ if (!app.requestSingleInstanceLock()) {
         let gamePath = data.gamePath
         let iconPath = data.iconPath
         //Id
-        let id = path+i
+        let id = `game${i}`
+        if (!isFile) id = `folder${i}`
         let img = `img${i}`
         //Default Image
         let image = "./Data/Images/icon_folder.png"
         if (isFile) image = "./Data/Images/icon_file.png"
         //HTML
-        let html = createHTML(id, img, image, name)
+        let html = createDataHTML(id, img, image, name, path)
         //Create
         win.webContents.send('add1ToList', html);
         if (isFile) {
@@ -214,13 +213,14 @@ if (!app.requestSingleInstanceLock()) {
             win.webContents.send('addListener', id, img, path, name, gamePathArg, gamePath, '')
             iconPath = gamePathArg.pathClean
           }
-          app.getFileIcon(iconPath, {size:"large"}).then((fileIcon) =>{ 
+          app.getFileIcon(iconPath, {size:"large"}).then((fileIcon) =>{
             if (actualPath == argPath) win.webContents.send('changeIcon', img, fileIcon.toDataURL()) 
           })
         } else{
           win.webContents.send('addFolderListener', id, path)
         }
       }
+      win.webContents.send('finished')
     }
   }
 
@@ -259,14 +259,12 @@ if (!app.requestSingleInstanceLock()) {
     });
 
     win2.webContents.send('setLocation', path, img);
-    //Name
     win2.webContents.send('setName', name);
     win2.webContents.send('setPath', filePath);
     win2.webContents.send('setIconPath', iconPath);
   })
 
   ipcMain.on('contextFolder', (event, path) => {
-    console.log(path);
     createWin2('context.html', 189)
 
     win2.on('close', function() {
@@ -275,11 +273,22 @@ if (!app.requestSingleInstanceLock()) {
     });
 
     win2.webContents.send('setLocation', path, "./Data/Images/icon_folder.png");
-    //Name
     let name = path.substring(path.lastIndexOf("\\")+1)
     win2.webContents.send('setName', name);
     win2.webContents.send('setPath', undefined);
     win2.webContents.send('setIconPath', undefined);
+  })
+
+  ipcMain.on('contextMulti', (event, paths) => {
+    if (paths.length <3) createWin2('context-multi.html', 195) //CORASONSITO :3
+    else createWin2('context-multi.html', 215)
+
+    win2.on('close', function() {
+      createList(actualPath)
+      win2 = null
+    })
+
+    win2.webContents.send('setPaths', paths);
   })
 
   ipcMain.on('getFileContext', async function(event, path) {
@@ -294,60 +303,86 @@ if (!app.requestSingleInstanceLock()) {
     else win2.webContents.send('fileGottenIcon', await getFile("Choose a Game", `${apath}`))
   })
 
-  ipcMain.on('move', async function(event, path) {
-    if (fs.existsSync(path)) {
-      let newFilePath = await getFolder("Choose a Folder", launcherFolder)+'\\'
-      if (!newFilePath.includes(launcherFolder)) return
-      let oldFilePath = path
-      if (path.endsWith('\\')) oldFilePath = path.slice(0,-1)
-      let name = oldFilePath.substring(oldFilePath.lastIndexOf('\\')+1)
-      fs.rename(path, newFilePath+name, function(err) {
+  ipcMain.on('move', async function(event, paths) {
+    let newFilePath = await getFolder("Choose a Folder", launcherFolder)+'\\'
+    if (!newFilePath.includes(launcherFolder)) return
+
+    //CHECK IF NEW FOLDER IS ALSO BEING MOVED
+    let posibleToMove = true
+    for (i in paths) {
+      if (newFilePath.includes(paths[i]))
+      posibleToMove = false
+    }
+
+    //IF NOT MOVE ヾ(•ω•`)o
+    if (posibleToMove)
+    for (i in paths) {
+      let path = paths[i]
+      if (fs.existsSync(path)) {
+        let oldFilePath = path
+        if (path.endsWith('\\')) oldFilePath = path.slice(0,-1)
+        let name = oldFilePath.substring(oldFilePath.lastIndexOf('\\')+1)
+        fs.rename(path, newFilePath+name, function(err) {
+          if (i == paths.length-1) {
+            closeWin2()
+            createList(actualPath)
+          }
+        })
+      } else if (i == paths.length-1) {
         closeWin2()
         createList(actualPath)
-      })
+      }
     }
   })
 
-  ipcMain.on('remove', (event, path) => {
-    createWin3()
+  ipcMain.on('remove', (event, paths) => {
+    createWin3('remove.html')
     win2.hide()
     
     win3.on('close', function() {
       win3 = null
     });
 
-    win3.webContents.send('setLocation', path);
+    win3.webContents.send('setPaths', paths);
   })
 
-  ipcMain.on('removecancel', (event, path) => {
-    closeWin3()
-    win2.show()
-  })
-
-  ipcMain.on('removefinal', (event, path) => {
-    if (fs.existsSync(path)) {
-      if (fs.statSync(path).isFile()) {
-        fs.unlink(path, (err) => {
-          closeWin2()
-          closeWin3()
-        })
-      } else {
-        const rimraf = require("rimraf");
-        rimraf(path, (err) => {
-          closeWin2()
-          closeWin3()
-        })
+  ipcMain.on('removefinal', (event, paths) => {
+    for (i in paths) {
+      let path = paths[i]
+      if (fs.existsSync(path)) {
+        if (fs.statSync(path).isFile()) {
+          fs.unlink(path, (err) => {
+            if (i == paths.length-1) {
+              closeWin2()
+              closeWin3()
+            }
+          })
+        } else {
+          const rimraf = require("rimraf");
+          rimraf(path, (err) => {
+            if (i == paths.length-1) {
+              closeWin2()
+              closeWin3()
+            }
+          })
+        }
+      } else if (i == paths.length-1) {
+        closeWin2()
+        closeWin3()
       }
     }
   })
 
   ipcMain.on('save', (event, path, newName, newPath, newIcon) => {
+    //NO NAME >:|
     if (newName == '') {
       win2.webContents.send('log', 'Name Is Necesary');
       return
     }
     if (fs.existsSync(path)) {
+      //SAVE FILE OR FOLDER
       if (fs.statSync(path).isFile()) {
+        //NO PATH
         if (newPath == '') {
           win2.webContents.send('log', 'Path Is Necesary');
           return
@@ -355,6 +390,10 @@ if (!app.requestSingleInstanceLock()) {
         fs.writeFile(path, newPath+'\n'+newIcon, (err) => {
           if (newName != undefined) {
             let newFilePath = actualPath+newName+'.txt'
+            if (fs.existsSync(newFilePath)) {
+              win2.webContents.send('log', 'File Already Exists');
+              return
+            }
             fs.rename(path, newFilePath, function(err) {
               closeWin2()
               createList(actualPath)
@@ -367,6 +406,10 @@ if (!app.requestSingleInstanceLock()) {
       } else {
         if (newName != undefined) {
           let newFilePath = actualPath+newName
+          if (fs.existsSync(newFilePath)) {
+            win2.webContents.send('log', 'Folder Already Exists');
+            return
+          }
           fs.rename(path, newFilePath, function(err) {
             closeWin2()
             createList(actualPath)
@@ -733,7 +776,7 @@ if (!app.requestSingleInstanceLock()) {
       let image = "./Data/Images/icon_file.png"
       if (fs.existsSync(path+'\\Data\\Images\\icon_file.png')) image = path+'\\Data\\Images\\icon_file.png'
       //Id
-      let id = path+i
+      let id = 'theme'+i
       //HTML
       let html = createHTML(id, null, image, name)
       //Create
@@ -940,7 +983,7 @@ function closeWin2() {
   win2.close()
 }
 
-function createWin3() {
+function createWin3(file) {
   win3 = new BrowserWindow({
     height: 136,
     width: 390,
@@ -957,7 +1000,7 @@ function createWin3() {
   })
 
   win3.hide()
-  win3.loadFile('remove.html')
+  win3.loadFile(file)
   win3.removeMenu()
   //win3.openDevTools()
 
@@ -979,7 +1022,23 @@ function createHTML(id, img, icon, name) {
                 </div>
                 <div style="width: 140px; height: 40px; padding: 5px">
                   <div class="unselectableDiv">
-                    <div style="font-size: 17px; overflow: hidden; width: 140px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${name}</div>
+                    <div style="color: var(--c3); font-size: 17px; overflow: hidden; width: 140px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${name}</div>
+                  </div>
+                </div>
+              </div>`
+  return html
+}
+
+function createDataHTML(id, img, icon, name, path) {
+  let data = path
+  let html = `<div id="${id}" style="margin-top: 5px; margin-right: 5px; width: 150px; height: 150px; background-image: url('./Data/Images/icon_item.png'); text-align: center; display: inline-block;">
+                <div id="${'data-'+id}" style="display: none;">${data}</div>
+                <div style="width: 150px; height: 100px;">
+                  <img id="${img}" style="margin: 10px; max-width: 130px; height: 90px; object-fit: contain; -webkit-user-drag: none;" src="${icon}"></img>
+                </div>
+                <div style="width: 140px; height: 40px; padding: 5px">
+                  <div class="unselectableDiv">
+                    <div style="color: var(--c3); font-size: 17px; overflow: hidden; width: 140px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${name}</div>
                   </div>
                 </div>
               </div>`

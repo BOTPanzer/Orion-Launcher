@@ -35,7 +35,7 @@ body {
 <body>
   <div style="height: 20px; width: 100%; display: flex; background-color: var(--c1);">
     <div style="height: 15px; width: 100%; margin-left: 5px; margin-top: 5px; -webkit-app-region: drag; align-items: center;">
-      <div style="height: 16px; position: absolute; font-family: ItemFont; font-size: 16px; color: var(--c4);">Oriøn: Properties</div>
+      <div style="height: 16px; position: absolute; font-family: ItemFont; font-size: 16px; color: var(--c4);">Oriøn: Add Folder</div>
     </div>
     <div style="display: flex; font-family: Franklin Gothic Medium">
       <div style="display: flex; align-items: center;">
@@ -55,7 +55,7 @@ body {
     <div id="addFolder" style="height: 36px; width: 107px; margin-left: 20px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
       <div style="font-family: ItemFont;">Add Folder</div>
     </div>
-    <div id="log" style="margin-left: auto; margin-right: 25px; font-family: ItemFont; color: var(--c4);"></div>
+    <div id="log" style="margin-left: auto; margin-right: 25px; font-family: ItemFont; font-size: 16px; color: var(--c4);"></div>
   </div>
 
 
@@ -63,18 +63,11 @@ body {
   const { ipcRenderer } = require('electron');
   let actualPath = ''
 
-  //EXIT
-  document.getElementById('exit').addEventListener('mousedown', (event) => {
-    if (event.which != 1) return
+  addButtonListener('exit', function() {
     document.getElementById('exit').style.backgroundColor = '#690108';
-    
-    document.addEventListener('mouseup', () => {
-      document.getElementById('exit').style.backgroundColor = 'rgba(0, 0, 0, 0)';
-    })
-  })
-
-  document.getElementById('exit').addEventListener('click', (event) => {
-    if (event.which != 1) return
+  }, function() {
+    document.getElementById('exit').style.backgroundColor = 'rgba(0, 0, 0, 0)';
+  }, function() {
     ipcRenderer.send('exitContext')
   })
 
@@ -93,18 +86,11 @@ body {
     document.getElementById('show').style.display = 'none'
   })
 
-  //ADDFOLDER
-  document.getElementById('addFolder').addEventListener('mousedown', (event) => {
-    if (event.which != 1) return
+  addButtonListener('addFolder', function() {
     document.getElementById('addFolder').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-    
-    document.addEventListener('mouseup', () => {
-      document.getElementById('addFolder').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-    })
-  })
-
-  document.getElementById('addFolder').addEventListener('click', (event) => {
-    if (event.which != 1) return
+  }, function() {
+    document.getElementById('addFolder').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+  }, function() {
     let name = document.getElementById('nameText').value
     if (name == '') {
       document.getElementById('log').innerText = 'Name Is Necesary'
@@ -114,25 +100,22 @@ body {
     ipcRenderer.send('addFolderContext', name)
   })
 
-  function getPathInfo(gamePath) {
-    gamePath = gamePath.trim()
-    let pathClean = gamePath
-    let argsClean = ''
-    if (gamePath.includes('--') && gamePath.includes(' ') && !gamePath.endsWith('"')) {
-      if (gamePath.startsWith('"') ) {
-        pathClean = gamePath.substring(1, gamePath.lastIndexOf('"'))
-        let args = gamePath.substring(pathClean.length+2).trim()
-        argsClean = args.split(' ')
-        argsClean.unshift("/c", pathClean)
-      } else {
-        pathClean = gamePath.substring(0, gamePath.lastIndexOf(' '))
-        let args = gamePath.substring(pathClean.length+2).trim()
-        argsClean = args.split(' ')
-        argsClean.unshift("/c", pathClean)
-      }
-    }
-    let data = {pathClean, argsClean}
-    return data
+  function addButtonListener(id, mousedown, mouseup, click) {
+    document.getElementById(id).addEventListener('mousedown', (event) => {
+      if (event.which != 1) return
+      mousedown()
+    })
+
+    document.addEventListener('mouseup', () => {
+      if (event.which != 1) return
+      if (document.getElementById(id) == undefined) return
+      mouseup()
+    })
+    
+    document.getElementById(id).addEventListener('click', (event) => {
+      if (event.which != 1) return
+      click()
+    })
   }
 </script>
 </body>
