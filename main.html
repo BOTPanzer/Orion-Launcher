@@ -5,7 +5,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=0">
 <style>
-/* Style the body */
 	
 @font-face { font-family: BodyFont; src: url('Data/Fonts/font_body.ttf'); } 
 @font-face { font-family: ItemFont; src: url('Data/Fonts/font_item.ttf'); } 
@@ -21,30 +20,25 @@ body {
   vertical-align: baseline;
   background: url('./Data/Images/lines.png'), linear-gradient(#38151C, #070B14 75%);
   background-attachment: fixed;
+  --c1: #181B22;
+  --c2: #7E0D0E;
+  --c3: #68D8D5;
+  --c4: white;
 }
 
-/* width */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 
-/* Track */
-::-webkit-scrollbar-track {
-  background: #181B22; 
-}
- 
-/* Handle */
-::-webkit-scrollbar-thumb {
-  background: #7E0D0E; 
+body::-webkit-scrollbar-track {
+  background: var(--c1); 
 }
 
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-  background: #572629; 
+body::-webkit-scrollbar-thumb {
+  background: var(--c2); 
 }
-	
-/* Page Content */
+
 .content { 
   height: 100%;
   margin: 10px;
@@ -76,19 +70,22 @@ body {
 <div>
   <img id="logo" style="margin: 20px;" src="./Data/Images/logo.png"  height="150px" width="auto"/>
   <div style="float: right;">
-    <div id="store" style="height: 36px; width: 107px; margin: 20px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png');">
-      <div class="unselectable" style="color: #68D8D5; font-family: ItemFont;">Store</div>
+    <div id="store" style="height: 36px; width: 107px; margin: 20px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
+      <div class="unselectable" style="font-family: ItemFont;">Store</div>
     </div>
-    <div id="add" style="height: 36px; width: 107px; margin: 20px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png');">
-      <div class="unselectable" style="color: #68D8D5; font-family: ItemFont;">Add</div>
+    <div id="add" style="height: 36px; width: 107px; margin: 20px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
+      <div class="unselectable" style="font-family: ItemFont;">Add</div>
+    </div>
+    <div id="themes" style="height: 36px; width: 107px; margin: 20px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
+      <div class="unselectable" style="font-family: ItemFont;">Themes</div>
     </div>
   </div>
 </div>
 	
 <div id="content" class="content">
-  <h1 id="txtMenu" class="unselectable" style="color: white; margin: 10px; margin-bottom: 20px;">Home</h1>
+  <h1 id="txtMenu" class="unselectable" style="color: var(--c4); margin: 10px; margin-bottom: 20px;">Home</h1>
 	<div style="display: flex; justify-content: space-between;">
-	  <div id="list" style="color: #68D8D5; font-family: ItemFont; margin-left: 10px">
+	  <div id="list" style="color: var(--c3); font-family: ItemFont; margin-left: 10px">
         
       <div id="b2" style="margin-bottom: 5px; margin-right: 5px; width: 150px; height: 150px; background-image: url('./Data/Images/icon_item.png'); text-align: center;">
           <div style="width: 150px; height: 100px;">
@@ -107,11 +104,11 @@ body {
 		<div style="padding-left: 10px; font-family: ItemFont; align-items: center;">
 			<div style="height: 10%"></div>
 		  <div style="min-height: 55%; max-height: 55%; display: flex; align-items: center">
-			  <div id="txtDescription" class="unselectable" style="margin-right: 10px; line-height: 21px; font-size: 20px; display: inline-block; max-height: 42px;">Game</div>
+			  <div id="txtDescription" class="unselectable" style="color: var(--c4); margin-right: 10px; line-height: 21px; font-size: 20px; display: inline-block; max-height: 42px;">Game</div>
 		  </div>
 		  <div style="height: 35%; width: 195px; display: flex; align-items: flex-start; justify-content: space-between;">
-			<div id="launchDescription" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png');">
-		      <div class="unselectable" style="color: #68D8D5;">Launch</div>
+			<div id="launchDescription" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
+		      <div class="unselectable">Launch</div>
 		    </div>
 			<div id="folderDescription" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png');">
 			  <img class="unselectable" style="height: 30px; min-width: 30px; margin: 3px;" src="./Data/Images/icon_folder.png"></img>
@@ -125,7 +122,18 @@ body {
 <script>
   const { ipcRenderer } = require('electron');
   let descPath = null
+  
 
+  ipcRenderer.on('theme', (event, theme) => {
+    document.body.style.setProperty('--c1', theme.c1);
+    document.body.style.setProperty('--c2', theme.c2);
+    document.body.style.setProperty('--c3', theme.c3);
+    document.body.style.setProperty('--c4', theme.c4);
+    //BACKGROUND
+    document.body.style.background = theme.background
+    document.body.style.backgroundAttachment = 'fixed'
+  })
+  
   ipcRenderer.on('clearList', (event) => {
     document.getElementById('list').innerHTML = '';
   })
@@ -197,6 +205,14 @@ body {
 	    setTimeout(function() {
         document.getElementById('add').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
         ipcRenderer.send('add')
+      }, 100)
+    })
+
+    document.getElementById('themes').addEventListener('click', () => {
+      document.getElementById('themes').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+	    setTimeout(function() {
+        document.getElementById('themes').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+        ipcRenderer.send('themes')
       }, 100)
     })
   })

@@ -20,27 +20,23 @@ body {
   vertical-align: baseline;
   background: url('./Data/Images/lines.png'), linear-gradient(#38151C, #070B14 75%);
   background-attachment: fixed;
+  --c1: #181B22;
+  --c2: #7E0D0E;
+  --c3: #68D8D5;
+  --c4: white;
 }
 
-/* width */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 
-/* Track */
-::-webkit-scrollbar-track {
-  background: #181B22; 
-}
- 
-/* Handle */
-::-webkit-scrollbar-thumb {
-  background: #7E0D0E; 
+body::-webkit-scrollbar-track {
+  background: var(--c1); 
 }
 
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-  background: #572629; 
+body::-webkit-scrollbar-thumb {
+  background: var(--c2); 
 }
 
 .list {
@@ -75,29 +71,27 @@ body {
 </head>
 	
 <body>
-<!--div id="locationText" class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; margin: 10px; margin-bottom: 20px; padding: 5px; padding-left: 10px;">Texto</div-->
-
-<div id="name">
-  <div class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Name:</div>
+<div id="name" style="color: var(--c4);">
+  <div class="unselectable" style="font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Name:</div>
   <div style="align-items: center; margin: 20px; margin-top: 0px;">
-    <input id='nameText' type="text" size="38" maxlength="50" style="height: 32px; padding-left: 10px; padding-right: 10px; color: #68D8D5; font-size: 16px; font-family: ItemFont; background-color: #181B22; border-style: solid; border-color: #7E0D0E; border-width: 1px;"></input>
+    <input id='nameText' type="text" size="38" maxlength="50" style="height: 32px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
   </div>
 </div>
 
-<div id="path">
-  <div class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Game Path:</div>
+<div id="path" style="color: var(--c4);">
+  <div class="unselectable" style="font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Game Path:</div>
   <div style="align-items: center; margin: 20px; margin-top: 0px; display: flex;">
-    <input id='pathText' type="text" size="32" style="height: 32px; padding-left: 10px; padding-right: 10px; color: #68D8D5; font-size: 16px; font-family: ItemFont; background-color: #181B22; border-style: solid; border-color: #7E0D0E; border-width: 1px;"></input>
+    <input id='pathText' type="text" size="32" style="height: 32px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
     <div id="folder" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px">
       <img class="unselectable" style="height: 30px; min-width: 30px; margin: 3px;" src="./Data/Images/icon_folder.png"></img>
     </div>
   </div>
 </div>
 
-<div id="iconPath">
-  <div class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Game Icon Path:</div>
+<div id="iconPath" style="color: var(--c4);">
+  <div class="unselectable" style="font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Game Icon Path:</div>
   <div style="align-items: center; margin: 20px; margin-top: 0px; display: flex;">
-    <input id='iconText' type="text" size="32" style="height: 32px; padding-left: 10px; padding-right: 10px; color: #68D8D5; font-size: 16px; font-family: ItemFont; background-color: #181B22; border-style: solid; border-color: #7E0D0E; border-width: 1px;"></input>
+    <input id='iconText' type="text" size="32" style="height: 32px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
     <div id="folderIcon" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px">
       <img class="unselectable" style="height: 30px; min-width: 30px; margin: 3px;" src="./Data/Images/icon_folder.png"></img>
     </div>
@@ -105,14 +99,14 @@ body {
 </div>
 
 <div style="width: 100%; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; position: absolute; bottom: 0;">
-  <div id="move" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px;">
-    <div class="unselectable" style="color: #68D8D5; font-family: ItemFont;">Move</div>
+  <div id="move" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px; color: var(--c3);">
+    <div class="unselectable" style="font-family: ItemFont;">Move</div>
   </div>
-  <div id="remove" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px;">
-    <div class="unselectable" style="color: #68D8D5; font-family: ItemFont;">Remove</div>
+  <div id="remove" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px; color: var(--c3);">
+    <div class="unselectable" style="font-family: ItemFont;">Remove</div>
   </div>
-  <div id="save" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png');">
-    <div class="unselectable" style="color: #68D8D5; font-family: ItemFont;">Save</div>
+  <div id="save" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
+    <div class="unselectable" style="font-family: ItemFont;">Save</div>
   </div>
 </div>
 
@@ -123,6 +117,16 @@ body {
   let oldPath = ''
   let oldIcon = ''
 
+
+  ipcRenderer.on('theme', (event, theme) => {
+    document.body.style.setProperty('--c1', theme.c1);
+    document.body.style.setProperty('--c2', theme.c2);
+    document.body.style.setProperty('--c3', theme.c3);
+    document.body.style.setProperty('--c4', theme.c4);
+    //BACKGROUND
+    document.body.style.background = theme.background
+    document.body.style.backgroundAttachment = 'fixed'
+  })
   
   ipcRenderer.on('setLocation', (event, path) => {
     //document.getElementById('locationText').innerText = path

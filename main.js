@@ -1,11 +1,12 @@
 const { app, ipcMain, BrowserWindow, dialog } = require('electron')
 const fs = require('fs');
-const { tmpdir } = require('os');
 let window = 'launcher'
 let win = null
 let win2 = null
 let dataFolder = null
+let launcherFolder = null
 let actualPath = null
+var theme = []
 
 
 function createWindow() {
@@ -34,6 +35,7 @@ app.on('window-all-closed', () => {
 })
 
 app.whenReady().then(() => {
+  //WINDOWS
   createWindow()
 
   win.on('close', function() {
@@ -55,20 +57,30 @@ app.whenReady().then(() => {
     window = 'add'
   })
 
+  ipcMain.on('themes', (event) => {
+    win.loadFile('themes.html')
+    window = 'themes'
+  })
+
   win.webContents.on('dom-ready', () => {
+    updateTheme()
+    win.webContents.send('theme', theme);
     if (window == 'launcher') {
       createList(actualPath)
     } else if (window == 'store') {
       
     } else if (window == 'add') {
-      win.webContents.send('start', actualPath, dataFolder);
+      win.webContents.send('start', actualPath, launcherFolder);
+    } else if (window == 'themes') {
+      createThemeList()
     }
   });
 
 
   //FUNCTIONS LAUNCHER
-  dataFolder = app.getAppPath()+'\\Launcher\\'
-  actualPath = dataFolder
+  dataFolder = app.getAppPath()+'\\Data\\'
+  launcherFolder = app.getAppPath()+'\\Launcher\\'
+  actualPath = launcherFolder
   
   ipcMain.on('load', (event, path) => {
     createList(path)
@@ -78,7 +90,7 @@ app.whenReady().then(() => {
     if (!argPath.endsWith('\\')) argPath = argPath+'\\'
     if (!fs.existsSync(argPath)) return
     win.webContents.send('setbutt');
-    win.webContents.send('setLocPath', argPath, dataFolder);
+    win.webContents.send('setLocPath', argPath, launcherFolder);
     win.webContents.send('clearList');
     createBackButt(argPath)
     //FIRST FOLDERS THEN FILES
@@ -138,7 +150,7 @@ app.whenReady().then(() => {
   }
 
   function createBackButt(argPath) {
-    if (argPath != dataFolder) {
+    if (argPath != launcherFolder) {
       //HTML
       let html = createHTML("backButt", "backImg", "./Data/Images/icon_back.png", "Back")
       //Create
@@ -211,6 +223,10 @@ app.whenReady().then(() => {
     win2.loadFile('context.html')
     win2.removeMenu()
     //win2.openDevTools()
+
+    win2.webContents.on('dom-ready', () => {
+      win2.webContents.send('theme', theme);
+    });
   }
 
   ipcMain.on('getFileContext', async function() {
@@ -224,7 +240,7 @@ app.whenReady().then(() => {
   ipcMain.on('move', async function(event, path) {
     if (fs.existsSync(path)) {
       let newFilePath = await getFolder("Choose a Folder")+'\\'
-      if (!newFilePath.includes(dataFolder)) return
+      if (!newFilePath.includes(launcherFolder)) return
       let oldFilePath = path
       if (path.endsWith('\\')) oldFilePath = path.slice(0,-1)
       let name = oldFilePath.substring(oldFilePath.lastIndexOf('\\')+1)
@@ -611,9 +627,64 @@ app.whenReady().then(() => {
     }
     return splitStr.join(' '); 
   }
+
+
+  //THEME MANAGER
+  function createThemeList() {
+    let argPath = app.getAppPath()+'\\Data\\Themes\\'
+    if (!fs.existsSync(argPath)) return
+    win.webContents.send('clearList');
+    //START
+    let allPaths = fs.readdirSync(argPath);
+    for(i in allPaths) {
+      //Data
+      let path = argPath+allPaths[i]
+      let data = getFileInfo(path)
+      let name = data.name
+      //Id
+      let id = path+i
+      //HTML
+      let html = createHTML(id, null, "./Data/Images/icon.png", name)
+      //Create
+      win.webContents.send('add1ToList', html);
+      win.webContents.send('addListener', id, path);
+    }
+  }
+  
+  ipcMain.on('copyTheme', (event, path) => {
+    const fse = require('fs-extra');
+    fse.copy(path, app.getAppPath(), { overwrite: true })
+    .then(() => {
+      win.loadFile('main.html')
+      window = 'launcher'
+    }).catch(err => console.error(err))
+  })
+
+  ipcMain.on('openThemeFolder', (event) => {
+    const { shell } = require('electron');
+    let themeFolder = dataFolder+'Themes\\'
+    if (fs.existsSync(themeFolder)) {
+      shell.openPath(themeFolder)
+    }
+  })
 })
 
 //FUNCTIONS ALL
+function updateTheme() {
+  let si = fs.readFileSync(dataFolder+'settings.txt').toString().trim().split('\n')
+  let background = si[0]
+  if (background != undefined) background = background.replaceAll('\r', '')
+  let c1 = si[1]
+  if (c1 != undefined) c1 = c1.replaceAll('\r', '')
+  let c2 = si[2]
+  if (c2 != undefined) c2 = c2.replaceAll('\r', '')
+  let c3 = si[3]
+  if (c3 != undefined) c3 = c3.replaceAll('\r', '')
+  let c4 = si[4]
+  if (c4 != undefined) c4 = c4.replaceAll('\r', '')
+  theme = { background, c1, c2, c3, c4}
+}
+
 function getFileInfo(argPath) {
   let path = argPath
   if (path.endsWith('\\')) path = path.slice(0,-1)
@@ -630,7 +701,7 @@ function getFileInfo(argPath) {
     let gamePath = si[0]
     if (gamePath != undefined) {
       gamePath = gamePath.replaceAll('\r', '')
-      if (gamePath.startsWith('?:')) gamePath = gamePath.replace('?:', dataFolder.substring(0, 2))
+      if (gamePath.startsWith('?:')) gamePath = gamePath.replace('?:', launcherFolder.substring(0, 2))
     }
     //Icon
     let iconPath = si[1]
@@ -682,7 +753,7 @@ async function getFile(title) {
 async function getFolder(title) {
   let result = await dialog.showOpenDialog({
     title: title,
-    defaultPath: dataFolder,
+    defaultPath: launcherFolder,
     properties: ['openDirectory'],
   }).then(function(files) {
     let file = files.filePaths[0]

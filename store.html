@@ -20,31 +20,27 @@ body {
   vertical-align: baseline;
   background: url('./Data/Images/lines.png'), linear-gradient(#38151C, #070B14 75%);
   background-attachment: fixed;
+  --c1: #181B22;
+  --c2: #7E0D0E;
+  --c3: #68D8D5;
+  --c4: white;
 }
 
-/* width */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 
-/* Track */
-::-webkit-scrollbar-track {
-  background: #181B22; 
-}
- 
-/* Handle */
-::-webkit-scrollbar-thumb {
-  background: #7E0D0E; 
+body::-webkit-scrollbar-track {
+  background: var(--c1); 
 }
 
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-  background: #572629; 
+body::-webkit-scrollbar-thumb {
+  background: var(--c2); 
 }
 
 .list {
-  color: #68D8D5; 
+  color: var(--c3); 
   font-family: ItemFont; 
   margin-left: 10px; 
   margin-right: 10px; 
@@ -77,25 +73,25 @@ body {
 <body>
 <div>
   <img id="logo" style="margin: 20px;" src="./Data/Images/logo.png"  height="150px" width="auto"/>
-  <div id="launcher" style="height: 36px; width: 107px; margin: 20px; float: right; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png');">
-    <div class="unselectable" style="color: #68D8D5; font-family: ItemFont;">Launcher</div>
+  <div id="launcher" style="height: 36px; width: 107px; margin: 20px; float: right; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
+    <div class="unselectable" style="font-family: ItemFont;">Launcher</div>
   </div>
 </div>
 
 <div style="height: 36px; display: flex; align-items: center; margin: 20px; margin-bottom: 30px;">
-  <div id="search" style="height: 36px; min-width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px;">
-    <div class="unselectable" style="color: #68D8D5; font-family: ItemFont;">Search</div>
+  <div id="search" style="height: 36px; min-width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px; color: var(--c3);">
+    <div class="unselectable" style="font-family: ItemFont;">Search</div>
   </div>
-  <input id='editText' type="text" size="60" maxlength="50" style="height: 32px; padding-left: 10px; padding-right: 10px; color: #68D8D5; font-size: 16px; font-family: ItemFont; background-color: #181B22; border-style: solid; border-color: #7E0D0E; border-width: 1px;"></input>
+  <input id='editText' type="text" size="60" maxlength="50" style="height: 32px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
 </div>
 <div style="margin: 10px; margin-top: 20px;">
-  <div class="unselectable" id="Elamigos" style="color: white; font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">ElAmigos:</div>
+  <div class="unselectable" id="Elamigos" style="color: var(--c4); font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">ElAmigos:</div>
   <div class="list" id="listElamigos"></div>
-  <div class="unselectable" id="Fitgirl" style="color: white; font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">Fitgirl:</div>
+  <div class="unselectable" id="Fitgirl" style="color: var(--c4); font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">Fitgirl:</div>
   <div class="list" id="listFitgirl"></div>
-  <div class="unselectable" id="Pivi" style="color: white; font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">Pivi:</div>
+  <div class="unselectable" id="Pivi" style="color: var(--c4); font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">Pivi:</div>
   <div class="list" id="listPivi"></div>
-  <div class="unselectable" id="Skidrow" style="color: white; font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">Skidrow Codex:</div>
+  <div class="unselectable" id="Skidrow" style="color: var(--c4); font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">Skidrow Codex:</div>
   <div class="list" id="listSkidrow"></div>
 </div>
 
@@ -103,6 +99,19 @@ body {
   const { ipcRenderer } = require('electron');
   window.$ = window.jQuery = require('jquery');
   var user = true
+  let c4 = null
+
+
+  ipcRenderer.on('theme', (event, theme) => {
+    document.body.style.setProperty('--c1', theme.c1);
+    document.body.style.setProperty('--c2', theme.c2);
+    document.body.style.setProperty('--c3', theme.c3);
+    document.body.style.setProperty('--c4', theme.c4);
+    //BACKGROUND
+    document.body.style.background = theme.background
+    document.body.style.backgroundAttachment = 'fixed'
+    c4 = theme.c4
+  })
 
   ipcRenderer.on('searchingResults', (event, id) => {
     document.getElementById(id).style.color = 'gray'
@@ -113,7 +122,7 @@ body {
   })
 
   ipcRenderer.on('hasResults', (event, id) => {
-    document.getElementById(id).style.color = 'white'
+    document.getElementById(id).style.color = c4
     let name = id
     if (name == 'Elamigos') name = 'ElAmigos'
     if (name == 'Skidrow') name = 'Skidrow Codex'
