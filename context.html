@@ -104,7 +104,10 @@ body {
   </div>
 </div>
 
-<div style="margin-left: 20px; margin-right: 20px; margin-bottom: 20px; display: flex; align-items: center; position: absolute; bottom: 0; right: 0;">
+<div style="margin-top: 105px; margin-left: 20px; margin-right: 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center;">
+  <div id="move" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px;">
+    <div class="unselectable" style="color: #68D8D5; font-family: ItemFont;">Move</div>
+  </div>
   <div id="remove" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px;">
     <div class="unselectable" style="color: #68D8D5; font-family: ItemFont;">Remove</div>
   </div>
@@ -172,6 +175,14 @@ body {
 
   ipcRenderer.on('fileGottenIcon', (event, path) => {
     document.getElementById('iconText').value = path
+  })
+
+  document.getElementById('move').addEventListener('click', () => {
+    document.getElementById('move').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+	  setTimeout(function() {
+      document.getElementById('move').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+      ipcRenderer.send('move', actualPath)
+    }, 100)
   })
 
   document.getElementById('remove').addEventListener('click', () => {

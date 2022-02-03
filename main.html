@@ -85,7 +85,7 @@ body {
   </div>
 </div>
 	
-<div class="content">
+<div id="content" class="content">
   <h1 id="txtMenu" class="unselectable" style="color: white; margin: 10px; margin-bottom: 20px;">Home</h1>
 	<div style="display: flex; justify-content: space-between;">
 	  <div id="list" style="color: #68D8D5; font-family: ItemFont; margin-left: 10px">
@@ -185,6 +185,10 @@ body {
 
   ipcRenderer.on('setbutt', (event, path, homePath) => {
     document.getElementById('description').style.display = 'none'
+    document.getElementById('content').style.minHeight = document.getElementById('content').offsetHeight+'px'
+    setTimeout(function() { 
+      document.getElementById('content').style.minHeight = ''
+    }, 250)
 
     document.getElementById('store').addEventListener('click', () => {
       document.getElementById('store').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';

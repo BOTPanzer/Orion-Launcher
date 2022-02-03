@@ -1,5 +1,6 @@
 const { app, ipcMain, BrowserWindow, dialog } = require('electron')
 const fs = require('fs');
+const { data } = require('jquery');
 let window = 'launcher'
 let window2 = null
 let win = null
@@ -109,7 +110,7 @@ app.whenReady().then(() => {
       name = name.substring(name.lastIndexOf("\\")+1)
       if (name.includes('.')) name = name.substring(0, name.lastIndexOf('.'))
       //Id
-      let id = `b${i}`
+      let id = path+i
       let img = `img${i}`
       //Default Image
       let image = "./Data/Images/icon_folder.png"
@@ -123,7 +124,6 @@ app.whenReady().then(() => {
         var filePath = si[0]
         if (filePath.endsWith('\r')) filePath = filePath.slice(0,-1)
         if (filePath.startsWith('?:')) filePath = filePath.replace('?:', dataFolder.substring(0, 2))
-        //if (filePath.startsWith('?:')) filePath = filePath.replace('?:', 'E:')
         //Image
         var iconPath = si[1]
         if (iconPath != undefined) {
@@ -145,6 +145,7 @@ app.whenReady().then(() => {
         win.webContents.send('addFolderListener', id, path);
       }
     }
+    win.webContents.send('size');
     actualPath = argPath
   }
 
@@ -242,6 +243,20 @@ app.whenReady().then(() => {
 
   ipcMain.on('getFileIconContext', async function() {
     win2.webContents.send('fileGottenIcon', await getFile("Choose a Game"));
+  })
+
+  ipcMain.on('move', async function(event, path) {
+    if (fs.existsSync(path)) {
+      let newFilePath = await getFolder("Choose a Folder")+'\\'
+      if (!newFilePath.includes(dataFolder)) return
+      let oldFilePath = path
+      if (path.endsWith('\\')) oldFilePath = path.slice(0,-1)
+      let name = oldFilePath.substring(oldFilePath.lastIndexOf('\\')+1)
+      fs.rename(path, newFilePath+name, function(err) {
+        closeWin2()
+        createList(actualPath)
+      })
+    }
   })
 
   ipcMain.on('remove', (event, path) => {
@@ -589,6 +604,22 @@ app.whenReady().then(() => {
     let result = await dialog.showOpenDialog({
       title: title,
       properties: ['openFile'],
+    }).then(function(files) {
+      let file = files.filePaths[0]
+      if (file == undefined) {
+        return ''
+      } else {
+        return file
+      }
+    })
+    return result
+  }
+
+  async function getFolder(title) {
+    let result = await dialog.showOpenDialog({
+      title: title,
+      defaultPath: dataFolder,
+      properties: ['openDirectory'],
     }).then(function(files) {
       let file = files.filePaths[0]
       if (file == undefined) {
