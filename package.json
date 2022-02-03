@@ -1,6 +1,6 @@
 {
   "name": "orion-launcher",
-  "version": "1.4.0",
+  "version": "1.4.4",
   "author": "BOT Panzer",
   "description": "Launcher & Game Store",
   "main": "main.js",
@@ -11,10 +11,9 @@
   "keywords": [],
   "license": "ISC",
   "devDependencies": {
-    "electron": "^12.0.1"
+    "electron": "^12.0.2"
   },
   "dependencies": {
-    "electron-context-menu": "^2.5.0",
     "jquery": "^3.6.0",
     "jsdom": "^16.2.2",
     "node-addon-api": "^3.1.0",

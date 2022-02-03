@@ -113,18 +113,18 @@ body {
   })
 
   ipcRenderer.on('clearList', (event) => {
-    let infoDiv = document.querySelector('div[id=listElamigos]')
+    let infoDiv = document.getElementById('listElamigos')
     infoDiv.innerHTML = '';
-    infoDiv = document.querySelector('div[id=listFitgirl]')
+    infoDiv = document.getElementById('listFitgirl')
     infoDiv.innerHTML = '';
-    infoDiv = document.querySelector('div[id=listPivi]')
+    infoDiv = document.getElementById('listPivi')
     infoDiv.innerHTML = '';
-    infoDiv = document.querySelector('div[id=listSkidrow]')
+    infoDiv = document.getElementById('listSkidrow')
     infoDiv.innerHTML = '';
   })
   
   ipcRenderer.on('add1ToList', (event, item, list) => {
-    let infoDiv = document.querySelector(`div[id=${list}]`)
+    let infoDiv = document.getElementById(list)
     infoDiv.insertAdjacentHTML('beforeend', item)
   })
 

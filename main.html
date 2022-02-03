@@ -72,7 +72,7 @@ body {
 </style>
 </head>
 	
-<body>
+<body id="body">
 <div>
   <img id="logo" style="margin: 20px;" src="./Data/Images/logo.png"  height="150px" width="auto"/>
   <div style="float: right;">
@@ -127,12 +127,12 @@ body {
   const fs = require('fs');
 
   ipcRenderer.on('clearList', (event, list) => {
-    let infoDiv = document.querySelector('div[id=list]')
+    let infoDiv = document.getElementById('list')
     infoDiv.innerHTML = '';
   })
 
   ipcRenderer.on('add1ToList', (event, item) => {
-    let infoDiv = document.querySelector('div[id=list]')
+    let infoDiv = document.getElementById('list')
     infoDiv.insertAdjacentHTML('beforeend', item)
   })
 
@@ -147,6 +147,7 @@ body {
     })
 
     document.getElementById(id).addEventListener('contextmenu', () => {
+      document.getElementById('body').replaceWith(document.getElementById('body').cloneNode(true));
       ipcRenderer.send('delFile', path)
     })
   })
@@ -163,7 +164,7 @@ body {
     })
 
     document.getElementById(id).addEventListener('contextmenu', () => {
-      console.log('delete '+path)
+      document.getElementById('body').replaceWith(document.getElementById('body').cloneNode(true));
       ipcRenderer.send('delFolder', path)
     })
   })
@@ -184,6 +185,24 @@ body {
     document.getElementById('txtMenu').firstChild.data = name
   })
 
+  ipcRenderer.on('setbutt', (event, path, homePath) => {
+    document.getElementById('store').addEventListener('click', () => {
+      document.getElementById('store').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+	    setTimeout(function() {
+        document.getElementById('store').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+        ipcRenderer.send('store')
+      }, 100)
+    })
+
+    document.getElementById('add').addEventListener('click', () => {
+      document.getElementById('add').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+	    setTimeout(function() {
+        document.getElementById('add').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+        ipcRenderer.send('add')
+      }, 100)
+    })
+  })
+
   function load(path) {
     ipcRenderer.send('load', path)
   }
@@ -197,7 +216,16 @@ body {
       document.getElementById('launchDescription').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
       setTimeout(function() {
         document.getElementById('launchDescription').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-        shell.openPath(path)
+        if (path.startsWith('"') && !path.endsWith('"')) {
+          let pathClean = path.substring(1, path.lastIndexOf('"'))
+          let args = path.substring(pathClean.length+2).trim()
+          let argsClean = args.split(' ')
+          argsClean.unshift("/c", pathClean)
+          let spawn = require("child_process").spawn;
+          let bat = spawn("cmd.exe", argsClean)
+        } else {
+          shell.openPath(path)
+        }
       }, 100)
     })
     document.getElementById('folderDescription').replaceWith(document.getElementById('folderDescription').cloneNode(true));
@@ -211,22 +239,6 @@ body {
     //Show
     document.getElementById('description').style.display = 'flex'
   }
-
-  document.getElementById('store').addEventListener('click', () => {
-    document.getElementById('store').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-	  setTimeout(function() {
-      document.getElementById('store').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-      ipcRenderer.send('store')
-    }, 100)
-  })
-
-  document.getElementById('add').addEventListener('click', () => {
-    document.getElementById('add').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-	  setTimeout(function() {
-      document.getElementById('add').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-      ipcRenderer.send('add')
-    }, 100)
-  })
 </script>
 </body>
 </html>

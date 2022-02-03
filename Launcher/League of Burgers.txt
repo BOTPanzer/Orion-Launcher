@@ -1,0 +1,2 @@
+"D:\Games\Riot Games\Riot Client\RiotClientServices.exe" --launch-product=league_of_legends --launch-patchline=live
+D:\Games\Riot Games\League of Legends\0burger.ico

@@ -1,0 +1,2 @@
+com.epicgames.launcher://apps/Sugar?action=launch&silent=true
+D:\Games\rocketleague\Binaries\Win64\RocketLeague.exe

@@ -67,12 +67,23 @@ app.whenReady().then(() => {
   })
 
   ipcMain.on('delFile', (event, path) => {
+    delFile(path)
+  })
+
+  ipcMain.on('delFolder', (event, path) => {
+    delFolder(path)
+  })
+
+  function delFile(path) {
+    let name = path.substring(0, path.lastIndexOf("\\"))
+    name = name.substring(name.lastIndexOf("\\")+1)
+    if (name.includes('.')) name = name.substring(0, name.lastIndexOf('.'))
     const options = {
       icon: __dirname+'.\\Data\\Images\\icon.ico',
       buttons: ['Yes', 'No'],
       title: 'Oriøn: Launcher',
       message: 'Remove Game?',
-      detail: path,
+      detail: 'Game: '+name,
     };
 
     const delWin = async () => {
@@ -87,19 +98,21 @@ app.whenReady().then(() => {
             createList(actualPath)
           })
         }
-      }
+      } else createList(actualPath)
     }
 
     delWin()
-  })
+  }
 
-  ipcMain.on('delFolder', (event, path) => {
+  function delFolder(path) {
+    let name = path.substring(0, path.lastIndexOf("\\"))
+    name = name.substring(name.lastIndexOf("\\")+1)
     const options = {
       icon: __dirname+'.\\Data\\Images\\icon.ico',
       buttons: ['Yes', 'No'],
       title: 'Oriøn: Launcher',
       message: 'Remove Folder?',
-      detail: path,
+      detail: 'Folder: '+name,
     };
 
     const delWin = async () => {
@@ -114,19 +127,39 @@ app.whenReady().then(() => {
             createList(actualPath)
           })
         }
-      }
+      } else createList(actualPath)
     }
 
     delWin()
-  })
+  }
 
   function createList(argPath) {
+    win.webContents.send('setbutt');
     win.webContents.send('setLocPath', argPath, dataFolder);
     var paths = fs.readdirSync(argPath);
     win.webContents.send('clearList', null);
     createBackButt(argPath)
+    //FIRST FOLDERS THEN FILES
+    let folders = []
+    let files = []
     for(i in paths) {
       let path = argPath+paths[i]+'\\';
+      if (fs.statSync(path).isFile()) {
+        files.push(paths[i])
+      } else {
+        folders.push(paths[i])
+      }
+    }
+    let allPaths = []
+    for(i in folders) {
+      allPaths.push(folders[i])
+    }
+    for(i in files) {
+      allPaths.push(files[i])
+    }
+    //START
+    for(i in allPaths) {
+      let path = argPath+allPaths[i]+'\\';
       //Name
       let name = path.substring(0, path.lastIndexOf("\\"))
       name = name.substring(name.lastIndexOf("\\")+1)
@@ -142,14 +175,24 @@ app.whenReady().then(() => {
       //Create
       win.webContents.send('add1ToList', html);
       if (fs.statSync(path).isFile()) {
-        var filePath = fs.readFileSync(path).toString().replaceAll('\n', '').trim()
+        let si = fs.readFileSync(path).toString().trim().split('\n')
+        var filePath = si[0]
+        if (filePath.endsWith('\r')) filePath = filePath.slice(0,-1)
         if (filePath.startsWith('?:')) filePath = filePath.replace('?:', dataFolder.substring(0, 2))
         //if (filePath.startsWith('?:')) filePath = filePath.replace('?:', 'E:')
         win.webContents.send('addListener', id, path, filePath, name, img);
         //Image
-        app.getFileIcon(filePath, {size:"large"}).then((fileIcon) =>{ 
-          win.webContents.send('changeIcon', img, fileIcon.toDataURL()) 
-        })
+        var iconPath = si[1]
+        if (iconPath != undefined) {
+          if (iconPath.endsWith('\r')) iconPath = iconPath.slice(0,-1)
+          app.getFileIcon(iconPath, {size:"large"}).then((fileIcon) =>{ 
+            win.webContents.send('changeIcon', img, fileIcon.toDataURL()) 
+          })
+        } else {
+          app.getFileIcon(filePath, {size:"large"}).then((fileIcon) =>{ 
+            win.webContents.send('changeIcon', img, fileIcon.toDataURL()) 
+          })
+        }
       } else{
         win.webContents.send('addFolderListener', id, path);
       }
@@ -174,46 +217,59 @@ app.whenReady().then(() => {
   
   //FUNCTIONS LAUNCHER CREATOR
   ipcMain.on('b1', (event, name) => {
-    createFolder(actualPath+name.trim())
-  })
-
-  ipcMain.on('b3', (event, name) => {
-    addGameToFolder(actualPath+name.trim())
-  })
-
-  function createFolder(path) {
-    if (!fs.existsSync(path)) {
-      fs.mkdirSync(path);
+    let fullName = actualPath+name.trim()
+    if (!fs.existsSync(fullName)) {
+      fs.mkdirSync(fullName);
       const notification = {
         title: 'Oriøn Launcher',
         body: 'Folder Added'
       }
       new Notification(notification).show()
     }
-  }
+  })
 
-  function addGameToFolder(pathToFile) {
-    let name = pathToFile+'.txt'
-    if (!fs.existsSync(name)) {
-      dialog.showOpenDialog({
-        title: "Choose Game to Open",
-        properties: ['openFile'],
-      }).then((files)=>{
-        let file = files.filePaths[0]
-        if (file == undefined) {
-          console.log("No file selected");
-        } else {
-          fs.writeFile(name, file, (err) => {
-            const notification = {
-              title: 'Oriøn Launcher',
-              body: 'Game Added'
-            }
-            new Notification(notification).show()
-          })
+  ipcMain.on('getFile', (event) => {
+    dialog.showOpenDialog({
+      title: "Choose a Game",
+      properties: ['openFile'],
+    }).then((files)=>{
+      let file = files.filePaths[0]
+      if (file == undefined) {
+        console.log("No file selected");
+      } else {
+        win.webContents.send('fileGotten', file);
+      }
+    }).catch(err=>console.log('Handle Error',err))
+  })
+
+  ipcMain.on('getFileIcon', (event) => {
+    dialog.showOpenDialog({
+      title: "Choose a Game",
+      properties: ['openFile'],
+    }).then((files)=>{
+      let file = files.filePaths[0]
+      if (file == undefined) {
+        console.log("No file selected");
+      } else {
+        win.webContents.send('fileGottenIcon', file);
+      }
+    }).catch(err=>console.log('Handle Error',err))
+  })
+
+  ipcMain.on('b3', (event, name, path, icon) => {
+    let fullName = actualPath+name.trim()+'.txt'
+    let data = path
+    if (icon != '') data = path+'\n'+icon
+    if (!fs.existsSync(fullName)) {
+      fs.writeFile(fullName, data, (err) => {
+        const notification = {
+          title: 'Oriøn Launcher',
+          body: 'Game Added'
         }
-      }).catch(err=>console.log('Handle Error',err))
+        new Notification(notification).show()
+      })
     }
-  }
+  })
 
 
   //FUNCTIONS STORE
