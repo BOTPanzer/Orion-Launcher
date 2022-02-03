@@ -5,6 +5,7 @@ let tray = null
 let window = ''
 let win = null
 let win2 = null
+let win3 = null
 let dataFolder = null
 let launcherFolder = null
 let actualPath = null
@@ -100,6 +101,12 @@ if (!app.requestSingleInstanceLock()) {
 
   ipcMain.on('exitContext', (event) => {
     closeWin2();
+  })
+
+  ipcMain.on('exitContext3', (event) => {
+    closeWin3();
+    if (win2 != null)
+    win2.show()
   })
 
 
@@ -222,13 +229,13 @@ if (!app.requestSingleInstanceLock()) {
 
 
   //FUNCTIONS LAUNCHER CONTEXT
-  ipcMain.on('contextFile', (event, path, name, filePath, iconPath) => {
+  ipcMain.on('contextFile', (event, path, name, filePath, iconPath, img) => {
     let gamePathArg = getPathInfo(filePath)
     showPath = gamePathArg.pathClean
     if (fs.existsSync(showPath)) {
-      createWin2('context.html', 421)
+      createWin2('context.html', 420)//421
     } else {
-      createWin2('context.html', 375)
+      createWin2('context.html', 375)//375
     }
 
     win2.on('close', function() {
@@ -236,7 +243,7 @@ if (!app.requestSingleInstanceLock()) {
       win2 = null
     });
 
-    win2.webContents.send('setLocation', path);
+    win2.webContents.send('setLocation', path, img);
     //Name
     win2.webContents.send('setName', name);
     win2.webContents.send('setPath', filePath);
@@ -251,7 +258,7 @@ if (!app.requestSingleInstanceLock()) {
       win2 = null
     });
 
-    win2.webContents.send('setLocation', path);
+    win2.webContents.send('setLocation', path, "./Data/Images/icon_folder.png");
     //Name
     let name = path.substring(path.lastIndexOf("\\")+1)
     win2.webContents.send('setName', name);
@@ -286,66 +293,37 @@ if (!app.requestSingleInstanceLock()) {
   })
 
   ipcMain.on('remove', (event, path) => {
-    if (fs.statSync(path).isFile()) {
-      delFile(path)
-    } else {
-      delFolder(path)
-    }
+    createWin3()
+    win2.hide()
+    
+    win3.on('close', function() {
+      win3 = null
+    });
+
+    win3.webContents.send('setLocation', path);
   })
 
-  function delFile(path) {
-    const { dialog } = require('electron')
-    let name = path.substring(path.lastIndexOf("\\")+1)
-    if (name.includes('.')) name = name.substring(0, name.lastIndexOf('.'))
-    const options = {
-      icon: __dirname+'.\\Data\\Images\\icon.ico',
-      buttons: ['Yes', 'No'],
-      title: 'Oriøn: Launcher',
-      message: 'Remove Game?',
-      detail: 'Game: '+name,
-    };
+  ipcMain.on('removecancel', (event, path) => {
+    closeWin3()
+    win2.show()
+  })
 
-    const delWin = async () => {
-      let response = await dialog.showMessageBox(options)
-      if (response.response == 0) {
-        if (fs.existsSync(path)) {
-          fs.unlink(path, (err) => {
-            closeWin2()
-            createList(actualPath)
-          })
-        }
+  ipcMain.on('removefinal', (event, path) => {
+    if (fs.existsSync(path)) {
+      if (fs.statSync(path).isFile()) {
+        fs.unlink(path, (err) => {
+          closeWin2()
+          closeWin3()
+        })
+      } else {
+        const rimraf = require("rimraf");
+        rimraf(path, (err) => {
+          closeWin2()
+          closeWin3()
+        })
       }
     }
-
-    delWin()
-  }
-
-  function delFolder(path) {
-    const { dialog } = require('electron')
-    let name = path.substring(path.lastIndexOf("\\")+1)
-    const options = {
-      icon: __dirname+'.\\Data\\Images\\icon.ico',
-      buttons: ['Yes', 'No'],
-      title: 'Oriøn: Launcher',
-      message: 'Remove Folder?',
-      detail: 'Folder: '+name,
-    };
-
-    const delWin = async () => {
-      const rimraf = require("rimraf");
-      let response = await dialog.showMessageBox(options)
-      if (response.response == 0) {
-        if (fs.existsSync(path)) {
-          rimraf(path, (err) => {
-            closeWin2()
-            createList(actualPath)
-          })
-        }
-      }
-    }
-
-    delWin()
-  }
+  })
 
   ipcMain.on('save', (event, path, newName, newPath, newIcon) => {
     if (newName == '') {
@@ -421,7 +399,7 @@ if (!app.requestSingleInstanceLock()) {
     else win.webContents.send('fileGottenIcon', await getFile("Choose a Game", `${apath}`))
   })
 
-  ipcMain.on('addFolder', (event, name) => {
+  ipcMain.on('addFolderContext', (event, name) => {
     let fullName = actualPath+name.trim()
     if (!fs.existsSync(fullName)) {
       fs.mkdirSync(fullName);
@@ -430,7 +408,7 @@ if (!app.requestSingleInstanceLock()) {
     } else win.webContents.send('log', `Folder "${name}" Already Exists`);
   })
 
-  ipcMain.on('addGame', (event, name, path, icon) => {
+  ipcMain.on('addGameContext', (event, name, path, icon) => {
     let fullName = actualPath+name.trim()+'.txt'
     let data = path
     if (icon != '') data = path+'\n'+icon
@@ -924,19 +902,53 @@ function createWin2(file, size) {
       enableRemoteModule: true
     }
   })
-
+  
+  win2.hide()
   win2.loadFile(file)
   win2.removeMenu()
   //win2.openDevTools()
 
   win2.webContents.on('dom-ready', () => {
     win2.webContents.send('theme', theme);
+    win2.show()
   })
 }
 
 function closeWin2() {
   if (win2 != null)
   win2.close()
+}
+
+function createWin3() {
+  win3 = new BrowserWindow({
+    height: 136,
+    width: 390,
+    minHeight: 136,
+    minWidth: 390,
+    maxHeight: 136,
+    maxWidth: 390,
+    frame: false,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      enableRemoteModule: true
+    }
+  })
+
+  win3.hide()
+  win3.loadFile('remove.html')
+  win3.removeMenu()
+  //win3.openDevTools()
+
+  win3.webContents.on('dom-ready', () => {
+    win3.webContents.send('theme', theme);
+    win3.show()
+  })
+}
+
+function closeWin3() {
+  if (win3 != null)
+  win3.close()
 }
 
 function createHTML(id, img, icon, name) {

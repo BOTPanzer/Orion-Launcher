@@ -86,12 +86,19 @@ body {
     const { ipcRenderer } = require('electron');
     let actualPath = ''
   
-    document.getElementById('exit').addEventListener('click', () => {
+    //EXIT
+    document.getElementById('exit').addEventListener('mousedown', (event) => {
+      if (event.which != 1) return
       document.getElementById('exitb').style.opacity = '1';
-      setTimeout(function() {
+    
+      document.addEventListener('mouseup', () => {
         document.getElementById('exitb').style.opacity = '0';
-        ipcRenderer.send('exitContext')
-      }, 100)
+      })
+    })
+
+    document.getElementById('exit').addEventListener('click', (event) => {
+      if (event.which != 1) return
+      ipcRenderer.send('exitContext')
     })
   
     ipcRenderer.on('theme', (event, theme) => {
@@ -180,7 +187,7 @@ body {
       }
       let icon = document.getElementById('iconText').value
       document.body.replaceWith(document.body.cloneNode(true));
-      ipcRenderer.send('addGame', name, path, icon)
+      ipcRenderer.send('addGameContext', name, path, icon)
     })
 
     function getPathInfo(gamePath) {

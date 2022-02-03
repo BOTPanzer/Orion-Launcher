@@ -1,4 +1,4 @@
-<div id="content" style="margin: 10px; color: white;">
+<div id="content" style="margin: 10px; margin-bottom: 20px; color: white;">
   <div style="margin: 10px; display: flex; align-items: center;">
 	  <div id="txtMenu" style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden; width: 100%; color: var(--c4); font-size: 40px; margin-right: 10px;">Home</div>
 	  <input id='editText' placeholder="Search Games" type="text" maxlength="50" style="height: 32px; width: 250px; padding-left: 10px; padding-right: 10px; margin-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
@@ -82,7 +82,7 @@
       let scroll = document.getElementById('rightBar').scrollTop
       document.body.replaceWith(document.body.cloneNode(true));
       document.getElementById('rightBar').scrollTop = scroll
-      ipcRenderer.send('contextFile', path, name, gamePath, iconPath)
+      ipcRenderer.send('contextFile', path, name, gamePath, iconPath, document.getElementById(img).src)
       cont = true
     })
   })
