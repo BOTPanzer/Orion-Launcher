@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-<title>Oriøn Game Store</title>
+<title>Oriøn: Game Store</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=0">
 <style>
@@ -25,6 +25,7 @@ body {
 /* width */
 ::-webkit-scrollbar {
   width: 10px;
+  height: 10px;
 }
 
 /* Track */
@@ -42,6 +43,16 @@ body {
   background: #572629; 
 }
 
+.list {
+  color: #68D8D5; 
+  font-family: ItemFont; 
+  margin-left: 10px; 
+  margin-right: 10px; 
+  padding-bottom: 5px; 
+  overflow-x: auto;
+  white-space: nowrap;
+}
+	
 .unselectableDiv {
   vertical-align: middle;
   height: 40px;
@@ -49,9 +60,9 @@ body {
   display: table-cell;
   align-items: center;
 }
-	
+
 .unselectable {
-  overflow:hidden;
+  overflow: hidden;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
@@ -64,31 +75,60 @@ body {
 </head>
 	
 <body>
-<div style="height: 36px; display: flex; align-items: center; margin: 20px;">
+<div>
+  <img id="logo" style="margin: 20px;" src="./Data/Images/logo.png"  height="150px" width="auto"/>
+  <div id="launcher" style="height: 36px; width: 107px; margin: 20px; float: right; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png');">
+    <div class="unselectable" style="color: #68D8D5; font-family: ItemFont;">Launcher</div>
+  </div>
+</div>
+
+<div style="height: 36px; display: flex; align-items: center; margin: 20px; margin-bottom: 30px;">
   <div id="search" style="height: 36px; min-width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px;">
     <div class="unselectable" style="color: #68D8D5; font-family: ItemFont;">Search</div>
   </div>
-  <input id='editText' type="text" size="30" maxlength="50" style="height: 32px; padding-left: 10px; padding-right: 10px; color: #68D8D5; font-size: 16px; font-family: ItemFont; background-color: #181B22; border-style: solid; border-color: #7E0D0E; border-width: 1px;"></input>
-  <div style="width: 100%;">
-    <div id="launcher" style="height: 36px; width: 107px; display: flex; float: right; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); ">
-      <div class="unselectable" style="color: #68D8D5; font-family: ItemFont;">Launcher</div>
-    </div>
-  </div>
+  <input id='editText' type="text" size="60" maxlength="50" style="height: 32px; padding-left: 10px; padding-right: 10px; color: #68D8D5; font-size: 16px; font-family: ItemFont; background-color: #181B22; border-style: solid; border-color: #7E0D0E; border-width: 1px;"></input>
 </div>
 <div style="margin: 10px; margin-top: 20px;">
-  <h1 class="unselectable" style="color: white; font-size: 20px; margin: 10px; margin-top: 20px;">ElAmigos:</h1>
-  <div id="listElamigos" style="color: #68D8D5; font-family: ItemFont;"></div>
-  <h1 class="unselectable" style="color: white; font-size: 20px; margin: 10px; margin-top: 20px;">Fitgirl:</h1>
-  <div id="listFitgirl" style="color: #68D8D5; font-family: ItemFont;"></div>
-  <h1 class="unselectable" style="color: white; font-size: 20px; margin: 10px; margin-top: 20px;">Pivi:</h1>
-  <div id="listPivi" style="color: #68D8D5; font-family: ItemFont;"></div>
-  <h1 class="unselectable" style="color: white; font-size: 20px; margin: 10px; margin-top: 20px;">Skidrow:</h1>
-  <div id="listSkidrow" style="color: #68D8D5; font-family: ItemFont;"></div>
+  <div class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">ElAmigos:</div>
+  <div class="list" id="listElamigos"></div>
+  <div class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">Fitgirl:</div>
+  <div class="list" id="listFitgirl"></div>
+  <div class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">Pivi:</div>
+  <div class="list" id="listPivi"></div>
+  <div class="unselectable" style="color: white; font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">Skidrow Codex:</div>
+  <div class="list" id="listSkidrow"></div>
 </div>
+
 <script>
-  const { app, shell, ipcRenderer } = require('electron');
-  const superagent = require('superagent');
+  const { shell, ipcRenderer } = require('electron');
+  window.$ = window.jQuery = require('jquery');
   var user = true
+
+  ipcRenderer.on('clearList', (event) => {
+    let infoDiv = document.querySelector('div[id=listElamigos]')
+    infoDiv.innerHTML = '';
+    infoDiv = document.querySelector('div[id=listFitgirl]')
+    infoDiv.innerHTML = '';
+    infoDiv = document.querySelector('div[id=listPivi]')
+    infoDiv.innerHTML = '';
+    infoDiv = document.querySelector('div[id=listSkidrow]')
+    infoDiv.innerHTML = '';
+  })
+  
+  ipcRenderer.on('add1ToList', (event, item, list) => {
+    let infoDiv = document.querySelector(`div[id=${list}]`)
+    infoDiv.insertAdjacentHTML('beforeend', item)
+  })
+
+  ipcRenderer.on('addListener', (event, id, link) => {
+    document.getElementById(id).addEventListener('click', () => {
+      document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item_clicked.png")';
+	    setTimeout(function() {
+        document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
+        shell.openExternal(link)
+      }, 100)
+    })
+  })
 
   document.getElementById('launcher').addEventListener('click', () => {
     document.getElementById('launcher').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
@@ -115,221 +155,44 @@ body {
       }, 100)
     } else user = true
 
-    let search = document.getElementById('editText').value.replaceAll(' ', '+')
+    let search = document.getElementById('editText').value
     if (search == '') return
 
-    let infoDiv = document.querySelector('div[id=listElamigos]')
-    infoDiv.innerHTML = '';
-    infoDiv = document.querySelector('div[id=listFitgirl]')
-    infoDiv.innerHTML = '';
-	  infoDiv = document.querySelector('div[id=listPivi]')
-    infoDiv.innerHTML = '';
-    infoDiv = document.querySelector('div[id=listSkidrow]')
-    infoDiv.innerHTML = '';
-
-    let fullURL = 'https://www.elamigos-games.com/?q='+search
-    getHTML().then(function(result) {
-      elamigos(result)
-    })
-
-    fullURL = 'https://fitgirlrepacks.co/search/'+search
-    getHTML().then(function(result) {
-      fitgirl(result)
-    })
-
-    fullURL = 'https://pivigames.blog/?s='+search
-    getHTML().then(function(result) {
-      pivi(result)
-    })
-
-    fullURL = 'https://www.skidrowcodex.net/?s='+search
-    getHTML().then(function(result) {
-      skidrow(result)
-    })
-
-    function elamigos(result) {
-      var si = result.split('"')
-      var links = []
-      var imgs = []
-      var names = []
-      var next = false
-      //LINKS & IMAGES
-      for(i in si) {
-        if (next) {
-          if (si[i].includes('/storage/games_tumbl/')) {
-            imgs.push('https://www.elamigos-games.com'+si[i])
-            next = false
-          }
-        } else if (si[i].includes('https://www.elamigos-games.com/games/')) {
-          links.push(si[i])
-          next = true
-        }
-      }
-      links = Array.from(new Set(links))
-      //NAMES
-      for(i in links) {
-        let name = links[i].substring(links[i].lastIndexOf("/")+1, links[i].length)
-        name = name.replaceAll('-', ' ')
-        names.push(titleCase(name))
-      }
-      //ADD GAMES
-      for(i in links) {
-        let id = `elamigos${i}`
-        let img = imgs[i]
-        let link = links[i]
-        let name = names[i]
-        let html = createHTML(id, null, img, name)
-        let infoDiv = document.querySelector('div[id=listElamigos]')
-        infoDiv.insertAdjacentHTML('beforeend', html)
-        addListener(id, link)
-      }
-    }
-    
-    function fitgirl(result) {
-      var si = result.split('"')
-      var links = []
-      var names = []
-      //LINKS
-      for(i in si) {
-        if (si[i].includes('https://fitgirlrepacks.co/repack/')) {
-          links.push(si[i].replaceAll('/#respond', ''))
-        }
-      }
-      links = Array.from(new Set(links))
-      //NAMES
-      for(i in links) {
-        let name = links[i].substring(links[i].lastIndexOf("/")+1, links[i].length)
-        name = name.substring(name.indexOf("-")+1, name.length)
-        name = name.replaceAll('-', ' ')
-        names.push(titleCase(name))
-      }
-      //ADD GAMES
-      for(i in links) {
-        let id = `fitgirl${i}`
-        let link = links[i]
-        let name = names[i]
-        let html = createHTML(id, null, './Data/Images/icon_file.png', name)
-        let infoDiv = document.querySelector('div[id=listFitgirl]')
-        infoDiv.insertAdjacentHTML('beforeend', html)
-        addListener(id, link)
-      }
-    }
-
-    function pivi(result) {
-      let part = result.substring(result.indexOf('<div id="gp-left-column">'))
-      var si = part.split('<')
-      var links = []
-      var imgs = []
-      var names = []
-      var next = false
-      //LINKS & IMAGES
-      for(i in si) {
-        if (next) {
-          if (si[i].includes('src="https://pivigames.blog/wp-content/')) {
-            let img = si[i].substring(si[i].indexOf('src="')+5, si[i].lastIndexOf('" class'))
-            if (img.startsWith('http')) {
-              imgs.push(img)
-              next = false
-            }
-          }
-        } else if (si[i].includes('a href="https://pivigames.blog/') && si[i].includes('title=') && !si[i].includes('title="PiviGames"')) {
-          let link = si[i].substring(0, si[i].indexOf('title='))
-          link = link.substring(link.indexOf('"')+1, link.lastIndexOf('"')-1)
-          links.push(link)
-          next = true
-        }
-      }
-      links = Array.from(new Set(links))
-      imgs = Array.from(new Set(imgs))
-      //NAMES
-      for(i in links) {
-        let name = links[i].substring(links[i].lastIndexOf("/")+1, links[i].length)
-        name = name.replaceAll('-', ' ')
-        names.push(titleCase(name))
-      }
-      //ADD GAMES
-      for(i in links) {
-        let id = `pivi${i}`
-        let img = imgs[i]
-        let link = links[i]
-        let name = names[i]
-        let html = createHTML(id, null, img, name)
-        let infoDiv = document.querySelector('div[id=listPivi]')
-        infoDiv.insertAdjacentHTML('beforeend', html)
-        addListener(id, link)
-      }
-    }
-
-    function skidrow(result) {
-      let part = result.substring(result.indexOf('<div class="container blog">'), result.indexOf('<div class="pagination">'))
-      var si = part.split('<')
-      var links = []
-      var names = []
-      //LINKS & IMAGES
-      for(i in si) {
-        'https://www.skidrowcodex.net/cyberpunk-2077-update-v1-2-riddick/'
-        if (si[i].includes('a href="https://www.skidrowcodex.net/') && si[i].includes('data-wpel-link=')) {
-          let link = si[i].substring(0, si[i].indexOf('data-wpel-link='))
-          link = link.substring(link.indexOf('"')+1, link.lastIndexOf('"')-1)
-          links.push(link)
-        }
-      }
-      links = Array.from(new Set(links))
-      //NAMES
-      for(i in links) {
-        let name = links[i].substring(links[i].lastIndexOf("/")+1, links[i].length)
-        name = name.replaceAll('-', ' ')
-        names.push(titleCase(name))
-      }
-      //ADD GAMES
-      for(i in links) {
-        let id = `skidrow${i}`
-        let link = links[i]
-        let name = names[i]
-        let html = createHTML(id, null, './Data/Images/icon_file.png', name)
-        let infoDiv = document.querySelector('div[id=listSkidrow]')
-        infoDiv.insertAdjacentHTML('beforeend', html)
-        addListener(id, link)
-      }
-    }
-
-    async function getHTML() {
-      const response = await superagent.get(fullURL)
-      return response.text
-    }
-
-    function addListener(id, link) {
-      document.getElementById(id).addEventListener('click', () => {
-        document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item_clicked.png")';
-	      setTimeout(function() {
-          document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
-          shell.openExternal(link)
-        }, 100)
-      })
-    }
-
-    function titleCase(str) {
-      var splitStr = str.toLowerCase().split(' ');
-      for (var i = 0; i < splitStr.length; i++) {
-        splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);     
-      }
-      return splitStr.join(' '); 
-    }
-
-    function createHTML(id, img, icon, name) {
-      let html = `<div id="${id}" style="margin-top: 5px; margin-right: 5px; width: 150px; height: 150px; background-image: url('./Data/Images/icon_item.png'); text-align: center; display: inline-block;">
-                  <div style="width: 150px; height: 100px;">
-                    <img id="${img}" class="unselectable" style="margin: 10px; max-width: 130px; height: 90px;" src="${icon}"></img>
-                  </div>
-                  <div style="width: 140px; height: 40px; padding: 5px">
-                    <div class="unselectableDiv">
-                      <div class="unselectable" style="line-height:20px; display: inline-block; max-height: 40px; width: 140px;">${name}</div>
-                    </div>
-                  </div>
-                </div>`
-      return html
+    ipcRenderer.send('searchGames', search)
+  })
+  
+  //HORIZONTAL SCROLL
+  document.getElementById('listElamigos').addEventListener("wheel", function (event) {
+    if ($('#listElamigos').hasScrollBar()) {
+      this.scrollLeft -= (event.wheelDelta/2);
+      event.preventDefault();
     }
   })
+
+  document.getElementById('listFitgirl').addEventListener("wheel", function (event) {
+    if ($('#listFitgirl').hasScrollBar()) {
+      this.scrollLeft -= (event.wheelDelta/2);
+      event.preventDefault();
+    }
+  })
+
+  document.getElementById('listPivi').addEventListener("wheel", function (event) {
+    if ($('#listPivi').hasScrollBar()) {
+      this.scrollLeft -= (event.wheelDelta/2);
+      event.preventDefault();
+    }
+  })
+
+  document.getElementById('listSkidrow').addEventListener("wheel", function (event) {
+    if ($('#listSkidrow').hasScrollBar()) {
+      this.scrollLeft -= (event.wheelDelta/2);
+      event.preventDefault();
+    }
+  })
+
+  jQuery.fn.hasScrollBar = function(direction) {
+    return this.get(0).scrollWidth > this.innerWidth();
+  }
 </script>
 </body>
 </html>
