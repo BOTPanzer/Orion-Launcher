@@ -1,32 +1,57 @@
 const { app, ipcMain, BrowserWindow } = require('electron')
 const fs = require('fs');
 let win = null
+let win2 = null
 
-function createWindow () {
+function createWindow(_height, _width) {
+  if (_height == null) _height = 550
+  if (_width == null) _width = 1025
   win = new BrowserWindow({
-    width: 1025,
-    height: 550,
+    height: _height,
+    width: _width,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
     }
   })
 
-  win.loadFile('index.html')
+  win.loadFile('main.html')
+  win.removeMenu()
   //win.openDevTools()
 }
 
-app.whenReady().then(() => {
-  createWindow()
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow()
+function createWindow2() {
+  win2 = new BrowserWindow({
+    height: win.getBounds().height,
+    width: win.getBounds().width,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false
     }
   })
-  win.removeMenu()
+  win2.loadFile('store.html')
+  win2.removeMenu()
+  //win2.openDevTools()
+  win.close();
+}
+
+app.whenReady().then(() => {
+  createWindow(null, null)
+
+  ipcMain.on('store', (event, path) => {
+    createWindow2()
+  })
+
+  ipcMain.on('launcher', (event, path) => {
+    createWindow(win2.getBounds().height, win2.getBounds().width)
+    win2.close();
+
+    let dataFolder = app.getAppPath()+'\\Locations\\'
+    createListFromFolder(dataFolder)
+  })
   
   //START
-  let dataFolder = app.getAppPath()+'\\Data\\'
+  let dataFolder = app.getAppPath()+'\\Locations\\'
   createListFromFolder(dataFolder)
 
   ipcMain.on('load', (event, path) => {
@@ -54,7 +79,7 @@ app.whenReady().then(() => {
       let id = `b${i}`
       let img = `img${i}`
       //HTML
-      let html = createHTML(id, img, "./icon_file.png", name)
+      let html = createHTML(id, img, "./Data/Images/icon_file.png", name)
       //Create
       win.webContents.send('add1ToList', html);
       win.webContents.send('addListener', id, path, img);
@@ -79,7 +104,7 @@ app.whenReady().then(() => {
       let id = `b${i}`
       let img = `img${i}`
       //HTML
-      let html = createHTML(id, img, "./icon_folder.png", name)
+      let html = createHTML(id, img, "./Data/Images/icon_folder.png", name)
       //Create
       win.webContents.send('add1ToList', html);
       win.webContents.send('addReturnListener', id, path);
@@ -89,7 +114,7 @@ app.whenReady().then(() => {
   function createBackButt(argPath) {
     if (argPath != dataFolder) {
       //HTML
-      let html = createHTML("backButt", "backImg", "./icon_back.png", "Back")
+      let html = createHTML("backButt", "backImg", "./Data/Images/icon_back.png", "Back")
       //Create
       win.webContents.send('add1ToList', html);
       let bpath = argPath
@@ -101,9 +126,9 @@ app.whenReady().then(() => {
   }
 
   function createHTML(id, img, icon, name) {
-    let html = `<div id="${id}" style="margin-top: 5px; margin-right: 5px; width: 150px; height: 150px; background-image: url('./icon_item.png'); text-align: center; display: inline-block;">
+    let html = `<div id="${id}" style="margin-top: 5px; margin-right: 5px; width: 150px; height: 150px; background-image: url('./Data/Images/icon_item.png'); text-align: center; display: inline-block;">
                   <div style="width: 150px; height: 100px;">
-                    <img id="${img}" class="unselectable" style="margin: 10px; width: 90px; height: 90px;" src="${icon}"></img>
+                    <img id="${img}" class="unselectable" style="margin: 10px; max-width: 130px; height: 90px;" src="${icon}"></img>
                   </div>
                   <div style="width: 140px; height: 40px; padding: 5px">
                     <div class="unselectableDiv">

@@ -1,45 +1,46 @@
 <!doctype html>
 <html lang="en">
 <head>
-<title>Orion Launcher v1.2.6</title>
+<title>Oriøn Launcher v1.3.0</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=0">
 <style>
 /* Style the body */
 	
-@font-face { font-family: BodyFont; src: url('font_body.ttf'); } 
-@font-face { font-family: ItemFont; src: url('font_item.ttf'); } 
+@font-face { font-family: BodyFont; src: url('Data/Fonts/font_body.ttf'); } 
+@font-face { font-family: ItemFont; src: url('Data/Fonts/font_item.ttf'); } 
+	
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: BodyFont;
-  margin: 0;
+  margin: 0px;
+  padding: 0px;
   vertical-align: baseline;
-  background: url('./lines.png'), linear-gradient(#38151C, #070B14 75%);
+  background: url('./Data/Images/lines.png'), linear-gradient(#38151C, #070B14 75%);
   background-attachment: fixed;
 }
 
-/* Header/Logo Title */
-.header {
-  height: 50px;
-  width: 50%;
-  padding-top: 0px;
-  background: #1f1f1f;
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
 }
 
-.menuButt {
-  padding: 10px;
-  margin: 0;
-  color: white;
-  font-size: 20px;
-  padding-left: auto; 
-  padding-right: 10px; 
-  float: right;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  -webkit-user-drag: none;
+/* Track */
+::-webkit-scrollbar-track {
+  background: #181B22; 
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #7E0D0E; 
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #572629; 
 }
 	
 /* Page Content */
@@ -72,16 +73,20 @@ body {
 	
 <body>
 <div>
-  <img style="margin: 20px;" src="./logo.png"  height="150px" width="auto"/>
+  <img id="logo" style="margin: 20px;" src="./Data/Images/logo.png"  height="150px" width="auto"/>
+  <div id="store" style="height: 36px; width: 107px; margin: 20px; float: right; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png');">
+    <div class="unselectable" style="color: #68D8D5; font-family: ItemFont;">Store</div>
+  </div>
 </div>
 	
 <div class="content">
-    <h1 id="txtMenu" class="unselectable" style="color: white; margin: 10px; margin-bottom: 20px;">Home</h1>
+  <h1 id="txtMenu" class="unselectable" style="color: white; margin: 10px; margin-bottom: 20px;">Home</h1>
 	<div style="display: flex; justify-content: space-between;">
 	  <div id="list" style="color: #68D8D5; font-family: ItemFont;">
-        <div id="b2" style="margin-bottom: 5px; margin-right: 5px; width: 150px; height: 150px; background-image: url('./icon_item.png'); text-align: center;">
+        
+      <div id="b2" style="margin-bottom: 5px; margin-right: 5px; width: 150px; height: 150px; background-image: url('./Data/Images/icon_item.png'); text-align: center;">
           <div style="width: 150px; height: 100px;">
-		    <img id="img2" class="unselectable" style="margin: 10px; width: 90px; height: 90px;" src="./icon_folder.png"></img>
+		    <img id="img2" class="unselectable" style="margin: 10px; max-width: 130px; height: 90px;" src="./Data/Images/icon_folder.png"></img>
 	      </div>
 	      <div style="width: 140px; height: 40px; padding: 5px">
 		    <div class="unselectableDiv">
@@ -89,20 +94,23 @@ body {
 		    </div>
 	      </div>
 	    </div>
-      </div>
-	  <div id="description" style="height: 150px; min-width: 350px; max-width: 350px; display: none; margin-top: 5px; background-image: url('./icon_description.png');">
-        <img id="imgDescription" class="unselectable" style="height: 90px; min-width: 90px; margin: 30px; margin-left: 20px; margin-right: 20px;" src="./icon_file.png"></img>
+
+    </div>
+	  <div id="description" style="height: 150px; min-width: 350px; max-width: 350px; display: none; margin-top: 5px; background-image: url('./Data/Images/icon_description.png');">
+        <img id="imgDescription" class="unselectable" style="height: 90px; min-width: 90px; margin: 30px; margin-left: 20px; margin-right: 20px;" src="./Data/Images/icon_file.png"></img>
 		<div style="padding-left: 10px; font-family: ItemFont; align-items: center;">
 			<div style="height: 10%"></div>
 		  <div style="min-height: 55%; max-height: 55%; display: flex; align-items: center">
 			  <div id="txtDescription" class="unselectable" style="margin-right: 10px; line-height: 21px; font-size: 20px; display: inline-block; max-height: 42px;">Game</div>
 		  </div>
 		  <div style="height: 35%; width: 195px; display: flex; align-items: flex-start; justify-content: space-between;">
-			<div id="launchDescription" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./icon_description_launch.png');">
+			<div id="launchDescription" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png');">
 		      <div class="unselectable" style="color: #68D8D5;">Launch</div>
 		    </div>
-			<img id="folderDescription" class="unselectable" style="height: 36px; min-width: 36px; background-image: url('./icon_description_folder.png');" src="./icon_folder.png"></img>
-		  </div>
+			<div id="folderDescription" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png');">
+			  <img class="unselectable" style="height: 30px; min-width: 30px; margin: 3px;" src="./Data/Images/icon_folder.png"></img>
+			</div>
+	      </div>
 		</div>
       </div>
 	</div>
@@ -110,7 +118,6 @@ body {
 
 <script>
   const { app, shell, ipcRenderer } = require('electron');
-  const fileIcon = require("extract-file-icon");
 
   ipcRenderer.on('clearList', (event, list) => {
     let infoDiv = document.querySelector('div[id=list]')
@@ -124,9 +131,9 @@ body {
 
   ipcRenderer.on('addListener', (event, id, path, img) => {
     document.getElementById(id).addEventListener('click', () => {
-      document.getElementById(id).style.backgroundImage = 'url("./icon_item_clicked.png")';
+      document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item_clicked.png")';
       setTimeout(function() {
-        document.getElementById(id).style.backgroundImage = 'url("./icon_item.png")';
+        document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
         //Name
         let name = path.substring(0, path.lastIndexOf("\\"))
         name = name.substring(name.lastIndexOf("\\")+1)
@@ -135,17 +142,17 @@ body {
         document.getElementById('txtDescription').innerHTML = name
         document.getElementById('launchDescription').replaceWith(document.getElementById('launchDescription').cloneNode(true));
         document.getElementById('launchDescription').addEventListener('click', () => {
-          document.getElementById('launchDescription').style.backgroundImage = 'url("./icon_description_launch_clicked.png")';
+          document.getElementById('launchDescription').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
           setTimeout(function() {
-            document.getElementById('launchDescription').style.backgroundImage = 'url("./icon_description_launch.png")';
+            document.getElementById('launchDescription').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
             shell.openPath(path)
           }, 100)
         })
         document.getElementById('folderDescription').replaceWith(document.getElementById('folderDescription').cloneNode(true));
         document.getElementById('folderDescription').addEventListener('click', () => {
-          document.getElementById('folderDescription').style.backgroundImage = 'url("./icon_description_folder_clicked.png")';
+          document.getElementById('folderDescription').style.backgroundImage = 'url("./Data/Images/icon_description_folder_clicked.png")';
           setTimeout(function() {
-            document.getElementById('folderDescription').style.backgroundImage = 'url("./icon_description_folder.png")';
+            document.getElementById('folderDescription').style.backgroundImage = 'url("./Data/Images/icon_description_folder.png")';
             shell.showItemInFolder(path)
           }, 100)
         })
@@ -157,9 +164,10 @@ body {
 
   ipcRenderer.on('addReturnListener', (event, id, path) => {
     document.getElementById(id).addEventListener('click', () => {
-      document.getElementById(id).style.backgroundImage = 'url("./icon_item_clicked.png")';
-      setTimeout(function() {
-        document.getElementById(id).style.backgroundImage = 'url("./icon_item.png")';
+      document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item_clicked.png")';
+	    window.scrollTo(0, 0);
+	    setTimeout(function() {
+        document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
         load(path)
         document.getElementById('description').style.display = 'none'
       }, 100)
@@ -185,6 +193,14 @@ body {
   function load(path) {
     ipcRenderer.send('load', path)
   }
+
+  document.getElementById('store').addEventListener('click', () => {
+    document.getElementById('store').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+	  setTimeout(function() {
+      document.getElementById('store').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+      ipcRenderer.send('store')
+    }, 100)
+  })
 </script>
 </body>
 </html>
