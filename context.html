@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-<title>Oriøn: Description</title>
+<title>Oriøn: Properties</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=0">
 
@@ -34,7 +34,9 @@ body {
 	
 <body>
   <div style="height: 20px; width: 100%; display: flex; background-color: var(--c1);">
-    <div style="height: 15px; width: 100%; margin-left: 5px; margin-top: 5px; -webkit-app-region: drag;"></div>
+    <div style="height: 15px; width: 100%; margin-left: 5px; margin-top: 5px; -webkit-app-region: drag; align-items: center;">
+      <div style="height: 16px; position: absolute; font-family: ItemFont; font-size: 16px; color: var(--c4);">Oriøn: Properties</div>
+    </div>
     <div style="display: flex; font-family: Franklin Gothic Medium">
       <div style="display: flex; align-items: center;">
         <div id="exitb" style="height: 20px; width: 30px; background-color: #690108; opacity: 0;"></div>
@@ -46,16 +48,16 @@ body {
   </div>
 
 <div id="name" style="color: var(--c4);">
-  <div style="font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Name:</div>
+  <div style="height: 20px; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 15px; padding: 5px; padding-left: 10px;">Name:</div>
   <div style="align-items: center; margin: 20px; margin-top: 0px;">
-    <input id='nameText' type="text" size="38" maxlength="50" style="height: 32px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
+    <input id='nameText' type="text" maxlength="50" style="height: 32px; width: 330px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
   </div>
 </div>
 
 <div id="path" style="color: var(--c4);">
-  <div style="font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Game Path:</div>
+  <div style="height: 20px; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Game Path:</div>
   <div style="align-items: center; margin: 20px; margin-top: 0px; display: flex;">
-    <input id='pathText' type="text" size="32" style="height: 32px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
+    <input id='pathText' type="text" style="height: 32px; width: 284px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
     <div id="folder" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px">
       <img style="height: 30px; min-width: 30px; margin: 3px;" src="./Data/Images/icon_folder.png"></img>
     </div>
@@ -63,9 +65,9 @@ body {
 </div>
 
 <div id="iconPath" style="color: var(--c4);">
-  <div style="font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Game Icon Path:</div>
+  <div style="height: 20px; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Game Icon Path:</div>
   <div style="align-items: center; margin: 20px; margin-top: 0px; display: flex;">
-    <input id='iconText' type="text" size="32" style="height: 32px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
+    <input id='iconText' type="text" style="height: 32px; width: 284px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
     <div id="folderIcon" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px">
       <img style="height: 30px; min-width: 30px; margin: 3px;" src="./Data/Images/icon_folder.png"></img>
     </div>
@@ -76,7 +78,7 @@ body {
   <div id="log" style="color: var(--c4); font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;"></div>
   <div style="width: 100%; position: absolute; bottom: 0; display: block;">
     <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
-      <div style="height: 36px; width: 107px;margin-right: 10px; opacity: 0;"></div>   
+      <div style="height: 36px; width: 107px; margin-right: 10px; opacity: 0;"></div>   
       <div id="show" style="height: 36px; width: 107px; display: none; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px; color: var(--c3);">
         <div style="font-family: ItemFont;">Show</div>
       </div>   
@@ -143,7 +145,6 @@ body {
       const fs = require('fs');
       let gamePathArg = getPathInfo(path)
       showPath = gamePathArg.pathClean
-      console.log(showPath)
       if (fs.existsSync(showPath)) {
         document.getElementById('show').style.display = 'flex'
       } else {

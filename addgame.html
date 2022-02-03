@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>Oriøn: Add Game</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=0">
+
+<style>
+@font-face { font-family: BodyFont; src: url('Data/Fonts/font_body.ttf'); } 
+@font-face { font-family: ItemFont; src: url('Data/Fonts/font_item.ttf'); } 
+
+body {
+  font-family: BodyFont;
+  margin: 0px;
+  vertical-align: baseline;
+  background: url('./Data/Images/lines.png'), linear-gradient(#38151C, #070B14 75%);
+  background-attachment: fixed;
+  --c1: #181B22;
+  --c2: #7E0D0E;
+  --c3: #68D8D5;
+  --c4: white;
+
+  overflow: hidden;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+</style>
+</head>
+
+<body>
+  <div style="height: 20px; width: 100%; display: flex; background-color: var(--c1);">
+    <div style="height: 15px; width: 100%; margin-left: 5px; margin-top: 5px; -webkit-app-region: drag; align-items: center;">
+      <div style="height: 16px; position: absolute; font-family: ItemFont; font-size: 16px; color: var(--c4);">Oriøn: Add Game</div>
+    </div>
+    <div style="display: flex; font-family: Franklin Gothic Medium">
+      <div style="display: flex; align-items: center;">
+        <div id="exitb" style="height: 20px; width: 30px; background-color: #690108; opacity: 0;"></div>
+      </div>
+      <div style="display: flex; position: absolute;">
+        <div id="exit" style="height: 20px; width: 30px; color: var(--c3); border-radius: 5px; text-align: center; align-items: center;">x</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="name" style="color: var(--c4);">
+    <div style="height: 20px; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 15px; padding: 5px; padding-left: 10px;">Name:</div>
+    <div style="align-items: center; margin: 20px; margin-top: 0px;">
+      <input id='nameText' type="text" maxlength="50" style="height: 32px; width: 330px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
+    </div>
+  </div>
+
+  <div id="path" style="color: var(--c4);">
+    <div style="height: 20px; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Path:</div>
+    <div style="align-items: center; margin: 20px; margin-top: 0px; display: flex;">
+      <input id='pathText' type="text" style="height: 32px; width: 284px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
+      <div id="folder" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px">
+        <img style="height: 30px; min-width: 30px; margin: 3px;" src="./Data/Images/icon_folder.png"></img>
+      </div>
+    </div>
+  </div>
+
+  <div id="icon" style="color: var(--c4);">
+    <div style="height: 20px; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Icon Path (Optional):</div>
+    <div style="align-items: center; margin: 20px; margin-top: 0px; display: flex;">
+      <input id='iconText' type="text" style="height: 32px; width: 284px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
+      <div id="folderIcon" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px">
+        <img style="height: 30px; min-width: 30px; margin: 3px;" src="./Data/Images/icon_folder.png"></img>
+      </div>
+    </div>
+  </div>
+
+  <div style="width: 100%; position: absolute; bottom: 20px; display: flex; align-items: center;">
+    <div id="addGame" style="height: 36px; width: 107px; margin-left: 20px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
+      <div style="font-family: ItemFont;">Add Game</div>
+    </div>
+    <div id="log" style="margin-left: auto; margin-right: 25px; font-family: ItemFont; color: var(--c4);"></div>
+  </div>
+
+
+  <script>
+    const { ipcRenderer } = require('electron');
+    let actualPath = ''
+  
+    document.getElementById('exit').addEventListener('click', () => {
+      document.getElementById('exitb').style.opacity = '1';
+      setTimeout(function() {
+        document.getElementById('exitb').style.opacity = '0';
+        ipcRenderer.send('exitContext')
+      }, 100)
+    })
+  
+    ipcRenderer.on('theme', (event, theme) => {
+      document.body.style.setProperty('--c1', theme.c1);
+      document.body.style.setProperty('--c2', theme.c2);
+      document.body.style.setProperty('--c3', theme.c3);
+      document.body.style.setProperty('--c4', theme.c4);
+      //BACKGROUND
+      document.body.style.background = theme.background
+      document.body.style.backgroundAttachment = 'fixed'
+    })
+    
+    ipcRenderer.on('setLocation', (event, path) => {
+      actualPath = path
+      document.getElementById('show').style.display = 'none'
+    })
+  
+    document.getElementById('folder').addEventListener('click', () => {
+      document.getElementById('folder').style.backgroundImage = 'url("./Data/Images/icon_description_folder_clicked")';
+      setTimeout(function() {
+        document.getElementById('folder').style.backgroundImage = 'url("./Data/Images/icon_description_folder.png")';
+        let a = document.getElementById('pathText').value
+        let gamePathArg = getPathInfo(a)
+        ipcRenderer.send('getFileContext', gamePathArg.pathClean)
+      }, 100)
+    })
+  
+    ipcRenderer.on('fileGotten', (event, path) => {
+      if (path != '')
+      document.getElementById('pathText').value = path
+      if (document.getElementById('nameText').value == '')
+      document.getElementById('nameText').value = path.substring(path.lastIndexOf('\\')+1)
+    })
+  
+    document.getElementById('folderIcon').addEventListener('click', () => {
+      document.getElementById('folderIcon').style.backgroundImage = 'url("./Data/Images/icon_description_folder_clicked")';
+      setTimeout(function() {
+        document.getElementById('folderIcon').style.backgroundImage = 'url("./Data/Images/icon_description_folder.png")';
+        let a = document.getElementById('pathText').value
+        if (document.getElementById('iconText').value != '') a = document.getElementById('iconText').value
+        let gamePathArg = getPathInfo(a)
+        ipcRenderer.send('getFileIconContext', gamePathArg.pathClean)
+      }, 100)
+    })
+  
+    ipcRenderer.on('fileGottenIcon', (event, path) => {
+      if (path != '')
+      document.getElementById('iconText').value = path
+    })
+  
+    document.getElementById('addGame').addEventListener('click', () => {
+      document.getElementById('addGame').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+	    setTimeout(function() {
+        document.getElementById('addGame').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+        let name = document.getElementById('nameText').value
+        if (name == '') {
+          document.getElementById('log').innerText = 'Name Is Necesary'
+          return
+        }
+        let path = document.getElementById('pathText').value
+        if (path == '') {
+          document.getElementById('log').innerText = 'Path Is Necesary'
+          return
+        }
+        let icon = document.getElementById('iconText').value
+        document.body.replaceWith(document.body.cloneNode(true));
+        ipcRenderer.send('addGame', name, path, icon)
+      }, 100)
+    })
+
+    function getPathInfo(gamePath) {
+      gamePath = gamePath.trim()
+      let pathClean = gamePath
+      let argsClean = ''
+      if (gamePath.includes('--') && gamePath.includes(' ') && !gamePath.endsWith('"')) {
+        if (gamePath.startsWith('"') ) {
+          pathClean = gamePath.substring(1, gamePath.lastIndexOf('"'))
+          let args = gamePath.substring(pathClean.length+2).trim()
+          argsClean = args.split(' ')
+          argsClean.unshift("/c", pathClean)
+        } else {
+          pathClean = gamePath.substring(0, gamePath.lastIndexOf(' '))
+          let args = gamePath.substring(pathClean.length+2).trim()
+          argsClean = args.split(' ')
+          argsClean.unshift("/c", pathClean)
+        }
+      }
+      let data = {pathClean, argsClean}
+      return data
+    }
+  </script>
+</body>
+</html>

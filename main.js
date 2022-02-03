@@ -55,12 +55,6 @@ if (!app.requestSingleInstanceLock()) {
     window = 'store'
   })
 
-  ipcMain.on('add', (event) => {
-    if (window == 'add') return
-    win.webContents.send('load', 'add.html')
-    window = 'add'
-  })
-
   ipcMain.on('themes', (event) => {
     if (window == 'themes') return
     win.webContents.send('load', 'themes.html')
@@ -229,7 +223,13 @@ if (!app.requestSingleInstanceLock()) {
 
   //FUNCTIONS LAUNCHER CONTEXT
   ipcMain.on('contextFile', (event, path, name, filePath, iconPath) => {
-    createWin2()
+    let gamePathArg = getPathInfo(filePath)
+    showPath = gamePathArg.pathClean
+    if (fs.existsSync(showPath)) {
+      createWin2('context.html', 421)
+    } else {
+      createWin2('context.html', 375)
+    }
 
     win2.on('close', function() {
       createList(actualPath)
@@ -244,7 +244,7 @@ if (!app.requestSingleInstanceLock()) {
   })
 
   ipcMain.on('contextFolder', (event, path) => {
-    createWin2()
+    createWin2('context.html', 189)
 
     win2.on('close', function() {
       createList(actualPath)
@@ -258,31 +258,6 @@ if (!app.requestSingleInstanceLock()) {
     win2.webContents.send('setPath', undefined);
     win2.webContents.send('setIconPath', undefined);
   })
-
-  function createWin2() {
-    win2 = new BrowserWindow({
-      height: 400,
-      width: 404,
-      minHeight: 500,
-      minWidth: 404,
-      maxHeight: 500,
-      maxWidth: 404,
-      frame: false,
-      webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: false,
-        enableRemoteModule: true
-      }
-    })
-
-    win2.loadFile('context.html')
-    win2.removeMenu()
-    //win2.openDevTools()
-
-    win2.webContents.on('dom-ready', () => {
-      win2.webContents.send('theme', theme);
-    });
-  }
 
   ipcMain.on('getFileContext', async function(event, path) {
     let apath = path.substring(0, path.lastIndexOf('\\')+1)
@@ -410,6 +385,28 @@ if (!app.requestSingleInstanceLock()) {
     }
   })
 
+  ipcMain.on('addfolder', (event) => {
+    createWin2('addfolder.html', 189)
+
+    win2.on('close', function() {
+      createList(actualPath)
+      win2 = null
+    });
+
+    win2.webContents.send('setLocation', actualPath);
+  })
+
+  ipcMain.on('addgame', (event) => {
+    createWin2('addgame.html', 375)
+
+    win2.on('close', function() {
+      createList(actualPath)
+      win2 = null
+    });
+
+    win2.webContents.send('setLocation', actualPath);
+  })
+
   
   //FUNCTIONS LAUNCHER CREATOR
   ipcMain.on('getFile', async function(event, path) {
@@ -428,6 +425,7 @@ if (!app.requestSingleInstanceLock()) {
     let fullName = actualPath+name.trim()
     if (!fs.existsSync(fullName)) {
       fs.mkdirSync(fullName);
+      closeWin2()
       win.webContents.send('log', `Folder "${name}" Added`);
     } else win.webContents.send('log', `Folder "${name}" Already Exists`);
   })
@@ -439,6 +437,7 @@ if (!app.requestSingleInstanceLock()) {
     if (!fs.existsSync(fullName)) {
       fs.writeFile(fullName, data, (err) => {
         win.webContents.send('log', `Game "${name}" Added`);
+        closeWin2()
       })
     } else win.webContents.send('log', `Game "${name}" Already Exists`);
   })
@@ -910,6 +909,36 @@ function getPathInfo(gamePath) {
   return data
 }
 
+function createWin2(file, size) {
+  win2 = new BrowserWindow({
+    height: size,
+    width: 390,
+    minHeight: size,
+    minWidth: 390,
+    maxHeight: size,
+    maxWidth: 390,
+    frame: false,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      enableRemoteModule: true
+    }
+  })
+
+  win2.loadFile(file)
+  win2.removeMenu()
+  //win2.openDevTools()
+
+  win2.webContents.on('dom-ready', () => {
+    win2.webContents.send('theme', theme);
+  })
+}
+
+function closeWin2() {
+  if (win2 != null)
+  win2.close()
+}
+
 function createHTML(id, img, icon, name) {
   let html = `<div id="${id}" style="margin-top: 5px; margin-right: 5px; width: 150px; height: 150px; background-image: url('./Data/Images/icon_item.png'); text-align: center; display: inline-block;">
                 <div style="width: 150px; height: 100px;">
@@ -951,11 +980,6 @@ function createStoreHTML2(id, img, icon, name, info) {
                 </div>
               </div>`
   return html
-}
-
-function closeWin2() {
-  if (win2 != null)
-  win2.close()
 }
 
 async function getFile(title, path) {

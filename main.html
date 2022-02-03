@@ -83,24 +83,30 @@ body {
   </div>
   
   <div style="height: calc(100% - 20px); width: 100%; display: flex; position: relative;">
-    <div id="leftBar" style="height: 100%; width: 152px; display: flex; position: relative;">
+    <div id="leftBar" style="height: 100%; width: 184px; display: flex; position: relative;">
       <div style="height: 100%;">
         <div style="display: flex; align-items: center; margin: 10px;">
           <img id="orionLogo" style="min-height: 50px; min-width: 50px; max-height: 50px; max-width: 50px; -webkit-user-drag: none;" src="./Data/Images/icon.png"/>
           <div id="orionName" style="margin-left: 5px; font-family: ItemFont; color: var(--c4);">Oriøn Launcher</div>
         </div>
-        <div id="store" style="height: 36px; width: 107px; margin: 20px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
+        <div id="store" style="height: 36px; width: 107px; margin: 20px; margin-left: 23px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
           <div style="font-family: ItemFont;">Store</div>
         </div>
-        <div id="launcher" style="height: 36px; width: 107px; margin: 20px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
+        <div id="launcher" style="height: 36px; width: 107px; margin: 20px; margin-left: 23px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
           <div style="font-family: ItemFont;">Library</div>
         </div>
-        <div id="themes" style="height: 36px; width: 107px; margin: 20px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
+        <div id="themes" style="height: 36px; width: 107px; margin: 20px; margin-left: 23px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
           <div style="font-family: ItemFont;">Themes</div>
         </div>
   
-        <div id="add" style="height: 36px; width: 107px; margin: 20px; position: absolute; bottom: 0; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
-          <div style="font-family: ItemFont;">Add</div>
+        <div id="add" style="position: absolute; bottom: 0; display: none;">
+          <div id="addfolder" style="height: 36px; width: 107px; margin: 20px; margin-left: 23px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
+            <div style="font-family: ItemFont;">Add Folder</div>
+          </div>
+  
+          <div id="addgame" style="height: 36px; width: 107px; margin: 20px; margin-left: 23px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
+            <div style="font-family: ItemFont;">Add Game</div>
+          </div>
         </div>
       </div>
       <div id="line" style="width: 2px; margin-top: 5px; margin-bottom: 5px; background-color: var(--c2); opacity: 0.5;"></div>
@@ -111,12 +117,6 @@ body {
       <div id="window">
       
       </div>
-      <div id="noti" style="height: 70px; width: 200px; align-items: center; position: fixed; bottom: 20px; right: 20px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px; opacity: 0;">
-        <div style="margin-left: 20px; margin-right: 20px; display: block; position: absolute; top: 50%; -ms-transform: translateY(-50%); transform: translateY(-50%);">
-          <div style="margin-bottom: 10px; font-size: 17px; color: var(--c4);">Launching:</div>
-          <div id="notiName" style="width: 150px; margin-left: 10px; font-size: 17px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: var(--c3);">Game</div>
-        </div>
-      </div>
     </div>
   </div>
 </body>
@@ -124,12 +124,14 @@ body {
 <script>
   const { ipcRenderer } = require('electron');
   window.$ = window.jQuery = require('jquery');
+  let lastWin = ''
 
   a()
   setbuttons()
 
   function a() {
     ipcRenderer.on('load', (event, html) => {
+      lastWin = html
       $(function(){
         ipcRenderer.removeAllListeners()
         setbuttons()
@@ -161,27 +163,31 @@ body {
     document.getElementById('orionLogo').addEventListener('click', () => {
       if (document.getElementById('orionName').style.display != 'none') {
         document.getElementById('leftBar').style.width = '72px'
+        document.getElementById('leftBar').style.height = '70px'
         document.getElementById('leftBar').style.position = 'fixed'
 
         document.getElementById('orionName').style.display = 'none'
         document.getElementById('store').style.display = 'none'
         document.getElementById('launcher').style.display = 'none'
         document.getElementById('themes').style.display = 'none'
-        document.getElementById('add').style.opacity = '0'
+        document.getElementById('add').style.display = 'none'
         document.getElementById('line').style.opacity = '0'
 
         document.getElementById('logo').style.marginLeft = '72px'
       } else {
-        document.getElementById('leftBar').style.width = '152px'
+        document.getElementById('leftBar').style.width = '184px'
+        document.getElementById('leftBar').style.height = '100%'
         document.getElementById('leftBar').style.position = 'relative'
 
         document.getElementById('orionName').style.display = 'flex'
         document.getElementById('store').style.display = 'flex'
         document.getElementById('launcher').style.display = 'flex'
         document.getElementById('themes').style.display = 'flex'
-        document.getElementById('add').style.opacity = '1'
         document.getElementById('line').style.opacity = '0.5'
-
+        if (lastWin != 'launcher.html')
+          document.getElementById('add').style.display = 'none'
+        else
+          document.getElementById('add').style.display = 'block'
         document.getElementById('logo').style.marginLeft = '20px'
       }
     })
@@ -236,12 +242,29 @@ body {
 
     document.getElementById('add').style.display = 'none'
 
-    document.getElementById('add').addEventListener('click', () => {
+    document.getElementById('addfolder').addEventListener('click', () => {
       window.scrollTo(0, 0);
-      document.getElementById('add').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+      document.getElementById('addfolder').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
   	  setTimeout(function() {
-        document.getElementById('add').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-        ipcRenderer.send('add')
+        document.getElementById('addfolder').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+        let scroll = document.getElementById('rightBar').scrollTop
+        document.body.replaceWith(document.body.cloneNode(true));
+        document.getElementById('rightBar').scrollTop = scroll
+        ipcRenderer.send('addfolder')
+        cont = true
+      }, 100)
+    })
+
+    document.getElementById('addgame').addEventListener('click', () => {
+      window.scrollTo(0, 0);
+      document.getElementById('addgame').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+  	  setTimeout(function() {
+        document.getElementById('addgame').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+        let scroll = document.getElementById('rightBar').scrollTop
+        document.body.replaceWith(document.body.cloneNode(true));
+        document.getElementById('rightBar').scrollTop = scroll
+        ipcRenderer.send('addgame')
+        cont = true
       }, 100)
     })
   }
