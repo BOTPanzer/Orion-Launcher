@@ -13,12 +13,13 @@ body {
   font-family: BodyFont;
   margin: 0px;
   vertical-align: baseline;
-  background: url('./Data/Images/lines.png'), linear-gradient(#38151C, #070B14 75%);
+  background: linear-gradient(#000000, #000000);
   background-attachment: fixed;
-  --c1: #181B22;
-  --c2: #7E0D0E;
-  --c3: #68D8D5;
+  --c1: #000000;
+  --c2: #000000;
+  --c3: white;
   --c4: white;
+  --round: 0px;
 
   overflow: hidden;
   -webkit-touch-callout: none;
@@ -29,14 +30,17 @@ body {
   user-select: none;
   -webkit-user-drag: none;
 }
+
+::placeholder {
+  color: var(--c2);
+}
 </style>
 </head>
 
 <body>
   <div style="height: 20px; width: 100%; display: flex; background-color: var(--c1);">
-    <div style="height: 15px; width: 100%; margin-left: 5px; margin-top: 5px; -webkit-app-region: drag; align-items: center;">
-      <div style="height: 16px; position: absolute; font-family: ItemFont; font-size: 16px; color: var(--c4);">Oriøn: Properties</div>
-    </div>
+    <div style="height: 16px; margin-top: 2px; margin-left: 5px; position: absolute; font-family: ItemFont; font-size: 16px; color: var(--c4);">Oriøn: Properties</div>
+    <div style="height: 15px; width: 100%; margin-left: 5px; margin-top: 5px; -webkit-app-region: drag; align-items: center;"></div>
     <div style="display: flex; font-family: Franklin Gothic Medium">
       <div style="display: flex; align-items: center;">
         <div id="exit" style="height: 20px; width: 30px; color: var(--c3); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">x</div>
@@ -48,7 +52,7 @@ body {
     <div style="display: block;">
       <div style="height: 20px; font-family: ItemFont; font-size: 20px; margin-left: 10px; margin-bottom: 10px; padding: 5px; padding-left: 10px;">Name:</div>
       <div style="align-items: center; margin: 20px; margin-top: 0px;">
-        <input id='nameText' type="text" maxlength="50" style="height: 32px; width: 240px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
+        <input id='nameText' type="text" maxlength="50" style="height: 32px; width: 240px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px; border-radius: var(--round);"></input>
       </div>
     </div>
 
@@ -58,7 +62,7 @@ body {
   <div id="path" style="color: var(--c4);">
     <div style="height: 20px; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Game Path:</div>
     <div style="align-items: center; margin: 20px; margin-top: 0px; display: flex;">
-      <input id='pathText' type="text" style="height: 32px; width: 284px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
+      <input id='pathText' type="text" style="height: 32px; width: 284px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px; border-radius: var(--round);"></input>
       <div id="folder" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px">
         <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/icon_folder.png"></img>
       </div>
@@ -68,14 +72,14 @@ body {
   <div id="iconPath" style="color: var(--c4);">
     <div style="height: 20px; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Game Icon Path:</div>
     <div style="align-items: center; margin: 20px; margin-top: 0px; display: flex;">
-      <input id='iconText' type="text" style="height: 32px; width: 284px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
+      <input id='iconText' type="text" style="height: 32px; width: 284px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px; border-radius: var(--round);"></input>
       <div id="folderIcon" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px">
         <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/icon_folder.png"></img>
       </div>
     </div>
   </div>
 
-  <div id="log" style="color: var(--c4); font-family: ItemFont; font-size: 16px; margin: 10px; margin-top: 0px; padding: 5px; padding-left: 10px;"></div>
+  <div id="log" style="margin: 10px; margin-bottom: 0px; padding: 5px; padding-left: 10px; position: absolute; bottom: -2px; color: var(--c4); font-family: ItemFont; font-size: 14px;"></div>
 
   <div>
     <div style="width: 100%; position: absolute; bottom: 0; display: block;">
@@ -126,6 +130,7 @@ body {
     document.body.style.setProperty('--c2', theme.c2);
     document.body.style.setProperty('--c3', theme.c3);
     document.body.style.setProperty('--c4', theme.c4);
+    document.body.style.setProperty('--round', theme.round);
     //BACKGROUND
     document.body.style.background = theme.background
     document.body.style.backgroundAttachment = 'fixed'
@@ -200,7 +205,7 @@ body {
     let a = document.getElementById('pathText').value
     if (document.getElementById('iconText').value != '') a = document.getElementById('iconText').value
     let gamePathArg = getPathInfo(a)
-    ipcRenderer.send('getFileIconContext', gamePathArg.pathClean)
+    ipcRenderer.send('getFileIconContext', gamePathArg.pathClean, actualPath)
   })
 
   ipcRenderer.on('fileGottenIcon', (event, path) => {

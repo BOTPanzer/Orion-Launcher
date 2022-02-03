@@ -3,5 +3,5 @@ url('./Data/Images/lines.png'), radial-gradient(circle, rgba(146,30,82,1) 0%, rg
 #EA0F93
 #0DF8FB
 white
-
+4px
 

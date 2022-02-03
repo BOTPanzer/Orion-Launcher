@@ -12,8 +12,11 @@ let win2 = null
 let win3 = null
 
 let dataFolder = null
+let dataFile = null
 let launcherFolder = null
 let actualPath = null
+
+let defImage = null
 
 var theme = []
 let tempsearch = undefined
@@ -45,6 +48,7 @@ if (!app.requestSingleInstanceLock()) {
 
   //MAIN
   dataFolder = app.getAppPath()+'\\Data\\'
+  dataFile = dataFolder+'data'
   createWindow()
   createTray()
 
@@ -72,6 +76,12 @@ if (!app.requestSingleInstanceLock()) {
     window = 'themes'
   })
 
+  ipcMain.on('other', (event) => {
+    if (window == 'other') return
+    win.webContents.send('load', 'other.html')
+    window = 'other'
+  })
+
   ipcMain.on('loaded', (event) => {
     var size = win.getSize()
     win.webContents.send('resized', size[0])
@@ -83,6 +93,10 @@ if (!app.requestSingleInstanceLock()) {
       else searchGames('')
     } else if (window == 'themes') {
       createThemeList()
+    } else if (window == 'other') {
+      fs.readFile(dataFile, 'utf8' , (err, data) => {
+        win.webContents.send('gfolder', data)
+      })
     }
   })
 
@@ -145,8 +159,10 @@ if (!app.requestSingleInstanceLock()) {
 
 
   //FUNCTIONS LAUNCHER
+  app.getFileIcon('', {size:"large"}).then((fileIcon) =>{ defImage = fileIcon.toDataURL() })
   launcherFolder = app.getAppPath()+'\\Launcher\\'
   actualPath = launcherFolder
+  
   if (startArg != '') {
     actualPath = launcherFolder+startArg
     if (!fs.existsSync(actualPath)) actualPath = launcherFolder
@@ -228,15 +244,17 @@ if (!app.requestSingleInstanceLock()) {
         win.webContents.send('addListener', id, img)
         if (isFile) {
           if (iconPath == '') iconPath = pathClean
-          app.getFileIcon(iconPath, {size:"large"}).then((fileIcon) =>{
-            if (actualPath == argPath) {
-              win.webContents.send('changeIcon', img, fileIcon.toDataURL())
-              setTimeout(function() {
-                if (win2 != null)
-                  win2.webContents.send('changeIcon', path, fileIcon.toDataURL())
-              }, 1000)
+          if (fs.existsSync(iconPath) && fs.statSync(iconPath).isFile()) {
+            if (iconPath.toLowerCase().endsWith('.exe')) {
+              app.getFileIcon(iconPath, {size:"large"}).then((fileIcon) =>{
+                if (defImage != fileIcon.toDataURL() && actualPath == argPath) {
+                  win.webContents.send('changeIcon', img, fileIcon.toDataURL())
+                }
+              })
+            } else {
+              win.webContents.send('changeIcon', img, iconPath)
             }
-          })
+          }
         }
       }
       win.webContents.send('finished')
@@ -263,6 +281,16 @@ if (!app.requestSingleInstanceLock()) {
     }
   }
 
+  ipcMain.on('openFile', (event, pathClean, argsClean) => {
+    if (argsClean != '') {
+      let spawn = require("child_process").spawn;
+      let bat = spawn("cmd.exe", argsClean)
+    } else {
+      const { shell } = require('electron');
+      shell.openPath(pathClean)
+    }
+  })
+
   ipcMain.on('showOnExplorer', (event, path) => {
     const { shell } = require('electron');
     shell.showItemInFolder(path)
@@ -284,11 +312,32 @@ if (!app.requestSingleInstanceLock()) {
       win2 = null
     });
 
+    win2.webContents.on('dom-ready', function() {
+      if (iconPath == '')
+        askForIconWin2(path, gamePath)
+      else
+        askForIconWin2(path, iconPath)
+    })
+
     win2.webContents.send('setLocation', path, img);
     win2.webContents.send('setName', name);
     win2.webContents.send('setPath', gamePath);
     win2.webContents.send('setIconPath', iconPath);
   })
+
+  function askForIconWin2(argPath, path) {
+    if (fs.existsSync(path) && fs.statSync(path).isFile()) {
+      if (path.toLowerCase().endsWith('.exe')) {
+        app.getFileIcon(path, {size:"large"}).then((fileIcon) =>{
+          if (defImage != fileIcon.toDataURL()) {
+            win2.webContents.send('changeIcon', argPath, fileIcon.toDataURL())
+          }
+        })
+      } else {
+        win2.webContents.send('changeIcon', argPath, path)
+      }
+    }
+  }
 
   ipcMain.on('contextFolder', (event, path) => {
     createWin2('context.html', 189)
@@ -323,10 +372,15 @@ if (!app.requestSingleInstanceLock()) {
     else win2.webContents.send('fileGotten', await getFile("Choose a Game", `${apath}`))
   })
 
-  ipcMain.on('getFileIconContext', async function(event, path) {
+  ipcMain.on('getFileIconContext', async function(event, path, argPath) {
     let apath = path.substring(0, path.lastIndexOf('\\')+1)
-    if (!fs.existsSync(apath)) win2.webContents.send('fileGottenIcon', await getFile("Choose a Game"))
-    else win2.webContents.send('fileGottenIcon', await getFile("Choose a Game", `${apath}`))
+
+    let file = ''
+    if (!fs.existsSync(apath)) file = await getFile("Choose a Game")
+    else file = await getFile("Choose a Game", `${apath}`)
+
+    win2.webContents.send('fileGottenIcon', file)
+    askForIconWin2(argPath, file)
   })
 
   ipcMain.on('move', async function(event, paths) {
@@ -840,6 +894,56 @@ if (!app.requestSingleInstanceLock()) {
       shell.openPath(themeFolder)
     }
   })
+
+
+  //OTHER
+  ipcMain.on('install', (event, path, name, destination) => {
+    //PATH
+    if (!fs.existsSync(path)) {
+      win.webContents.send('log', 'File path does not exist')
+      resume()
+      return
+    }
+    //DESTINATION
+    if (!destination.endsWith('\\')) destination = destination+'\\'
+    if (!fs.existsSync(destination)) {
+      win.webContents.send('log', 'Destination does not exist')
+      resume()
+      return
+    }
+    //NEW FOLDER
+    let destination2 = destination+name+'\\'
+    if (fs.existsSync(destination2)) {
+      win.webContents.send('log', name+' is already installed')
+      resume()
+      return
+    }
+    //INSTALL
+    let zip = dataFolder+'7zip\\7za.exe'
+    updateData(destination)
+    win.webContents.send('log', 'Installing '+name+'...')
+    var exec = require('child_process').exec
+    exec(`"${zip}" x "${path}" -o"${destination2}"`, function (error, stdOut, stdErr) {
+      if (error || stdErr) {
+        win.webContents.send('log', 'An error ocurred while unzipping')
+        resume()
+      } else {
+        win.webContents.send('log', 'Installation successful')
+        resume()
+        const { shell } = require('electron')
+        shell.openPath(destination2)
+      }
+      console.log(stdOut)
+    })
+  })
+
+  ipcMain.on('getFileOther', async function(event) {
+    win.webContents.send('gottenFileOther', await getFile("Choose a File", app.getPath('downloads')))
+  })
+
+  ipcMain.on('getDestinationOther', async function(event) {
+    win.webContents.send('gottenDestinationOther', await getFolder("Choose a Destination"))
+  })
 })
 
 //FUNCTIONS ALL
@@ -908,6 +1012,17 @@ function createTray() {
       }
     },
     {
+      label: 'Other', click: function () {
+        if (paused) return
+        if (window != 'other') {
+          win.webContents.send('load', 'other.html')
+          window = 'other'
+        }
+        if (win.isMinimized() || !win.isVisible())
+        win.show();
+      }
+    },
+    {
       label: 'Quit Oriøn', click: function () {
         closing = true;
         app.quit();
@@ -935,7 +1050,18 @@ function updateTheme() {
   if (c3 != undefined) c3 = c3.replaceAll('\r', '')
   let c4 = si[4]
   if (c4 != undefined) c4 = c4.replaceAll('\r', '')
-  theme = { background, c1, c2, c3, c4}
+  let round = si[5]
+  if (round == undefined) round = '0px'
+  else round = round.replaceAll('\r', '')
+  theme = { background, c1, c2, c3, c4, round}
+}
+
+function updateData(gfolder) {
+  /*also update on loaded to get only the first line
+  fs.readFile(dataFile, 'utf8' , (err, data) => {
+    let data = gfolder+'\n'
+  })*/
+  fs.writeFile(dataFile, gfolder, (err) => { if (err) console.log(err) })
 }
 
 function getFileInfo(argPath, fixed) {
@@ -1108,64 +1234,36 @@ function createStoreHTML2(id, img, icon, name, info) {
 
 async function getFile(title, path) {
   const { dialog } = require('electron')
-  if (path == undefined) {
-    let result = await dialog.showOpenDialog({
-      title: title,
-      properties: ['openFile'],
-    }).then(function(files) {
-      let file = files.filePaths[0]
-      if (file == undefined) {
-        return ''
-      } else {
-        return file
-      }
-    })
-    return result
-  } else {
-    let result = await dialog.showOpenDialog({
-      title: title,
-      defaultPath: path,
-      properties: ['openFile'],
-    }).then(function(files) {
-      let file = files.filePaths[0]
-      if (file == undefined) {
-        return ''
-      } else {
-        return file
-      }
-    })
-    return result
-  }
+  if (path == undefined) path = ''
+  let result = await dialog.showOpenDialog({
+    title: title,
+    defaultPath: path,
+    properties: ['openFile'],
+  }).then(function(files) {
+    let file = files.filePaths[0]
+    if (file == undefined) {
+      return ''
+    } else {
+      return file
+    }
+  })
+  return result
 }
 
 async function getFolder(title, path) {
   const { dialog } = require('electron')
-  if (path == undefined) {
-    let result = await dialog.showOpenDialog({
-      title: title,
-      properties: ['openDirectory'],
-    }).then(function(files) {
-      let file = files.filePaths[0]
-      if (file == undefined) {
-        return ''
-      } else {
-        return file
-      }
-    })
-    return result
-  } else {
-    let result = await dialog.showOpenDialog({
-      title: title,
-      defaultPath: path,
-      properties: ['openDirectory'],
-    }).then(function(files) {
-      let file = files.filePaths[0]
-      if (file == undefined) {
-        return ''
-      } else {
-        return file
-      }
-    })
-    return result
-  }
+  if (path == undefined) path = ''
+  let result = await dialog.showOpenDialog({
+    title: title,
+    defaultPath: path,
+    properties: ['openDirectory'],
+  }).then(function(files) {
+    let file = files.filePaths[0]
+    if (file == undefined) {
+      return ''
+    } else {
+      return file
+    }
+  })
+  return result
 }

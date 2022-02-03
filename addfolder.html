@@ -13,12 +13,13 @@ body {
   font-family: BodyFont;
   margin: 0px;
   vertical-align: baseline;
-  background: url('./Data/Images/lines.png'), linear-gradient(#38151C, #070B14 75%);
+  background: linear-gradient(#000000, #000000);
   background-attachment: fixed;
-  --c1: #181B22;
-  --c2: #7E0D0E;
-  --c3: #68D8D5;
+  --c1: #000000;
+  --c2: #000000;
+  --c3: white;
   --c4: white;
+  --round: 0px;
 
   overflow: hidden;
   -webkit-touch-callout: none;
@@ -29,14 +30,17 @@ body {
   user-select: none;
   -webkit-user-drag: none;
 }
+
+::placeholder {
+  color: var(--c2);
+}
 </style>
 </head>
 	
 <body>
   <div style="height: 20px; width: 100%; display: flex; background-color: var(--c1);">
-    <div style="height: 15px; width: 100%; margin-left: 5px; margin-top: 5px; -webkit-app-region: drag; align-items: center;">
-      <div style="height: 16px; position: absolute; font-family: ItemFont; font-size: 16px; color: var(--c4);">Oriøn: Add Folder</div>
-    </div>
+    <div style="height: 16px; margin-top: 2px; margin-left: 5px; position: absolute; font-family: ItemFont; font-size: 16px; color: var(--c4);">Oriøn: Add Folder</div>
+    <div style="height: 15px; width: 100%; margin-left: 5px; margin-top: 5px; -webkit-app-region: drag; align-items: center;"></div>
     <div style="display: flex; font-family: Franklin Gothic Medium">
       <div style="display: flex; align-items: center;">
         <div id="exit" style="height: 20px; width: 30px; color: var(--c3); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">x</div>
@@ -47,7 +51,7 @@ body {
   <div id="name" style="color: var(--c4);">
     <div style="height: 20px; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 15px; padding: 5px; padding-left: 10px;">Name:</div>
     <div style="align-items: center; margin: 20px; margin-top: 0px;">
-      <input id='nameText' type="text" maxlength="50" style="height: 32px; width: 330px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
+      <input id='nameText' type="text" maxlength="50" style="height: 32px; width: 330px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px; border-radius: var(--round);"></input>
     </div>
   </div>
 
@@ -76,6 +80,7 @@ body {
     document.body.style.setProperty('--c2', theme.c2);
     document.body.style.setProperty('--c3', theme.c3);
     document.body.style.setProperty('--c4', theme.c4);
+    document.body.style.setProperty('--round', theme.round);
     //BACKGROUND
     document.body.style.background = theme.background
     document.body.style.backgroundAttachment = 'fixed'

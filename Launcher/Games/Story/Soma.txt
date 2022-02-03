@@ -1,0 +1,2 @@
+com.epicgames.launcher://apps/8a6a94901c8248fca1f5c78931c85cbd%3A2fc6b6a71a3249fca823e9c24a5b7d9c%3AEmu?action=launch&silent=true
+D:\Games\SOMA\Soma.exe
