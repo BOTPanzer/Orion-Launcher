@@ -47,10 +47,6 @@ body {
   margin-left: 5px; 
   margin-right: 5px; 
   white-space: nowrap;
-  background-color: var(--c1); 
-  border-style: solid; 
-  border-color: var(--c2); 
-  border-width: 1px; 
   overflow-x: auto;
   display: none;
 }
@@ -84,35 +80,38 @@ body {
   </div>
 </div>
 
-<div style="height: 36px; display: flex; align-items: center; margin: 20px; margin-bottom: 30px;">
-  <input id='editText' type="text" size="60" maxlength="50" style="height: 32px; padding-left: 10px; padding-right: 10px; margin-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
+<div style="height: 36px; display: flex; align-items: center; margin-top: 20px; margin-bottom: 30px; margin-left: 50px; margin-right: 50px;">
+  <div id="discover" style="height: 36px; min-width: 107px; margin-right: 10px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
+    <div class="unselectable" style="font-family: ItemFont;">Discover</div>
+  </div>
+  <input id='editText' type="text" maxlength="50" style="height: 32px; width: 100%; padding-left: 10px; padding-right: 10px; margin-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
   <div id="search" style="height: 36px; min-width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
     <div class="unselectable" style="font-family: ItemFont;">Search</div>
   </div>
 </div>
-<div style="margin: 10px; margin-top: 20px;">
 
+<div style="margin-bottom: 10px; margin-top: 20px; margin-left: 70px; margin-right: 70px;">
   <div style="display: flex; font-family: ItemFont; font-size: 20px; margin-top: 20px; justify-content: space-between">
-    <div class="unselectable" id="Elamigos" style="color: var(--c4); padding: 5px; padding-left: 10px;">ElAmigos:</div>
-    <div class="unselectable" id="moreElamigos" style="color: var(--c4); padding: 5px; padding-left: 10px; float: right;">Show More</div>
+    <div class="unselectable" id="Elamigos" style="color: var(--c4); padding: 5px;">ElAmigos:</div>
+    <div class="unselectable" id="moreElamigos" style="color: var(--c4); padding: 5px; float: right;">Show More</div>
   </div>
   <div class="list" id="listElamigos"></div>
 
   <div style="display: flex; font-family: ItemFont; font-size: 20px; margin-top: 20px; justify-content: space-between">
-    <div class="unselectable" id="Fitgirl" style="color: var(--c4); padding: 5px; padding-left: 10px;">Fitgirl:</div>
-    <div class="unselectable" id="moreFitgirl" style="color: var(--c4); padding: 5px; padding-left: 10px; float: right;">Show More</div>
+    <div class="unselectable" id="Fitgirl" style="color: var(--c4); padding: 5px;">Fitgirl:</div>
+    <div class="unselectable" id="moreFitgirl" style="color: var(--c4); padding: 5px; float: right;">Show More</div>
   </div>
   <div class="list" id="listFitgirl"></div>
 
   <div style="display: flex; font-family: ItemFont; font-size: 20px; margin-top: 20px; justify-content: space-between">
-    <div class="unselectable" id="Pivi" style="color: var(--c4); padding: 5px; padding-left: 10px;">Pivi:</div>
-    <div class="unselectable" id="morePivi" style="color: var(--c4); padding: 5px; padding-left: 10px; float: right;">Show More</div>
+    <div class="unselectable" id="Pivi" style="color: var(--c4); padding: 5px;">Pivi:</div>
+    <div class="unselectable" id="morePivi" style="color: var(--c4); padding: 5px; float: right;">Show More</div>
   </div>
   <div class="list" id="listPivi"></div>
 
   <div style="display: flex; font-family: ItemFont; font-size: 20px; margin-top: 20px; justify-content: space-between">
-    <div class="unselectable" id="SteamUnlocked" style="color: var(--c4); padding: 5px; padding-left: 10px;">Steam Unlocked:</div>
-    <div class="unselectable" id="moreSteamUnlocked" style="color: var(--c4); padding: 5px; padding-left: 10px; float: right;">Show More</div>
+    <div class="unselectable" id="SteamUnlocked" style="color: var(--c4); padding: 5px;">Steam Unlocked:</div>
+    <div class="unselectable" id="moreSteamUnlocked" style="color: var(--c4); padding: 5px; float: right;">Show More</div>
   </div>
   <div class="list" id="listSteamUnlocked"></div>
 </div>
@@ -199,6 +198,16 @@ body {
       ipcRenderer.send('launcher')
     }, 100)
   })
+
+  document.getElementById('discover').addEventListener('click', () => {
+    document.getElementById('discover').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+	  setTimeout(function() {
+      document.getElementById('discover').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+    }, 100)
+
+    ipcRenderer.send('searchGames', '')
+  })
+  
 
   document.getElementById('editText').addEventListener("keydown", event => {
     if (event.keyCode === 13) {

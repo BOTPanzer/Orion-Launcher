@@ -492,8 +492,16 @@ if (!app.requestSingleInstanceLock()) {
       tmp = tmp.substring(tmp.indexOf('-')+1)
       let link = 'https://fitgirl-repacks.site/'+tmp
       let name = names[i]
+      let name2 = ''
+      let info = ''
+      if (name.includes('&#8211;')) {
+        name2 = name.substring(0, name.indexOf('&#8211;')).trim()
+        info = name.substring(name.indexOf('&#8211;')+7).trim()
+      }
       let img = i+link
-      let html = createStoreHTML(id, img, './Data/Images/icon_file.png', name)
+      let html
+      if (name2 != '' && info != '') html = createStoreHTML2(id, img, './Data/Images/icon_file.png', name2, info)
+      else html = createStoreHTML(id, img, './Data/Images/icon_file.png', name)
       win.webContents.send('add1ToList', html, 'listFitgirl');
       win.webContents.send('addListener', id, link);
       //IMAGE
@@ -549,7 +557,14 @@ if (!app.requestSingleInstanceLock()) {
       let img = imgs[i]
       let link = links[i]
       let name = names[i]
-      let html = createStoreHTML(id, null, img, name)
+      let name2 = ''
+      let info = ''
+      if (name.toLowerCase().includes('pc ')) {
+        name2 = name.substring(0, name.toLowerCase().indexOf('pc ')).trim()
+        info = name.substring(name.toLowerCase().indexOf('pc ')+2).trim()
+      }
+      if (name2 != '' && info != '') html = createStoreHTML2(id, null, img, name2, info)
+      else html = createStoreHTML(id, null, img, name)
       win.webContents.send('add1ToList', html, 'listPivi');
       win.webContents.send('addListener', id, link);
     }
@@ -601,7 +616,15 @@ if (!app.requestSingleInstanceLock()) {
       let img = imgs[i]
       let link = links[i]
       let name = names[i]
-      let html = createStoreHTML(id, null, img, name)
+      let name2 = ''
+      let info = ''
+      if (name.toLowerCase().includes('free download')) {
+        name2 = name.substring(0, name.toLowerCase().indexOf('free download')).trim()
+        info = name.substring(name.toLowerCase().indexOf('free download')+13).trim()
+      }
+      if (name2 != '' && info != '') html = createStoreHTML2(id, null, img, name2, info)
+      else if (name2 != '') html = createStoreHTML(id, null, img, name2)
+      else html = createStoreHTML(id, null, img, name)
       win.webContents.send('add1ToList', html, 'listSteamUnlocked');
       win.webContents.send('addListener', id, link);
     }
@@ -820,6 +843,21 @@ function createStoreHTML(id, img, icon, name) {
   return html
 }
 
+function createStoreHTML2(id, img, icon, name, info) {
+  let html = `<div id="${id}" style="margin-top: 5px; margin-right: 5px; width: 200px; height: 250px; background-image: url('./Data/Images/icon_store_item.png'); text-align: center; display: inline-block;">
+                <div style="width: 200px; height: 200px;">
+                  <img id="${img}" class="unselectable" style="margin: 10px; max-width: 180px; height: 180px; object-fit: contain;" src="${icon}"></img>
+                </div>
+                <div style="width: 190px; height: 40px; padding: 5px">
+                  <div class="unselectableDiv">
+                    <div class="unselectable" style="line-height:20px; max-height: 20px; width: 190px; white-space: normal;">${name}</div>
+                    <div class="unselectable" style="line-height:20px; max-height: 20px; width: 190px; white-space: normal;">${info}</div>
+                  </div>
+                </div>
+              </div>`
+  return html
+}
+
 function closeWin2() {
   if (win2 != null)
   win2.close()
@@ -846,7 +884,7 @@ async function getFile(title, path) {
 async function getFolder(title) {
   let result = await dialog.showOpenDialog({
     title: title,
-    defaultPath: defpath,
+    defaultPath: launcherFolder,
     properties: ['openDirectory'],
   }).then(function(files) {
     let file = files.filePaths[0]
