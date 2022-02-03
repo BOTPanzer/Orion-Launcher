@@ -165,9 +165,7 @@ app.whenReady().then(() => {
 
   ipcMain.on('showOnExplorer', (event, path) => {
     const { shell } = require('electron');
-    if (fs.existsSync(path)) {
-      shell.showItemInFolder(path)
-    }
+    shell.showItemInFolder(path)
   })
 
 
@@ -374,6 +372,7 @@ app.whenReady().then(() => {
     win.webContents.send('searchingResults', 'Elamigos');
     win.webContents.send('searchingResults', 'Fitgirl');
     win.webContents.send('searchingResults', 'Pivi');
+    win.webContents.send('searchingResults', 'SteamUnlocked');
     win.webContents.send('searchingResults', 'Skidrow');
 
     let search = orSearch.replaceAll(' ', '+')
@@ -395,6 +394,13 @@ app.whenReady().then(() => {
     getHTML(fullURL).then(function(result) {
       pivi(result)
     })
+
+    fullURL = 'https://steamunlocked.net/?s='+search
+    if (search == '') fullURL = 'https://steamunlocked.net/'
+    getHTML(fullURL).then(function(result) {
+      steamunlocked(result, search)
+    })
+    
 
     getHTML('https://www.skidrowcodex.net/game-list/').then(function(result) {
       skidrow(result, orSearch)
@@ -505,7 +511,7 @@ app.whenReady().then(() => {
     //LINKS & NAMES & IMAGES
     for(i in si) {
       let tmp = si[i].toLowerCase()
-      if (!tmp.includes('>estrenos<') && !tmp.includes('>tops<') && !tmp.includes('>promociones<') && !tmp.includes('>oferta<')) {
+      if (!tmp.includes('>estrenos<') && !tmp.includes('>tops<') && !tmp.includes('>promociones<') && !tmp.includes('>oferta<') && !tmp.includes('>free to play<')) {
         let link = si[i].substring(si[i].indexOf('href="')+6)
         link = link.substring(0, link.indexOf('"')-1)
         let name = si[i].substring(si[i].indexOf('title="')+7)
@@ -614,9 +620,61 @@ app.whenReady().then(() => {
     }
   }
 
+  function steamunlocked(result, search) {
+    win.webContents.send('clearList', 'listSteamUnlocked');
+    var si
+    if (search != '') {
+      let part = result.substring(result.indexOf('class="cover-items"')) //remove top
+      part = part.substring(0, part.indexOf('class="col-lg-4"')) //to bot
+      si = part.split('class="cover-item category"')
+    } else {
+      let part = result.substring(result.indexOf('class="vc_pageable-slide-wrapper vc_clearfix"')) //remove top
+      part = part.substring(0, part.indexOf('class="vc_pageable-load-more-btn"')) //to bot
+      si = part.split('class="vc_grid-item vc_clearfix')
+    }
+    var links = []
+    var names = []
+    var imgs = []
+    //LINKS & NAMES & IMAGES
+    for(i in si) {
+      if (links.length == 12) break
+      let link = si[i].substring(si[i].indexOf('href="')+6)
+      link = link.substring(0, link.indexOf('"')-1)
+      let name
+      if (search != '') {
+        name = si[i].substring(si[i].indexOf('<h1>')+4)
+        name = name.substring(0, name.indexOf('</h1>'))
+      } else {
+        name = si[i].substring(si[i].indexOf('title="')+7)
+        name = name.substring(0, name.indexOf('"'))
+      }
+      let img = si[i].substring(si[i].lastIndexOf('src="')+5)
+      img = img.substring(0, img.indexOf('"'))
+      if (link != '' && name != '' && img != '') {
+        links.push(link)
+        names.push(titleCase(name))
+        imgs.push(img)
+      }
+    }
+    //HAS RESULTS
+    if (links.length == 0) win.webContents.send('noResults', 'SteamUnlocked');
+    else win.webContents.send('hasResults', 'SteamUnlocked');
+    //ADD GAMES
+    for(i in links) {
+      if (window != 'store') return
+      let id = `steamunlocked${i}`
+      let img = imgs[i]
+      let link = links[i]
+      let name = names[i]
+      let html = createHTML(id, null, img, name)
+      win.webContents.send('add1ToList', html, 'listSteamUnlocked');
+      win.webContents.send('addListener', id, link);
+    }
+  }
+
   async function getHTML(url) {
     const superagent = require('superagent');
-    const response = await superagent.get(url)
+    const response = await superagent.get(url).set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36')
     return response.text
   }
 

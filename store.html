@@ -31,11 +31,11 @@ body {
   height: 10px;
 }
 
-body::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: var(--c1); 
 }
 
-body::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
   background: var(--c2); 
 }
 
@@ -72,7 +72,7 @@ body::-webkit-scrollbar-thumb {
 	
 <body>
 <div>
-  <img id="logo" style="margin: 20px;" src="./Data/Images/logo.png"  height="150px" width="auto"/>
+  <img id="logo" class="unselectable" style="margin: 20px;" src="./Data/Images/logo.png"  height="150px" width="auto"/>
   <div id="launcher" style="height: 36px; width: 107px; margin: 20px; float: right; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
     <div class="unselectable" style="font-family: ItemFont;">Launcher</div>
   </div>
@@ -91,6 +91,8 @@ body::-webkit-scrollbar-thumb {
   <div class="list" id="listFitgirl"></div>
   <div class="unselectable" id="Pivi" style="color: var(--c4); font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">Pivi:</div>
   <div class="list" id="listPivi"></div>
+  <div class="unselectable" id="SteamUnlocked" style="color: var(--c4); font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">SteamUnlocked:</div>
+  <div class="list" id="listSteamUnlocked"></div>
   <div class="unselectable" id="Skidrow" style="color: var(--c4); font-family: ItemFont; font-size: 20px; padding: 5px; padding-left: 10px; margin-top: 20px;">Skidrow Codex:</div>
   <div class="list" id="listSkidrow"></div>
 </div>
@@ -117,6 +119,7 @@ body::-webkit-scrollbar-thumb {
     document.getElementById(id).style.color = 'gray'
     let name = id
     if (name == 'Elamigos') name = 'ElAmigos'
+    if (name == 'SteamUnlocked') name = 'Steam Unlocked'
     if (name == 'Skidrow') name = 'Skidrow Codex'
     document.getElementById(id).innerHTML = name+' (searching):'
   })
@@ -125,6 +128,7 @@ body::-webkit-scrollbar-thumb {
     document.getElementById(id).style.color = c4
     let name = id
     if (name == 'Elamigos') name = 'ElAmigos'
+    if (name == 'SteamUnlocked') name = 'Steam Unlocked'
     if (name == 'Skidrow') name = 'Skidrow Codex'
     document.getElementById(id).innerHTML = name+':'
   })
@@ -133,6 +137,7 @@ body::-webkit-scrollbar-thumb {
     document.getElementById(id).style.color = '#7E0D0E'
     let name = id
     if (name == 'Elamigos') name = 'ElAmigos'
+    if (name == 'SteamUnlocked') name = 'Steam Unlocked'
     if (name == 'Skidrow') name = 'Skidrow Codex'
     document.getElementById(id).innerHTML = name+' (no results)'
   })
@@ -142,6 +147,7 @@ body::-webkit-scrollbar-thumb {
       document.getElementById('listElamigos').innerHTML = '';
       document.getElementById('listFitgirl').innerHTML = '';
       document.getElementById('listPivi').innerHTML = '';
+      document.getElementById('listSteamUnlocked').innerHTML = '';
       document.getElementById('listSkidrow').innerHTML = '';
     } else document.getElementById(list).innerHTML = '';
   })
@@ -212,6 +218,13 @@ body::-webkit-scrollbar-thumb {
 
   document.getElementById('listPivi').addEventListener("wheel", function (event) {
     if ($('#listPivi').hasScrollBar()) {
+      this.scrollLeft -= (event.wheelDelta/2);
+      event.preventDefault();
+    }
+  })
+
+  document.getElementById('listSteamUnlocked').addEventListener("wheel", function (event) {
+    if ($('#listSteamUnlocked').hasScrollBar()) {
       this.scrollLeft -= (event.wheelDelta/2);
       event.preventDefault();
     }

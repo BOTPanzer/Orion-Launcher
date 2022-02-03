@@ -31,11 +31,11 @@ body {
   height: 10px;
 }
 
-body::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: var(--c1); 
 }
 
-body::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
   background: var(--c2); 
 }
 
@@ -68,18 +68,18 @@ body::-webkit-scrollbar-thumb {
 	
 <body id="body">
 <div>
-  <img id="logo" style="margin: 20px;" src="./Data/Images/logo.png"  height="150px" width="auto"/>
+  <img id="logo" class="unselectable" style="margin: 20px;" src="./Data/Images/logo.png"  height="150px" width="auto"/>
   <div style="float: right;">
     <div id="launcher" style="height: 36px; width: 107px; margin: 20px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
       <div class="unselectable" style="font-family: ItemFont;">Launcher</div>
     </div>
   </div>
 </div>
-	
+
 <div id="content" class="content">
-  <div style="display: flex; align-items: center;">
-    <h1 id="txtMenu" class="unselectable" style="color: var(--c4); margin: 10px; margin-bottom: 20px;">Theme Manager</h1>
-    <div id="folder" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px">
+  <div style="display: flex; align-items: center; margin: 10px; margin-bottom: 20px;">
+    <h1 id="txtMenu" class="unselectable" style="color: var(--c4); margin: 0px;">Theme Manager</h1>
+    <div id="folder" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px;">
       <img class="unselectable" style="height: 30px; min-width: 30px; margin: 3px;" src="./Data/Images/icon_folder.png"></img>
     </div>
   </div>
