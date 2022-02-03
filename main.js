@@ -6,10 +6,9 @@ let win = null
 
 function createWindow () {
   win = new BrowserWindow({
-    width: 900,
-    height: 500,
+    width: 990,
+    height: 517,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       contextIsolation: false
     }
@@ -27,11 +26,9 @@ app.whenReady().then(() => {
   })
   win.removeMenu()
 
-
-  let dataFolder = app.getAppPath()+'\\Data\\'
-  win.webContents.send('setMenuPath', dataFolder);
-
+  
   //START
+  let dataFolder = app.getAppPath()+'\\Data\\'
   createListFromFolder(dataFolder)
 
   ipcMain.on('load', (event, path) => {
@@ -58,7 +55,7 @@ app.whenReady().then(() => {
       let id = `b${i}`
       let img = `img${i}`
       //HTML
-      let html = `<div id="${id}" style="margin-top: 5px; margin-right: 5px; width: 150px; height: 150px; background: #1E1E1E; text-align: center; display: inline-block;">
+      let html = `<div id="${id}" style="margin-top: 5px; margin-right: 5px; width: 150px; height: 150px; background-image: url('./icon_item.png'); text-align: center; display: inline-block;">
                     <div style="width: 150px; height: 100px;">
                       <img id="${img}" class="unselectable" style="margin: 10px; max-width: 90px; max-height: 90px;" src="./icon.png"></img>
                     </div>
@@ -89,7 +86,7 @@ app.whenReady().then(() => {
       let id = `b${i}`
       let img = `img${i}`
       //HTML
-      let html = `<div id="${id}" style="margin-top: 5px; margin-right: 5px; width: 150px; height: 150px; background: #1E1E1E; text-align: center; display: inline-block;">
+      let html = `<div id="${id}" style="margin-top: 5px; margin-right: 5px; width: 150px; height: 150px; background-image: url('./icon_item.png'); text-align: center; display: inline-block;">
                     <div style="width: 150px; height: 100px;">
                       <img id="${img}" class="unselectable" style="margin: 10px; max-width: 90px; max-height: 90px;" src="./icon.png"></img>
                     </div>
@@ -109,7 +106,7 @@ app.whenReady().then(() => {
   function createBackButt(argPath) {
     if (argPath != dataFolder) {
       //HTML
-      let html = `<div id="backButt" style="margin-top: 5px; margin-right: 5px; width: 150px; height: 150px; background: #1E1E1E; text-align: center; display: inline-block;">
+      let html = `<div id="backButt" style="margin-top: 5px; margin-right: 5px; width: 150px; height: 150px; background-image: url('./icon_item.png'); text-align: center; display: inline-block;">
                     <div style="width: 150px; height: 100px;">
                       <img class="unselectable" style="margin: 10px; max-width: 90px; max-height: 90px;" src="./icon_back.png"></img>
                     </div>
