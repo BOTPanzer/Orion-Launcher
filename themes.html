@@ -22,12 +22,20 @@
   })
 
   ipcRenderer.on('addListener', (event, id, path) => {
-    document.getElementById(id).addEventListener('click', () => {
-      document.getElementById('txtMenu').innerText = 'Loading: '+path.substring(path.lastIndexOf('\\')+1)
+    document.getElementById(id).addEventListener('mousedown', (event) => {
+      if (event.which != 1) return
       document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item_clicked.png")';
+    
+      document.addEventListener('mouseup', () => {
+        document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
+      })
+    })
+
+    document.getElementById(id).addEventListener('mouseup', (event) => {
+      if (event.which != 1) return
+      document.getElementById('txtMenu').innerText = 'Loading: '+path.substring(path.lastIndexOf('\\')+1)
       $("#rightBar").animate({ scrollTop: 0 }, "fast");
 	    setTimeout(function() {
-        document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
         let scroll = document.getElementById('rightBar').scrollTop
         document.body.replaceWith(document.body.cloneNode(true));
         document.getElementById('rightBar').scrollTop = scroll
@@ -36,11 +44,18 @@
     })
   })
 
-  document.getElementById('folder').addEventListener('click', () => {
+
+  document.getElementById('folder').addEventListener('mousedown', (event) => {
+    if (event.which != 1) return
     document.getElementById('folder').style.backgroundImage = 'url("./Data/Images/icon_description_folder_clicked.png")';
-	  setTimeout(function() {
+    
+    document.addEventListener('mouseup', () => {
       document.getElementById('folder').style.backgroundImage = 'url("./Data/Images/icon_description_folder.png")';
-      ipcRenderer.send('openThemeFolder')
-    }, 100)
+    })
+  })
+
+  document.getElementById('folder').addEventListener('mouseup', (event) => {
+    if (event.which != 1) return
+    ipcRenderer.send('openThemeFolder')
   })
 </script>

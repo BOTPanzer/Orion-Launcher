@@ -59,7 +59,7 @@ body {
   <div style="align-items: center; margin: 20px; margin-top: 0px; display: flex;">
     <input id='pathText' type="text" style="height: 32px; width: 284px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
     <div id="folder" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px">
-      <img style="height: 30px; min-width: 30px; margin: 3px;" src="./Data/Images/icon_folder.png"></img>
+      <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/icon_folder.png"></img>
     </div>
   </div>
 </div>
@@ -69,7 +69,7 @@ body {
   <div style="align-items: center; margin: 20px; margin-top: 0px; display: flex;">
     <input id='iconText' type="text" style="height: 32px; width: 284px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px;"></input>
     <div id="folderIcon" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px">
-      <img style="height: 30px; min-width: 30px; margin: 3px;" src="./Data/Images/icon_folder.png"></img>
+      <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/icon_folder.png"></img>
     </div>
   </div>
 </div>
@@ -77,9 +77,9 @@ body {
 <div>
   <div id="log" style="color: var(--c4); font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;"></div>
   <div style="width: 100%; position: absolute; bottom: 0; display: block;">
-    <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+    <div id="showblock" style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
       <div style="height: 36px; width: 107px; margin-right: 10px; opacity: 0;"></div>   
-      <div id="show" style="height: 36px; width: 107px; display: none; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px; color: var(--c3);">
+      <div id="show" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px; color: var(--c3);">
         <div style="font-family: ItemFont;">Show</div>
       </div>   
       <div style="height: 36px; width: 107px; opacity: 0;"></div>
@@ -128,7 +128,7 @@ body {
   
   ipcRenderer.on('setLocation', (event, path) => {
     actualPath = path
-    document.getElementById('show').style.display = 'none'
+    document.getElementById('showblock').style.display = 'none'
   })
 
   ipcRenderer.on('setName', (event, name) => {
@@ -146,9 +146,9 @@ body {
       let gamePathArg = getPathInfo(path)
       showPath = gamePathArg.pathClean
       if (fs.existsSync(showPath)) {
-        document.getElementById('show').style.display = 'flex'
+        document.getElementById('showblock').style.display = 'flex'
       } else {
-        document.getElementById('show').style.display = 'none'
+        document.getElementById('showblock').style.display = 'none'
       } 
     }
   })
@@ -161,15 +161,22 @@ body {
       oldIcon = path
     }
   })
-
-  document.getElementById('folder').addEventListener('click', () => {
-    document.getElementById('folder').style.backgroundImage = 'url("./Data/Images/icon_description_folder_clicked")';
-	  setTimeout(function() {
+  
+  //FOLDER
+  document.getElementById('folder').addEventListener('mousedown', (event) => {
+    if (event.which != 1) return
+    document.getElementById('folder').style.backgroundImage = 'url("./Data/Images/icon_description_folder_clicked.png")';
+    
+    document.addEventListener('mouseup', () => {
       document.getElementById('folder').style.backgroundImage = 'url("./Data/Images/icon_description_folder.png")';
-      let a = document.getElementById('pathText').value
-      let gamePathArg = getPathInfo(a)
-      ipcRenderer.send('getFileContext', gamePathArg.pathClean)
-    }, 100)
+    })
+  })
+
+  document.getElementById('folder').addEventListener('click', (event) => {
+    if (event.which != 1) return
+    let a = document.getElementById('pathText').value
+    let gamePathArg = getPathInfo(a)
+    ipcRenderer.send('getFileContext', gamePathArg.pathClean)
   })
 
   ipcRenderer.on('fileGotten', (event, path) => {
@@ -178,16 +185,23 @@ body {
     if (document.getElementById('nameText').value == '')
     document.getElementById('nameText').value = path.substring(path.lastIndexOf('\\')+1)
   })
-
-  document.getElementById('folderIcon').addEventListener('click', () => {
-    document.getElementById('folderIcon').style.backgroundImage = 'url("./Data/Images/icon_description_folder_clicked")';
-	  setTimeout(function() {
+  
+  //ICONFOLDER
+  document.getElementById('folderIcon').addEventListener('mousedown', (event) => {
+    if (event.which != 1) return
+    document.getElementById('folderIcon').style.backgroundImage = 'url("./Data/Images/icon_description_folder_clicked.png")';
+    
+    document.addEventListener('mouseup', () => {
       document.getElementById('folderIcon').style.backgroundImage = 'url("./Data/Images/icon_description_folder.png")';
-      let a = document.getElementById('pathText').value
-      if (document.getElementById('iconText').value != '') a = document.getElementById('iconText').value
-      let gamePathArg = getPathInfo(a)
-      ipcRenderer.send('getFileIconContext', gamePathArg.pathClean)
-    }, 100)
+    })
+  })
+
+  document.getElementById('folderIcon').addEventListener('click', (event) => {
+    if (event.which != 1) return
+    let a = document.getElementById('pathText').value
+    if (document.getElementById('iconText').value != '') a = document.getElementById('iconText').value
+    let gamePathArg = getPathInfo(a)
+    ipcRenderer.send('getFileIconContext', gamePathArg.pathClean)
   })
 
   ipcRenderer.on('fileGottenIcon', (event, path) => {
@@ -195,41 +209,68 @@ body {
     document.getElementById('iconText').value = path
   })
 
-  document.getElementById('show').addEventListener('click', () => {
+  //SHOW
+  document.getElementById('show').addEventListener('mousedown', (event) => {
+    if (event.which != 1) return
     document.getElementById('show').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-	  setTimeout(function() {
+    
+    document.addEventListener('mouseup', () => {
       document.getElementById('show').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-      ipcRenderer.send('showOnExplorer', showPath)
-    }, 100)
+    })
   })
 
-  document.getElementById('move').addEventListener('click', () => {
+  document.getElementById('show').addEventListener('click', (event) => {
+    if (event.which != 1) return
+    ipcRenderer.send('showOnExplorer', showPath)
+  })
+  
+  //MOVE
+  document.getElementById('move').addEventListener('mousedown', (event) => {
+    if (event.which != 1) return
     document.getElementById('move').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-	  setTimeout(function() {
+    
+    document.addEventListener('mouseup', () => {
       document.getElementById('move').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-      ipcRenderer.send('move', actualPath)
-    }, 100)
+    })
   })
 
-  document.getElementById('remove').addEventListener('click', () => {
+  document.getElementById('move').addEventListener('click', (event) => {
+    if (event.which != 1) return
+    ipcRenderer.send('move', actualPath)
+  })
+  
+  //REMOVE
+  document.getElementById('remove').addEventListener('mousedown', (event) => {
+    if (event.which != 1) return
     document.getElementById('remove').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-	  setTimeout(function() {
+    
+    document.addEventListener('mouseup', () => {
       document.getElementById('remove').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-      ipcRenderer.send('remove', actualPath)
-    }, 100)
+    })
   })
 
-  document.getElementById('save').addEventListener('click', () => {
+  document.getElementById('remove').addEventListener('click', (event) => {
+    if (event.which != 1) return
+    ipcRenderer.send('remove', actualPath)
+  })
+  
+  //SAVE
+  document.getElementById('save').addEventListener('mousedown', (event) => {
+    if (event.which != 1) return
     document.getElementById('save').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-	  setTimeout(function() {
+    
+    document.addEventListener('mouseup', () => {
       document.getElementById('save').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-      //Save
-      let newName = undefined
-      if (oldName != document.getElementById('nameText').value) newName = document.getElementById('nameText').value
-      let newPath = document.getElementById('pathText').value
-      let newIcon = document.getElementById('iconText').value
-      ipcRenderer.send('save', actualPath, newName, newPath, newIcon)
-    }, 100)
+    })
+  })
+
+  document.getElementById('save').addEventListener('click', (event) => {
+    if (event.which != 1) return
+    let newName = undefined
+    if (oldName != document.getElementById('nameText').value) newName = document.getElementById('nameText').value
+    let newPath = document.getElementById('pathText').value
+    let newIcon = document.getElementById('iconText').value
+    ipcRenderer.send('save', actualPath, newName, newPath, newIcon)
   })
 
   ipcRenderer.on('log', (event, text) => {

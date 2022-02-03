@@ -125,6 +125,7 @@ body {
   const { ipcRenderer } = require('electron');
   window.$ = window.jQuery = require('jquery');
   let lastWin = ''
+  let button = ''
 
   a()
   setbuttons()
@@ -160,7 +161,9 @@ body {
   function setbuttons() {
     document.body.replaceWith(document.body.cloneNode(true));
 
-    document.getElementById('orionLogo').addEventListener('click', () => {
+    //ORIONLOGO
+    document.getElementById('orionLogo').addEventListener('click', (event) => {
+      if (event.which != 1) return
       if (document.getElementById('orionName').style.display != 'none') {
         document.getElementById('leftBar').style.width = '72px'
         document.getElementById('leftBar').style.height = '70px'
@@ -192,80 +195,137 @@ body {
       }
     })
 
-    document.getElementById('mini').addEventListener('click', () => {
+    //MINI
+    document.getElementById('mini').addEventListener('mousedown', (event) => {
+      if (event.which != 1) return
       document.getElementById('minib').style.opacity = '1';
-	    setTimeout(function() {
+
+      document.addEventListener('mouseup', () => {
         document.getElementById('minib').style.opacity = '0';
-        ipcRenderer.send('mini')
-      }, 100)
+      })
     })
 
-    document.getElementById('maxi').addEventListener('click', () => {
+    document.getElementById('mini').addEventListener('click', (event) => {
+      if (event.which != 1) return
+      ipcRenderer.send('mini')
+    })
+
+    //MAXI
+    document.getElementById('maxi').addEventListener('mousedown', (event) => {
+      if (event.which != 1) return
       document.getElementById('maxib').style.opacity = '1';
-	    setTimeout(function() {
+    
+      document.addEventListener('mouseup', () => {
         document.getElementById('maxib').style.opacity = '0';
+      })
+    })
+
+    document.getElementById('maxi').addEventListener('click', (event) => {
+      if (event.which != 1) return
         ipcRenderer.send('maxi')
-      }, 100)
     })
 
-    document.getElementById('exit').addEventListener('click', () => {
+    //EXIT
+    document.getElementById('exit').addEventListener('mousedown', (event) => {
+      if (event.which != 1) return
       document.getElementById('exitb').style.opacity = '1';
-	    setTimeout(function() {
+    
+      document.addEventListener('mouseup', () => {
         document.getElementById('exitb').style.opacity = '0';
-        ipcRenderer.send('exit')
-      }, 100)
+      })
     })
 
-    document.getElementById('store').addEventListener('click', () => {
+    document.getElementById('exit').addEventListener('click', (event) => {
+      if (event.which != 1) return
+      ipcRenderer.send('exit')
+    })
+
+    //STORE
+    document.getElementById('store').addEventListener('mousedown', (event) => {
+      if (event.which != 1) return
       document.getElementById('store').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-	    setTimeout(function() {
+    
+      document.addEventListener('mouseup', () => {
         document.getElementById('store').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-        ipcRenderer.send('store')
-      }, 100)
+      })
     })
 
-    document.getElementById('launcher').addEventListener('click', () => {
+    document.getElementById('store').addEventListener('click', (event) => {
+      if (event.which != 1) return
+      ipcRenderer.send('store')
+    })
+
+    //LAUNCHER
+    document.getElementById('launcher').addEventListener('mousedown', (event) => {
+      if (event.which != 1) return
       document.getElementById('launcher').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-      setTimeout(function() {
+    
+      document.addEventListener('mouseup', () => {
         document.getElementById('launcher').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-        ipcRenderer.send('launcher')
-      }, 100)
+      })
     })
 
-    document.getElementById('themes').addEventListener('click', () => {
-      document.getElementById('themes').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-  	  setTimeout(function() {
-        document.getElementById('themes').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-        ipcRenderer.send('themes')
-      }, 100)
+    document.getElementById('launcher').addEventListener('click', (event) => {
+      if (event.which != 1) return
+      ipcRenderer.send('launcher')
     })
+
+    //THEMES
+    document.getElementById('themes').addEventListener('mousedown', (event) => {
+      if (event.which != 1) return
+      document.getElementById('themes').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+    
+      document.addEventListener('mouseup', () => {
+        document.getElementById('themes').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+      })
+    })
+
+    document.getElementById('themes').addEventListener('click', (event) => {
+      if (event.which != 1) return
+      ipcRenderer.send('themes')
+    })
+
 
     document.getElementById('add').style.display = 'none'
 
-    document.getElementById('addfolder').addEventListener('click', () => {
-      window.scrollTo(0, 0);
+    //ADDFOLDER
+    document.getElementById('addfolder').addEventListener('mousedown', (event) => {
+      if (event.which != 1) return
       document.getElementById('addfolder').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-  	  setTimeout(function() {
+    
+      document.addEventListener('mouseup', () => {
         document.getElementById('addfolder').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-        let scroll = document.getElementById('rightBar').scrollTop
-        document.body.replaceWith(document.body.cloneNode(true));
-        document.getElementById('rightBar').scrollTop = scroll
-        ipcRenderer.send('addfolder')
-        cont = true
-      }, 100)
+      })
     })
 
-    document.getElementById('addgame').addEventListener('click', () => {
+    document.getElementById('addfolder').addEventListener('click', (event) => {
+      if (event.which != 1) return
       window.scrollTo(0, 0);
+      let scroll = document.getElementById('rightBar').scrollTop
+      document.body.replaceWith(document.body.cloneNode(true));
+      document.getElementById('rightBar').scrollTop = scroll
+      ipcRenderer.send('addfolder')
+      cont = true
+    })
+
+    //ADDGAME
+    document.getElementById('addgame').addEventListener('mousedown', (event) => {
+      if (event.which != 1) return
       document.getElementById('addgame').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-  	  setTimeout(function() {
+    
+      document.addEventListener('mouseup', () => {
         document.getElementById('addgame').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-        let scroll = document.getElementById('rightBar').scrollTop
-        document.body.replaceWith(document.body.cloneNode(true));
-        document.getElementById('rightBar').scrollTop = scroll
-        ipcRenderer.send('addgame')
-        cont = true
-      }, 100)
+      })
+    })
+
+    document.getElementById('addgame').addEventListener('click', (event) => {
+      if (event.which != 1) return
+      window.scrollTo(0, 0);
+      let scroll = document.getElementById('rightBar').scrollTop
+      document.body.replaceWith(document.body.cloneNode(true));
+      document.getElementById('rightBar').scrollTop = scroll
+      ipcRenderer.send('addgame')
+      cont = true
     })
   }
 </script>

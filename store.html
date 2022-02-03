@@ -93,13 +93,19 @@
   })
 
   ipcRenderer.on('addListener', (event, id, link) => {
-    document.getElementById(id).addEventListener('click', () => {
+    document.getElementById(id).addEventListener('mousedown', (event) => {
+      if (event.which != 1) return
       document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_store_item_clicked.png")';
-	    setTimeout(function() {
+    
+      document.addEventListener('mouseup', () => {
         document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_store_item.png")';
-        const { shell } = require('electron');
-        shell.openExternal(link)
-      }, 100)
+      })
+    })
+
+    document.getElementById(id).addEventListener('click', (event) => {
+      if (event.which != 1) return
+      const { shell } = require('electron');
+      shell.openExternal(link)
     })
   })
 
@@ -107,16 +113,22 @@
     document.getElementById(img).src = icon
   })
 
-  document.getElementById('discover').addEventListener('click', () => {
-    document.getElementById('discover').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-	  setTimeout(function() {
-      document.getElementById('discover').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-    }, 100)
 
+  document.getElementById('discover').addEventListener('mousedown', (event) => {
+    if (event.which != 1) return
+    document.getElementById('discover').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+
+    document.addEventListener('mouseup', () => {
+      document.getElementById('discover').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+    })
+  })
+
+  document.getElementById('discover').addEventListener('click', (event) => {
+    if (event.which != 1) return
     ipcRenderer.send('searchGames', '')
   })
 
-  document.getElementById('editText').addEventListener("keydown", event => {
+  document.getElementById('editText').addEventListener("keydown", (event) => {
     if (event.keyCode === 13) {
       event.preventDefault();
       user = false
@@ -124,19 +136,25 @@
       return false;
     }
   })
-
-  document.getElementById('search').addEventListener('click', () => {
+ 
+  document.getElementById('search').addEventListener('mousedown', (event) => {
+    if (event.which != 1) return
     if (user) {
       document.getElementById('search').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-	    setTimeout(function() {
+    
+      document.addEventListener('mouseup', () => {
         document.getElementById('search').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-      }, 100)
+      })
     } else user = true
+  })
 
+  document.getElementById('search').addEventListener('click', (event) => {
+    if (event.which != 1) return
     let search = document.getElementById('editText').value
     ipcRenderer.send('searchGames', search)
   })
-  
+
+
   document.getElementById('moreFitgirl').addEventListener('click', () => {
     const { shell } = require('electron');
     shell.openExternal('https://fitgirl-repacks.site/')

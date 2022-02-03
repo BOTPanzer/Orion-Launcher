@@ -33,43 +33,49 @@
   })
 
   ipcRenderer.on('addListener', (event, id, img, path, name, gamePathArg, gamePath, iconPath) => {
-    document.getElementById(id).addEventListener('click', () => {
-      document.getElementById('editText').value = ''
+    document.getElementById(id).addEventListener('mousedown', (event) => {
+      if (event.which != 1) return
       document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item_clicked.png")';
-	    setTimeout(function() {
+    
+      document.addEventListener('mouseup', () => {
         document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
-        if (click == id) {
-          if (gamePathArg.argsClean != '') {
-            let spawn = require("child_process").spawn;
-            let bat = spawn("cmd.exe", gamePathArg.argsClean)
-          } else {
-            const { shell } = require('electron');
-            shell.openPath(gamePathArg.pathClean)
-          }
+      })
+    })
 
-          if (document.getElementById('noti').style.opacity == 0) {
-            showNoti(name)
-          } else {
-            wait()
-
-            function wait() {
-              setTimeout(function() {
-                if (document.getElementById('noti').style.opacity == 0) {
-                  showNoti(name)
-                } else wait()
-              }, 500)
-            }
-          }
-          click = ''
-        } else {
-          click = id
-          setTimeout(function() {
-            if (click == id) {
-              click = ''
-            }
-          }, 500)
+    document.getElementById(id).addEventListener('click', (event) => {
+      if (event.which != 1) return
+      document.getElementById('editText').value = ''
+      if (click == id) {
+        if (gamePathArg.argsClean != '') {
+          let spawn = require("child_process").spawn;
+          let bat = spawn("cmd.exe", gamePathArg.argsClean)
+         } else {
+          const { shell } = require('electron');
+          shell.openPath(gamePathArg.pathClean)
         }
-      }, 100)
+
+        if (document.getElementById('noti').style.opacity == 0) {
+          showNoti(name)
+        } else {
+          wait()
+
+          function wait() {
+            setTimeout(function() {
+              if (document.getElementById('noti').style.opacity == 0) {
+                showNoti(name)
+              } else wait()
+            }, 500)
+          }
+        }
+        click = ''
+      } else {
+        click = id
+        setTimeout(function() {
+          if (click == id) {
+            click = ''
+          }
+        }, 500)
+      }
     })
 
     document.getElementById(id).addEventListener('contextmenu', () => {
@@ -82,14 +88,27 @@
   })
 
   ipcRenderer.on('addFolderListener', (event, id, path) => {
-    document.getElementById(id).addEventListener('click', () => {
-      document.getElementById('editText').value = ''
+    document.getElementById(id).addEventListener('mousedown', (event) => {
+      if (event.which != 1) return
       document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item_clicked.png")';
-      $("#rightBar").animate({ scrollTop: 0 }, "fast");
-	    setTimeout(function() {
+    
+      document.addEventListener('mouseup', () => {
         document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
+      })
+    })
+
+    document.getElementById(id).addEventListener('click', (event) => {
+      if (event.which != 1) return
+      document.getElementById('editText').value = ''
+      let scroll = document.getElementById('rightBar').scrollTop
+      if (scroll == 0) {
         ipcRenderer.send('loadPath', path)
-      }, 100)
+      } else {
+        $("#rightBar").animate({ scrollTop: 0 }, "fast");
+	      setTimeout(function() {
+          ipcRenderer.send('loadPath', path)
+        }, 150)
+      }
     })
 
     if (id != 'backButt')
@@ -113,7 +132,7 @@
     if (search != '') loc = loc+' - '+search
     document.getElementById('txtMenu').innerHTML = loc
 
-    document.getElementById('editText').addEventListener("keydown", event => {
+    document.getElementById('editText').addEventListener("keydown", (event) => {
       if (event.keyCode === 13) {
         event.preventDefault();
         if (document.getElementById('editText').value != search) {
@@ -124,12 +143,17 @@
       }
     })
 
-    document.getElementById('search').addEventListener('click', () => {
+    document.getElementById('search').addEventListener('mousedown', (event) => {
+      if (event.which != 1) return
       document.getElementById('search').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-      setTimeout(function() {
+    
+      document.addEventListener('mouseup', () => {
         document.getElementById('search').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-      }, 100)
+      })
+    })
 
+    document.getElementById('search').addEventListener('click', (event) => {
+      if (event.which != 1) return
       if (document.getElementById('editText').value != search) {
         $("#rightBar").animate({ scrollTop: 0 }, "fast");
         ipcRenderer.send('loadPath', path, document.getElementById('editText').value)

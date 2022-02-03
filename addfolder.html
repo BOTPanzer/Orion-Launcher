@@ -89,18 +89,25 @@ body {
     document.getElementById('show').style.display = 'none'
   })
 
-  document.getElementById('addFolder').addEventListener('click', () => {
+  //ADDFOLDER
+  document.getElementById('addFolder').addEventListener('mousedown', (event) => {
+    if (event.which != 1) return
     document.getElementById('addFolder').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-	  setTimeout(function() {
+    
+    document.addEventListener('mouseup', () => {
       document.getElementById('addFolder').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-      let name = document.getElementById('nameText').value
-      if (name == '') {
-        document.getElementById('log').innerText = 'Name Is Necesary'
-        return
-      }
-      document.body.replaceWith(document.body.cloneNode(true));
-      ipcRenderer.send('addFolder', name)
-    }, 100)
+    })
+  })
+
+  document.getElementById('addFolder').addEventListener('click', (event) => {
+    if (event.which != 1) return
+    let name = document.getElementById('nameText').value
+    if (name == '') {
+      document.getElementById('log').innerText = 'Name Is Necesary'
+      return
+    }
+    document.body.replaceWith(document.body.cloneNode(true));
+    ipcRenderer.send('addFolder', name)
   })
 
   function getPathInfo(gamePath) {

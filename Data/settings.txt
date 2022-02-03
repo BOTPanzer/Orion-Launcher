@@ -1,6 +1,6 @@
-url('./Data/Images/lines.png'), linear-gradient(#38151C, #070B14 75%)
-#181B22
-#7E0D0E
+linear-gradient(#0E0E0E, #46051D 75%)
+#18041D
+#DD0105
 #68D8D5
 white
 
