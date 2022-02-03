@@ -1,7 +1,9 @@
 const { app, ipcMain, BrowserWindow } = require('electron')
+const fileIcon = require("extract-file-icon");
 const path = require('path')
 const fs = require('fs');
 const readline = require('readline');
+const { get } = require('https');
 let win = null
 
 function createWindow () {
@@ -25,7 +27,6 @@ app.whenReady().then(() => {
     }
   })
   win.removeMenu()
-
   
   //START
   let dataFolder = app.getAppPath()+'\\Data\\'
@@ -48,6 +49,7 @@ app.whenReady().then(() => {
     for(i in paths) {
       let path = paths[i].replace('\r', '')
       if (path.startsWith('?:')) path = path.replace('?:', dataFolder.substring(0, 2))
+      //if (path.startsWith('?:')) path = path.replace('?:', 'E:')
       //Name
       let name = path.substring(0, path.lastIndexOf("\\"))
       name = name.substring(name.lastIndexOf("\\")+1)
@@ -55,20 +57,13 @@ app.whenReady().then(() => {
       let id = `b${i}`
       let img = `img${i}`
       //HTML
-      let html = `<div id="${id}" style="margin-top: 5px; margin-right: 5px; width: 150px; height: 150px; background-image: url('./icon_item.png'); text-align: center; display: inline-block;">
-                    <div style="width: 150px; height: 100px;">
-                      <img id="${img}" class="unselectable" style="margin: 10px; max-width: 90px; max-height: 90px;" src="./icon.png"></img>
-                    </div>
-                    <div style="width: 140px; height: 40px; padding: 5px">
-                      <div class="unselectableDiv">
-                        <div class="unselectable" style="line-height:20px; display: inline-block; max-height: 40px; width: 140px;">${name}</div>
-                      </div>
-                    </div>
-                  </div>`
+      let html = createHTML(id, img, "./icon_file.png", name)
       //Create
       win.webContents.send('add1ToList', html);
       win.webContents.send('addListener', id, path);
-      win.webContents.send('changeImage', img, 'file');
+      app.getFileIcon(path, {size:"large"}).then((fileIcon) =>{
+        win.webContents.send('changeIcon', img, fileIcon.toDataURL());
+      })
     }
   }
 
@@ -82,40 +77,22 @@ app.whenReady().then(() => {
       //Name
       let name = path.substring(0, path.lastIndexOf("\\"))
       name = name.substring(name.lastIndexOf("\\")+1)
+      if (name.includes('.')) name = name.substring(0, name.lastIndexOf('.'))
       //Id
       let id = `b${i}`
       let img = `img${i}`
       //HTML
-      let html = `<div id="${id}" style="margin-top: 5px; margin-right: 5px; width: 150px; height: 150px; background-image: url('./icon_item.png'); text-align: center; display: inline-block;">
-                    <div style="width: 150px; height: 100px;">
-                      <img id="${img}" class="unselectable" style="margin: 10px; max-width: 90px; max-height: 90px;" src="./icon.png"></img>
-                    </div>
-                    <div style="width: 140px; height: 40px; padding: 5px">
-                      <div class="unselectableDiv">
-                        <div class="unselectable" style="line-height:20px; display: inline-block;">${name}</div>
-                      </div>
-                    </div>
-                  </div>`
+      let html = createHTML(id, img, "./icon_folder.png", name)
       //Create
       win.webContents.send('add1ToList', html);
       win.webContents.send('addReturnListener', id, path);
-      win.webContents.send('changeImage', img, 'folder');
     }
   }
   
   function createBackButt(argPath) {
     if (argPath != dataFolder) {
       //HTML
-      let html = `<div id="backButt" style="margin-top: 5px; margin-right: 5px; width: 150px; height: 150px; background-image: url('./icon_item.png'); text-align: center; display: inline-block;">
-                    <div style="width: 150px; height: 100px;">
-                      <img class="unselectable" style="margin: 10px; max-width: 90px; max-height: 90px;" src="./icon_back.png"></img>
-                    </div>
-                    <div style="width: 140px; height: 40px; padding: 5px">
-                      <div class="unselectableDiv">
-                        <div class="unselectable" style="line-height:20px; display: inline-block; max-height: 40px; width: 140px;">Back</div>
-                      </div>
-                    </div>
-                  </div>`
+      let html = createHTML("backButt", "backImg", "./icon_back.png", "Back")
       //Create
       win.webContents.send('add1ToList', html);
       let bpath = argPath
@@ -124,6 +101,20 @@ app.whenReady().then(() => {
       if (numb > 1) bpath = bpath.substring(0, bpath.lastIndexOf("\\")+1)
       win.webContents.send('addReturnListener', 'backButt', bpath);
     }
+  }
+
+  function createHTML(id, img, icon, name) {
+    let html = `<div id="${id}" style="margin-top: 5px; margin-right: 5px; width: 150px; height: 150px; background-image: url('./icon_item.png'); text-align: center; display: inline-block;">
+                  <div style="width: 150px; height: 100px;">
+                    <img id="${img}" class="unselectable" style="margin: 10px; width: 90px; height: 90px;" src="${icon}"></img>
+                  </div>
+                  <div style="width: 140px; height: 40px; padding: 5px">
+                    <div class="unselectableDiv">
+                      <div class="unselectable" style="line-height:20px; display: inline-block; max-height: 40px; width: 140px;">${name}</div>
+                    </div>
+                  </div>
+                </div>`
+    return html
   }
 })
 

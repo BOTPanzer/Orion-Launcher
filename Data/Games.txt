@@ -1,12 +1,12 @@
 ?:\No Tocar\Games\Celeste\Celeste.exe
 ?:\No Tocar\Games\Dead Cells\deadcells_gl.exe
-?:\No Tocar\Games\Enter the Gungeon\LAUNCHER.exe
+?:\No Tocar\Games\Black Future 88\BlackFuture'88.exe
+?:\No Tocar\Games\Enter the Gungeon\EtG.exe
+?:\No Tocar\Games\Exit the Gungeon\XTG.exe
 ?:\No Tocar\Games\Katana ZERO\Katana ZERO.exe
-?:\No Tocar\Games\Untitled Goose Game\Untitled.exe
-?:\No Tocar\Games\Move or Die\Launcher.exe
+?:\No Tocar\Games\Move or Die\MoveOrDie.exe
 ?:\No tocar\Games\Duck Game\DuckGame.exe
 ?:\No Tocar\Games\Gang Beasts\Gang Beasts.exe
-?:\No Tocar\Games\Black Future 88\BlackFuture'88.exe
 ?:\No Tocar\Games\BroForce\Broforce_beta.exe
 ?:\No Tocar\Games\Besiege\Besiege.exe
 ?:\No Tocar\Games\Minecraft\LauncherFenix.exe

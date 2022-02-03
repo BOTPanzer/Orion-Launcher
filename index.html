@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-<title>Orion Launcher v1.1.0</title>
+<title>Orion Launcher v1.2.0</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=0">
 <style>
@@ -13,8 +13,7 @@ body {
   font-family: BodyFont;
   margin: 0;
   vertical-align: baseline;
-  background: radial-gradient(ellipse at center top, #3F2026 0%, #181B22 75%);
-  background-repeat: no-repeat;
+  background: url('./lines.png'), linear-gradient(#38151C, #070B14 75%);
   background-attachment: fixed;
 }
 
@@ -45,6 +44,7 @@ body {
 	
 /* Page Content */
 .content { 
+  height: 100%;
   margin: 10px;
   color: white;
 }	
@@ -71,7 +71,6 @@ body {
 </head>
 	
 <body>
-
 <div>
   <img style="margin: 20px;" src="./logo.png"  height="150px" width="auto"/>
 </div>
@@ -82,7 +81,7 @@ body {
 	  
 	<div id="b2" style="margin-top: 5px; margin-right: 5px; width: 150px; height: 150px; background-image: url('./icon_item.png'); text-align: center; display: inline-block;">
     <div style="width: 150px; height: 100px;">
-		  <img id="img2" class="unselectable" style="margin: 10px; max-width: 90px; max-height: 90px;" src="./icon.png"></img>
+		  <img id="img2" class="unselectable" style="margin: 10px; width: 90px; height: 90px;" src="./icon_folder.png"></img>
 	  </div>
 	  <div style="width: 140px; height: 40px; padding: 5px">
 		  <div class="unselectableDiv">
@@ -93,10 +92,9 @@ body {
 	
   </div>
 </div>
-
 <script>
-  //background-image: linear-gradient(#3F2026, #181B22);
   const { app, shell, ipcRenderer } = require('electron');
+  const fileIcon = require("extract-file-icon");
 
   ipcRenderer.on('clearList', (event, list) => {
     let infoDiv = document.querySelector('div[id=list]')
@@ -128,12 +126,15 @@ body {
     })
   })
 
-  ipcRenderer.on('changeImage', (event, img, type) => {
-    if (type == 'folder') {
-      document.getElementById(img).src = "./icon_folder.png"
-    } else {
-      document.getElementById(img).src = "./icon_file.png"
-    }
+  ipcRenderer.on('changeIcon', (event, img, icon) => {
+    document.getElementById(img).src = icon
+  })
+
+  ipcRenderer.on('changeIcon2', (event, img, path) => {
+    //slower but better quality
+    let base64data = new Buffer.from(fileIcon(path, 32)).toString('base64');
+    if (base64data == "") return 
+    document.getElementById(img).src = 'data:image/png;base64,'+base64data
   })
 
   ipcRenderer.on('setLocPath', (event, path, homePath) => {
@@ -143,6 +144,7 @@ body {
     } else {
       if (name.endsWith("\\")) name = name.slice(0,-1)
       name = name.substring(name.lastIndexOf("\\")+1)
+      if (name.includes('.')) name = name.substring(0, name.lastIndexOf('.'))
     }
     document.getElementById('txtMenu').firstChild.data = name
   })
