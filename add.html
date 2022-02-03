@@ -131,7 +131,10 @@ body {
 	    setTimeout(function() {
         document.getElementById('addFolder').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
         let name = document.getElementById('nameText').value
-        if (name == '') return
+        if (name == '') {
+          document.getElementById('log').innerText = 'Name Is Necesary'
+          return
+        }
         ipcRenderer.send('addFolder', name)
       }, 100)
     })
@@ -147,6 +150,8 @@ body {
     ipcRenderer.on('fileGotten', (event, path) => {
       if (path != '')
       document.getElementById('pathText').value = path
+      if (document.getElementById('nameText').value == '')
+      document.getElementById('nameText').value = path.substring(path.lastIndexOf('\\')+1)
     })
 
     document.getElementById('folderIcon').addEventListener('click', () => {
@@ -171,9 +176,15 @@ body {
 	    setTimeout(function() {
         document.getElementById('addGame').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
         let name = document.getElementById('nameText').value
-        if (name == '') return
+        if (name == '') {
+          document.getElementById('log').innerText = 'Name Is Necesary'
+          return
+        }
         let path = document.getElementById('pathText').value
-        if (path == '') return
+        if (path == '') {
+          document.getElementById('log').innerText = 'Path Is Necesary'
+          return
+        }
         let icon = document.getElementById('iconText').value
         ipcRenderer.send('addGame', name, path, icon)
       }, 100)

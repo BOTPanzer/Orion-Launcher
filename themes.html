@@ -125,6 +125,7 @@ body {
 
   ipcRenderer.on('addListener', (event, id, path) => {
     document.getElementById(id).addEventListener('click', () => {
+      document.getElementById('txtMenu').innerText = 'Loading: '+path.substring(path.lastIndexOf('\\')+1)
       document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item_clicked.png")';
 	    window.scrollTo(0, 0);
 	    setTimeout(function() {

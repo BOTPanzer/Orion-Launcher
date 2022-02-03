@@ -1,2 +1,0 @@
-com.epicgames.launcher://apps/aafc587fbf654758802c
-D:\Games\ARKSurvivalEvolved\ShooterGame\Binaries\Win64\ArkEGSLauncher.exe

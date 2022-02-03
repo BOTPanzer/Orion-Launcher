@@ -1,0 +1,5 @@
+url('./Data/Images/lines.png'), linear-gradient(#88A7AA, #3D5054 75%)
+#030303
+#A44A0C
+#EEEEEE
+#EEEEEE

@@ -1,7 +1,7 @@
-url('./Data/Images/lines.png'), linear-gradient(#101710, #101710 75%)
-#102A10
-#04FF05
-#04FF05
-#04FF05
+url('./Data/Images/lines.png'), linear-gradient(#38151C, #070B14 75%)
+#181B22
+#7E0D0E
+#68D8D5
+white
 
 

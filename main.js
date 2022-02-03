@@ -1,5 +1,7 @@
-const { app, ipcMain, BrowserWindow, dialog } = require('electron')
+const { app, ipcMain, BrowserWindow, dialog, Tray, Menu } = require('electron')
 const fs = require('fs');
+let closing = false
+let tray = null
 let window = 'launcher'
 let win = null
 let win2 = null
@@ -9,32 +11,26 @@ let actualPath = null
 var theme = []
 
 
-function createWindow() {
-  win = new BrowserWindow({
-    height: 550,
-    width: 1036,
-    minHeight: 491,
-    minWidth: 881,
-    webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-      enableRemoteModule: true
-    }
-  })
-
-  win.loadFile('main.html')
-  win.removeMenu()
-  //win.openDevTools()
-  window = 'launcher'
-}
-
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
 })
 
-app.whenReady().then(() => {
+if (!app.requestSingleInstanceLock()) {
+  closing = true;
+  app.quit();
+} else app.whenReady().then(() => {
+  //SECOND INSTANCES
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    // Someone tried to run a second instance, we should focus our window.
+    if (win) {
+      if (win.isMinimized() || !win.isVisible())
+      win.show();
+    }
+  })
+
+
   //WINDOWS
   createWindow()
 
@@ -81,6 +77,7 @@ app.whenReady().then(() => {
   dataFolder = app.getAppPath()+'\\Data\\'
   launcherFolder = app.getAppPath()+'\\Launcher\\'
   actualPath = launcherFolder
+  tray = createTray()
   
   ipcMain.on('load', (event, path) => {
     createList(path)
@@ -109,7 +106,7 @@ app.whenReady().then(() => {
     for(i in folders) { allPaths.push(folders[i]) }
     for(i in files) { allPaths.push(files[i]) }
     //START
-    
+    actualPath = argPath
     for(i in allPaths) {
       //Data
       let path = argPath+allPaths[i]
@@ -140,13 +137,12 @@ app.whenReady().then(() => {
           }
         }
         app.getFileIcon(iconPath, {size:"large"}).then((fileIcon) =>{ 
-          win.webContents.send('changeIcon', img, fileIcon.toDataURL()) 
+          if (actualPath == argPath) win.webContents.send('changeIcon', img, fileIcon.toDataURL()) 
         })
       } else{
         win.webContents.send('addFolderListener', id, path);
       }
     }
-    actualPath = argPath
   }
 
   function createBackButt(argPath) {
@@ -195,9 +191,7 @@ app.whenReady().then(() => {
 
     win2.webContents.send('setLocation', path);
     //Name
-    let name = path.substring(0, path.lastIndexOf("\\"))
-    name = name.substring(name.lastIndexOf("\\")+1)
-    if (name.includes('.')) name = name.substring(0, name.lastIndexOf('.'))
+    let name = path.substring(path.lastIndexOf("\\")+1)
     win2.webContents.send('setName', name);
     win2.webContents.send('setPath', undefined);
     win2.webContents.send('setIconPath', undefined);
@@ -312,27 +306,34 @@ app.whenReady().then(() => {
   }
 
   ipcMain.on('save', (event, path, newName, newPath, newIcon) => {
+    if (newName == '') {
+      win2.webContents.send('log', 'Name Is Necesary');
+      return
+    }
     if (fs.existsSync(path)) {
-      fs.writeFile(path, newPath+'\n'+newIcon, (err) => {
-        if (newName != undefined) {
-          if (fs.statSync(path).isFile()) {
+      if (fs.statSync(path).isFile()) {
+        if (newPath == '') {
+          win2.webContents.send('log', 'Path Is Necesary');
+          return
+        }
+        fs.writeFile(path, newPath+'\n'+newIcon, (err) => {
+          if (newName != undefined) {
             let newFilePath = actualPath+newName+'.txt'
             fs.rename(path, newFilePath, function(err) {
               closeWin2()
               createList(actualPath)
             })
-          } else {
-            let newFilePath = actualPath+newName
-            fs.rename(path, newFilePath, function(err) {
-              closeWin2()
-              createList(actualPath)
-            })
           }
-        } else {
-          closeWin2()
-          createList(actualPath)
+        })
+      } else {
+        if (newName != undefined) {
+          let newFilePath = actualPath+newName
+          fs.rename(path, newFilePath, function(err) {
+            closeWin2()
+            createList(actualPath)
+          })
         }
-      })
+      }
     }
   })
 
@@ -351,7 +352,7 @@ app.whenReady().then(() => {
     if (!fs.existsSync(fullName)) {
       fs.mkdirSync(fullName);
       win.webContents.send('log', `Folder "${name}" Added`);
-    }
+    } else win.webContents.send('log', `Folder "${name}" Already Exists`);
   })
 
   ipcMain.on('addGame', (event, name, path, icon) => {
@@ -362,7 +363,7 @@ app.whenReady().then(() => {
       fs.writeFile(fullName, data, (err) => {
         win.webContents.send('log', `Game "${name}" Added`);
       })
-    }
+    } else win.webContents.send('log', `Game "${name}" Already Exists`);
   })
 
 
@@ -728,6 +729,83 @@ app.whenReady().then(() => {
 })
 
 //FUNCTIONS ALL
+function createWindow() {
+  win = new BrowserWindow({
+    height: 550,
+    width: 1036,
+    minHeight: 491,
+    minWidth: 881,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      enableRemoteModule: true
+    }
+  })
+
+  win.loadFile('main.html')
+  win.removeMenu()
+  //win.openDevTools()
+  window = 'launcher'
+
+  win.on('close', function (event) {
+    if (!closing) {
+      event.preventDefault();
+      win.hide();
+    } else {
+      tray.destroy();
+    }
+  });
+}
+
+function createTray() {
+  let appIcon = new Tray(dataFolder+"Images/icon.ico");
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Launcher', click: function () {
+        if (window != 'launcher') {
+          win.loadFile('main.html')
+          window = 'launcher'
+        }
+        if (win.isMinimized() || !win.isVisible())
+        win.show();
+      }
+    },
+    {
+      label: 'Store', click: function () {
+        if (window != 'store') {
+          win.loadFile('store.html')
+          window = 'store'
+        }
+        if (win.isMinimized() || !win.isVisible())
+        win.show();
+      }
+    },
+    {
+      label: 'Themes', click: function () {
+        if (window != 'themes') {
+          win.loadFile('themes.html')
+          window = 'themes'
+        }
+        if (win.isMinimized() || !win.isVisible())
+        win.show();
+      }
+    },
+    {
+      label: 'Quit Oriøn', click: function () {
+        closing = true;
+        app.quit();
+      }
+    }
+  ]);
+
+  appIcon.on('double-click', function (event) {
+      win.show();
+  });
+  appIcon.setToolTip('Oriøn Launcher');
+  appIcon.setContextMenu(contextMenu);
+  return appIcon;
+}
+
 function updateTheme() {
   let si = fs.readFileSync(dataFolder+'settings.txt').toString().trim().split('\n')
   let background = si[0]
