@@ -1,0 +1,2 @@
+com.epicgames.launcher://apps/d0d1b5541a6540d5a81daacb3324639b%3A73fa17e4c7ed4152bd8afef8afb4559d%3AHydrangea?action=launch&silent=true
+D:\Games\RiME\RiME\SirenGame\Binaries\Win64\RiME.exe

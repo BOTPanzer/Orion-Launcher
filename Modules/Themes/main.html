@@ -1,0 +1,78 @@
+<div style="padding: 10px;">
+  <div style="width: 100%; display: flex; align-items: center;">
+    <div id="title" style="color: var(--text2Color); font-size: 40px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; margin-right: 10px;">Theme Manager</div>
+    <div id="folder" class="sbutton" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png');">
+      <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/icon_folder.png"></img>
+    </div>
+  </div>
+
+	<div id="list" style="width: calc(100% + 5px); transform: translate(-5px, 0); margin-top: 10px; display: flex; flex-wrap: wrap; font-family: ItemFont;">
+
+  </div>
+</div>
+
+<script>
+  ipcRenderer.on('resized', (event, size) => {
+    s1 = size/7
+    if (s1 < 150) s1 = 150
+    if (s1 > 171) s1 = 171
+    document.body.style.setProperty('--size1', s1+'px')
+  })
+
+  createThemeList()
+
+  function createThemeList() {
+    let argPath = data.root+'Data\\Themes\\'
+    if (!fs.existsSync(argPath)) return
+    document.getElementById('list').innerHTML = '';
+    //START
+    let allPaths = fs.readdirSync(argPath);
+    for(i in allPaths) {
+      //DATA
+      let id = 'theme'+i
+      let name = allPaths[i]
+      let path = argPath+name
+      let image = "./Data/Images/icon_file.png"
+      let tmpimage = path+'\\Data\\Images\\icon_file.png'
+      if (fs.existsSync(tmpimage)) image = argPath+name+'\\Data\\Images\\icon_file.png'
+      //HTML
+      let html = `<div id="${id}" class="sbutton" style="width: var(--size1); height: var(--size1); margin-top: 5px; margin-left: 5px; background-image: url('./Data/Images/icon_item.png'); background-repeat: no-repeat; background-size: cover; text-align: center; display: inline-block;">
+                    <div style="width: 100%; height: 65%;">
+                      <div style="height: 10%;"></div>
+                      <img style="width: 90%; height: 90%; object-fit: contain; -webkit-user-drag: none;" src="${image}"></img>
+                    </div>
+                    <div style="width: 100%; height: 35%; display: flex;">
+                      <div style="width: 90%; margin: auto; font-size: calc(var(--size1)/9); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: var(--textColor);">${name}</div>
+                    </div>
+                  </div>`
+      //ADD HTML
+      document.getElementById('list').insertAdjacentHTML('beforeend', html)
+      //ADD LISTENER
+      addButtonListener(id, function() {
+        document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item_clicked.png")';
+      }, function() {
+        document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
+      }, function() {
+        document.getElementById('title').innerText = 'Loading: '+name
+        $("#rightBar").animate({ scrollTop: 0 }, "fast");
+        ipcRenderer.send('pause')
+        const fse = require('fs-extra');
+        fse.copy(path, data.root, { overwrite: true }).then(function() {
+          ipcRenderer.send('reloadTheme')
+          ipcRenderer.send('resume')
+        }).catch(function() {
+          console.error('error while copying theme')
+          ipcRenderer.send('resume')
+        })
+      })
+    }
+  }
+
+  addButtonListener('folder', function() {
+    document.getElementById('folder').style.backgroundImage = 'url("./Data/Images/icon_description_folder_clicked.png")';
+  }, function() {
+    document.getElementById('folder').style.backgroundImage = 'url("./Data/Images/icon_description_folder.png")';
+  }, function() {
+    ipcRenderer.send('showOnExplorer', data.root+'Data\\Themes', false)
+  })
+</script>

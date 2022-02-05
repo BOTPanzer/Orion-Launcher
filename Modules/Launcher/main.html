@@ -1,0 +1,379 @@
+<div id="content" style="padding: 10px;">
+  <div style="width: 100%; display: flex; align-items: center;">
+    <div id="title" style="color: var(--text2Color); font-size: 40px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; width: 100%;">Home</div>
+	  <input id='editText' placeholder="Search Games" type="text" maxlength="50" style="height: 32px; min-width: 150px; max-width: 150px; padding-left: 10px; padding-right: 10px; margin-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
+    <div id="search" class="sbutton" style="height: 36px; min-width: 107px; background-image: url('./Data/Images/icon_description_launch.png');">Search</div>
+  </div>
+
+	<div id="launcherList" style="width: calc(100% + 5px); transform: translate(-5px, 0); margin-top: 10px; display: flex; flex-wrap: wrap; font-family: ItemFont;">
+
+  </div>
+</div>
+
+<script>
+  search = ''
+  click = ''
+  adding = false
+
+  selecting = false
+  selected = []
+  timeId = ''
+  time = 0
+
+  ipcRenderer.on('resized', (event, size) => {
+    s1 = size/7
+    if (s1 < 150) s1 = 150
+    if (s1 > 171) s1 = 171
+    document.body.style.setProperty('--size1', s1+'px')
+  })
+  createList(json.actualPath)
+
+  ipcRenderer.on('refreshLauncher', (event) => {
+    createList(json.actualPath)
+  })
+
+  ipcRenderer.on('changeIcon', (event, img, icon, path) => {
+    if (json.actualPath == path)
+      document.getElementById(img).src = icon
+  })
+
+  function startLauncher(s) {
+    setbuttons()
+    updateModules()
+    adding = true
+
+    selecting = false
+    selected = []
+    search = s
+
+    ipcRenderer.send('resume')
+
+    //SHOW ADD
+    if (document.getElementById('orionName').style.display != 'none')
+      document.getElementById('add').style.display = 'block'
+
+    //SEARCH
+    $('#editText').bind('keydown', function(event) {
+      if (event.keyCode === 13) {
+        event.preventDefault();
+        if (document.getElementById('editText').value != search) {
+          $("#rightBar").animate({ scrollTop: 0 }, "fast")
+          createList(json.actualPath, document.getElementById('editText').value)
+        }
+        return false;
+      }
+    })
+
+    addButtonListener('search', function() {
+      document.getElementById('search').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+    }, function() {
+      document.getElementById('search').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+    }, function() {
+      if (document.getElementById('editText').value != search) {
+        $("#rightBar").animate({ scrollTop: 0 }, "fast")
+        createList(json.actualPath, document.getElementById('editText').value)
+      }
+    })
+  
+    //LIST HEIGHT THINGY
+    document.getElementById('content').style.minHeight = document.getElementById('content').offsetHeight+'px'
+    setTimeout(function() {
+      document.getElementById('content').style.minHeight = ''
+    }, 200)
+
+    //CLEAR LIST
+    document.getElementById('launcherList').innerHTML = '';
+  }
+
+  function createList(argPath, search) {
+    if (search == undefined) search = ''
+    if (!argPath.startsWith(data.launcher)) argPath = data.launcher
+    if (!argPath.endsWith('\\')) argPath = argPath+'\\'
+    if (!fs.existsSync(argPath)) return
+    startLauncher(search)
+    //SET TITLE & LOCATION
+    json.actualPath = argPath
+    updateData(json)
+    let title = 'Home'
+    if (json.actualPath != data.launcher) title = json.actualPath.slice(0,-1).substring(json.actualPath.slice(0,-1).lastIndexOf("\\")+1)
+    if (search != '') title = title+' - '+search
+    document.getElementById('title').innerText = title
+    //BACK BUTTON
+    createBackButt(json.actualPath, search)
+    //GET PATHS
+    let paths = []
+    if (search == '') {
+      paths = fs.readdirSync(json.actualPath)
+      rest()
+    } else {
+      var recursive = require("recursive-readdir");
+      recursive(json.actualPath, function (err, files) {
+        for(i in files) {
+          let tmp = files[i].substring(json.actualPath.length)
+          let tmp2 = files[i].substring(files[i].lastIndexOf('\\')+1)
+          if (tmp2.endsWith('.txt')) tmp2 = tmp2.slice(0,-4)
+          if (tmp2.toLowerCase().includes(search.toLowerCase()))
+            paths.push(tmp)
+        }
+        rest()
+      })
+    }
+
+    function rest() {
+      //FIRST FOLDERS THEN FILES
+      let folders = []
+      let files = []
+      for(i in paths) {
+        let path = argPath+paths[i]
+        if (fs.statSync(path).isFile()) {
+          files.push(paths[i])
+        } else {
+          folders.push(paths[i])
+        }
+      }
+      let allPaths = []
+      for(i in folders) { allPaths.push(folders[i]) }
+      for(i in files) { allPaths.push(files[i]) }
+      //START
+      for(i in allPaths) {
+        //DATA
+        let path = argPath+allPaths[i]
+        let data = getFileInfo(path)
+        let isFile = data.isFile
+        let name = data.name
+        let gamePath = data.gamePath
+        let iconPath = data.iconPath
+        if (iconPath == undefined) iconPath = ''
+        let pathClean = ''
+        let argsClean = ''
+        if (isFile) {
+          let gamePathArg = getPathInfo(gamePath)
+          pathClean = gamePathArg.pathClean
+          argsClean = gamePathArg.argsClean
+        }
+        //ID
+        let id = `game${i}`
+        if (!isFile) id = `folder${i}`
+        let img = `img${i}`
+        //DEF IMAGE
+        let icon = "./Data/Images/icon_folder.png"
+        if (isFile) icon = "./Data/Images/icon_file.png"
+        //CREATE HTML
+        let html = createDataHTML(id, img, icon, path, isFile, name, gamePath, iconPath, pathClean, argsClean)
+        document.getElementById('launcherList').insertAdjacentHTML('beforeend', html)
+        addListener(id, img)
+
+        if (isFile) {
+          if (iconPath == '') iconPath = pathClean
+          if (fs.existsSync(iconPath) && fs.statSync(iconPath).isFile()) {
+            if (iconPath.toLowerCase().endsWith('.exe')) {
+              ipcRenderer.send('requestIcon', img, iconPath, json.actualPath)
+            } else {
+              document.getElementById(img).src = iconPath
+            }
+          }
+        }
+      }
+      adding = false
+    }
+  }
+
+  function createBackButt(argPath, search) {
+    if (search == '' && argPath != data.launcher) {
+      //bpath
+      let bpath = argPath
+      if (bpath.endsWith("\\")) bpath = bpath.slice(0,-1)
+      let numb = bpath.split("\\").length - 1
+      if (numb > 1) bpath = bpath.substring(0, bpath.lastIndexOf("\\")+1)
+      //HTML
+      let html = createDataHTML('backButt', 'backImg', './Data/Images/icon_back.png', bpath, 'false', 'Back', '', '', '', '')
+      document.getElementById('launcherList').insertAdjacentHTML('beforeend', html)
+      addListener('backButt', 'backImg')
+    } else if (search != '') {
+      //HTML
+      let html = createDataHTML('backButt', 'backImg', './Data/Images/icon_back.png', argPath, 'false', 'Back', '', '', '', '')
+      document.getElementById('launcherList').insertAdjacentHTML('beforeend', html)
+      addListener('backButt', 'backImg')
+    }
+  }
+
+  function addListener(id, img) {
+    let path = document.getElementById('path-'+id).innerText
+    let isFile = true
+    if (document.getElementById('isFile-'+id).innerText != 'true') isFile = false
+
+    addButtonListener(id, function() {
+      if (adding) return
+      document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item_clicked.png")';
+      timeId = id
+      time = Date.now()
+    }, function() {
+      if ($("#"+id+":hover").length == 0 && !selecting) { //IF ISN'T A CLICK & ISN'T SELECTING
+        document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
+      }
+    }, function() {
+      if (adding) return
+      if (id != 'backButt' && timeId == id && time+350 < Date.now()) selecting = true
+      if (id != 'backButt' && selecting) {
+        if (selected.includes(id)) {
+          const index = selected.indexOf(id);
+          if (index > -1) {
+            selected.splice(index, 1);
+            if (selected.length == 0) selecting = false
+            document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
+          }
+        } else {
+          selected.push(id)
+        }
+      } else {
+        document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
+        if (isFile) {
+          let name = document.getElementById('name-'+id).innerText
+          let pathClean = document.getElementById('pathClean-'+id).innerText
+          let argsClean = document.getElementById('argsClean-'+id).innerText
+          if (argsClean != '') argsClean = argsClean.split(",")
+          openFile(id, name, pathClean, argsClean)
+        } else {
+          openFolder(path)
+        }
+      }
+    })
+
+    if (id != 'backButt')
+    addRightButtonListener(id, function() {
+      if (!selecting) document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item_clicked.png")';
+    }, function() {
+      if ($("#"+id+":hover").length == 0 && !selecting) {
+        document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
+      }
+    }, function() {
+      if (!selecting || selected.length == 1 && selected.includes(id)) {
+        if (!selecting) document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item.png")';
+        ipcRenderer.send('pause')
+        if (isFile) {
+          ipcRenderer.send('contextFile', path, document.getElementById(img).src)
+        } else {
+          ipcRenderer.send('contextFolder', path)
+        }
+      } else if (selected.includes(id)) {
+        let paths = []
+        for(i in selected) {
+          paths.push(document.getElementById('path-'+selected[i]).innerText)
+        }
+        ipcRenderer.send('pause')
+        ipcRenderer.send('contextMulti', paths)
+      }
+    })
+  }
+
+  function createDataHTML(id, img, icon, path, isFile, name, gamePath, iconPath, pathClean, argsClean) {
+    let html = `<div id="${id}" class="sbutton" style="width: var(--size1); height: var(--size1); margin-top: 5px; margin-left: 5px; background-image: url('./Data/Images/icon_item.png'); background-repeat: no-repeat; background-size: cover; text-align: center; display: inline-block;">
+                
+                <div id="${'path-'+id}" style="display: none;">${path}</div>
+                <div id="${'isFile-'+id}" style="display: none;">${isFile}</div>
+                <div id="${'name-'+id}" style="display: none;">${name}</div>
+                <div id="${'gamePath-'+id}" style="display: none;">${gamePath}</div>
+                <div id="${'iconPath-'+id}" style="display: none;">${iconPath}</div>
+                <div id="${'pathClean-'+id}" style="display: none;">${pathClean}</div>
+                <div id="${'argsClean-'+id}" style="display: none;">${argsClean}</div>
+  
+                <div style="width: 100%; height: 65%;">
+                  <div style="height: 10%;"></div>
+                  <img id="${img}" style="width: 90%; height: 90%; object-fit: contain; -webkit-user-drag: none;" src="${icon}"></img>
+                </div>
+                <div style="width: 100%; height: 35%; display: flex;">
+                  <div style="width: 90%; margin: auto; font-size: calc(var(--size1)/9); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: var(--textColor);">${name}</div>
+                </div>
+              </div>`
+    return html
+  }
+
+  //GET
+  function getFileInfo(argPath, fixed) {
+    if (fixed == undefined) fixed = true
+    let path = argPath
+    if (path.endsWith('\\')) path = path.slice(0,-1)
+    //isFile
+    let isFile = false
+    if (fs.statSync(argPath).isFile()) isFile = true
+    //Name
+    let name = argPath.substring(argPath.lastIndexOf("\\")+1)
+    if (name.includes('.')) name = name.substring(0, name.lastIndexOf('.'))
+    //File Stuff
+    if (isFile) {
+      let si = fs.readFileSync(argPath).toString().trim().split('\n')
+      //Path
+      let gamePath = si[0]
+      if (gamePath != undefined) {
+        gamePath = gamePath.replaceAll('\r', '')
+        if (gamePath.startsWith('?:') && fixed) gamePath = gamePath.replace('?:', data.launcher.substring(0, 2))
+      }
+      //Icon
+      let iconPath = si[1]
+      if (iconPath != undefined) {
+        iconPath = iconPath.replaceAll('\r', '')
+      }
+      let data = {isFile, name, gamePath, iconPath}
+      return data
+    } else {
+      let data = {isFile, name}
+      return data
+    }
+  }
+
+  function getPathInfo(gamePath) {
+    //update add and context aswell
+    gamePath = gamePath.trim()
+    let pathClean = gamePath
+    let argsClean = ''
+    if (gamePath.includes('--') && gamePath.includes(' ') && !gamePath.endsWith('"')) {
+      if (gamePath.startsWith('"') ) {
+        pathClean = gamePath.substring(1, gamePath.lastIndexOf('"'))
+        let args = gamePath.substring(pathClean.length+2).trim()
+        argsClean = args.split(' ')
+        argsClean.unshift("/c", pathClean)
+      } else {
+        pathClean = gamePath.substring(0, gamePath.lastIndexOf(' '))
+        let args = gamePath.substring(pathClean.length+2).trim()
+        argsClean = args.split(' ')
+        argsClean.unshift("/c", pathClean)
+      }
+    }
+    let data = {pathClean, argsClean}
+    return data
+  }
+  
+  //OPEN
+  function openFile(id, name, pathClean, argsClean) {
+    if (click == id) {
+      if (argsClean != '') {
+        let spawn = require("child_process").spawn;
+        let bat = spawn("cmd.exe", argsClean)
+      } else {
+        shell.openPath(pathClean)
+      }
+      addNoti(name)
+      click = ''
+    } else {
+      click = id
+      setTimeout(function() {
+        if (click == id) {
+          click = ''
+        }
+      }, 500)
+    }
+  }
+
+  function openFolder(path) {
+    document.getElementById('editText').value = ''
+    let scroll = document.getElementById('rightBar').scrollTop
+    if (scroll == 0) {
+      createList(path)
+    } else {
+      $("#rightBar").animate({ scrollTop: 0 }, "fast")
+	    setTimeout(function() {
+        createList(path)
+      }, 150)
+    }
+  }
+</script>

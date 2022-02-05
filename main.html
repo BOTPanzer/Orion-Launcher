@@ -50,10 +50,15 @@
   }
   
   ::-webkit-scrollbar-thumb {
-    border-radius: 5px;
     background: var(--scrollColor);
+    border: solid 2px var(--topColor);
+    border-radius: 5px;
   }
-  
+
+  ::-webkit-scrollbar-thumb:hover {
+    border: solid 0px var(--topColor);
+  }
+
   ::placeholder {
     color: var(--placeholderColor);
   }
@@ -89,40 +94,32 @@
   </div>
   
   <div style="height: calc(100% - 20px); width: 100%; display: flex; position: relative;">
-    <div id="leftBar" style="height: 100%; width: 185px; display: flex; position: relative; z-index: 404;">
-      <div style="display: flex; flex-flow: column; height: 100%;">
-        <div style="display: flex; align-items: center; margin: 10px;">
-          <img id="orionLogo" class="sbutton" style="min-height: 50px; min-width: 50px; max-height: 50px; max-width: 50px; -webkit-user-drag: none;" src="./Data/Images/icon.png"/>
-          <div id="orionName" style="margin-left: 5px; font-family: ItemFont; color: var(--text2Color);">Oriøn Launcher</div>
-        </div>
-        
-        <div style="display: flex; flex-flow: column; flex: 1 1 auto; overflow-y: auto;">
-          <div style="flex: 1 1 auto;">
-            <div id="store" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin: 20px; margin-left: 23px;">Store</div>
-            <div id="launcher" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin: 20px; margin-left: 23px;">Library</div>
-            <div id="themes" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin: 20px; margin-left: 23px;">Themes</div>
-            <div id="installer" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin: 20px; margin-left: 23px;">Installer</div>
-            <div id="ftp" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin: 20px; margin-left: 23px; margin-bottom: 0px;">Connect</div>
-          </div>
-  
-          <div id="add" style="flex: 0 1 auto;">
-            <div id="addfolder" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin: 20px; margin-left: 23px;">Add Folder</div>
-            <div id="addgame" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin: 20px; margin-left: 23px;">Add Game</div>
-          </div>
+    <div id="leftBar" style="height: 100%; min-width: 155px; width: 155px; max-width: 155px; overflow: hidden; position: relative; z-index: 404; opacity: 0;">
+      <div style="display: flex; align-items: center; margin: 10px;">
+        <img id="orionLogo" class="sbutton" style="min-height: 50px; max-height: 50px; min-width: 50px; max-width: 50px; -webkit-user-drag: none;" src="./Data/Images/icon.png"/>
+        <div id="orionName" style="margin-left: 5px; font-family: ItemFont; color: var(--text2Color);">Oriøn Launcher</div>
+      </div>
+      
+      <div style="height: calc(100% - 70px); display: flex; flex-flow: column; flex: 1 1 auto; overflow-y: auto;">
+        <div id="moduleButtons" style="flex: 1 1 auto;"></div>
+
+        <div id="add" style="display: none; flex: 0 1 auto;">
+          <div id="addfolder" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin-bottom: 20px; margin-left: auto; margin-right: auto;">Add Folder</div>
+          <div id="addgame" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin-bottom: 20px; margin-left: auto; margin-right: auto;">Add Game</div>
         </div>
       </div>
-      <div id="line" style="width: 2px; margin-top: 5px; margin-bottom: 5px; background-color: var(--lineColor); opacity: 0.5;"></div>
     </div>
 
-    <div id="rightBar" style="width: 100%; overflow-y: auto; z-index: 0;">
+    <div id="line" style="width: 2px; margin-top: 5px; margin-bottom: 5px; background-color: var(--lineColor); opacity: 0.5;"></div>
+
+    <div id="rightBar" style="width: 100%; overflow-y: scroll; z-index: 0;">
       <img id="logo" style="height: 120px; margin: 20px; -webkit-user-drag: none;" src="./Data/Images/logo.png"/> 
-      <div id="window">
-      
-      </div>
+      <div id="window"></div>
     </div>
-    <div id="noti" style="height: 70px; width: 200px; position: fixed; bottom: 20px; right: 20px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; pointer-events: none; opacity: 0; display: flex; justify-content: space-between; flex-direction: column;">
+    
+    <div id="noti" style="height: 70px; width: 200px; position: fixed; bottom: 20px; right: 20px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round); pointer-events: none; opacity: 0; display: flex; justify-content: space-between; flex-direction: column;">
       <div></div>
-      <div style="margin-left: 10px; font-size: 17px; color: var(--text2Color);">Launching:</div>
+      <div id="notiTitle" style="margin-left: 10px; font-size: 17px; color: var(--text2Color);">Launching:</div>
       <div id="notiName" style="width: 160px; margin-left: 20px; font-size: 17px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: var(--textColor);">Game</div>
       <div></div>
     </div>
@@ -130,41 +127,85 @@
 </body>
 
 <script>
-  const { ipcRenderer } = require('electron');
+  const { app, ipcRenderer, shell } = require('electron');
   window.$ = window.jQuery = require('jquery');
-  const Net = require('net');
   const fs = require('fs');
-  let lastWin = ''
-  let button = ''
+
+  //DATA
+  let data = {} //root, launcher (folders)
+  let json = null
+  let currentPath = ''
+  let loading = false
+  //NOTI
+  let showingNoti = false
+  let notis = []
+  let notisTitle = []
+  //SERVER
   let fullLog = ''
-  let starts = ''
   let mainSocket = null
-  //let dataFolder = ''
 
   a()
   setbuttons()
-  ipcRenderer.send('getData', 1)
-  ipcRenderer.on('lineData', (event, text) => {
-    if (text == '1') initializeFTP()
-  })
 
   function a() {
-    ipcRenderer.on('load', (event, html) => {
-      lastWin = html
-      $(function(){
-        setbuttons()
-        ipcRenderer.removeAllListeners()
-        document.getElementById('add').style.display = 'none'
-        document.getElementById('window').scrollTop = 0
-        var result = $("#window").load(html, function () {
-          ipcRenderer.send('loaded')
-          a2()
-        })
-      })
+    ipcRenderer.on('theme', (event) => {
+      $("#themeDiv").load('Data\\themeSettings.html')
     })
 
-    ipcRenderer.on('theme', (event, theme) => {
-      $("#themeDiv").load(theme)
+    ipcRenderer.on('data', (event, argData) => {
+      data = argData
+      json = getData()
+
+      //ADD MODULES
+      let modulesFolder = data.root+'Modules\\'
+      if (!fs.existsSync(modulesFolder)) return
+      document.getElementById('moduleButtons').innerHTML = ''
+      let modulestmp = fs.readdirSync(modulesFolder);
+      let modules = []
+      if (modulestmp.includes('Store')) {
+        modules.push('Store')
+        modulestmp.splice(modulestmp.indexOf('Store'), 1);
+      } if (modulestmp.includes('Launcher')) {
+        modules.push('Launcher')
+        modulestmp.splice(modulestmp.indexOf('Launcher'), 1);
+      } if (modulestmp.includes('Themes')) {
+        modules.push('Themes')
+        modulestmp.splice(modulestmp.indexOf('Themes'), 1);
+      } if (modulestmp.includes('Installer')) {
+        modules.push('Installer')
+        modulestmp.splice(modulestmp.indexOf('Installer'), 1);
+      } if (modulestmp.includes('Connect')) {
+        modules.push('Connect')
+        modulestmp.splice(modulestmp.indexOf('Connect'), 1);
+      }
+      for(i in modulestmp) { modules.push(modulestmp[i]) }
+      for(i in modules) {
+        //DATA
+        let id = 'module'+i
+        let name = modules[i]
+        let path = modulesFolder+name
+        let html = `<div id="${id}" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin-bottom: 20px; margin-left: auto; margin-right: auto; margin-top: 10px;">
+                      ${name}
+                      <div id="${'path-'+id}" style="display: none;">${path}</div>
+                    </div>`
+        //ADD MODULE
+        document.getElementById('moduleButtons').insertAdjacentHTML('beforeend', html)
+      }
+      updateModules()
+
+      //START FTP
+      if (json.startServer && fs.existsSync(data.root+'Modules\\Connect')) initializeFTP()
+
+      //ORION BUTTON
+      if (json.leftbar && document.getElementById('orionName').style.display == 'none')
+        document.getElementById('orionLogo').click();
+      else if (!json.leftbar && document.getElementById('orionName').style.display != 'none')
+        document.getElementById('orionLogo').click();
+      document.getElementById('leftBar').style.opacity = '1'
+    })
+
+    ipcRenderer.on('loadModule', (event, path, specialData) => {
+      loadModule(path, specialData)
     })
 
     ipcRenderer.on('pause', (event) => {
@@ -176,14 +217,10 @@
     })
   }
 
-  function a2() {
-    a()
-  }
-
   function setbuttons() {
     $(window).unbind()
     $('*').unbind()
-  
+
     //ORIONLOGO
     addButtonListener('orionLogo', function() {}, function() {}, function() {
       if (document.getElementById('orionName').style.display != 'none') {
@@ -192,32 +229,31 @@
         document.getElementById('leftBar').style.position = 'fixed'
 
         document.getElementById('orionName').style.display = 'none'
-        document.getElementById('store').style.display = 'none'
-        document.getElementById('launcher').style.display = 'none'
-        document.getElementById('themes').style.display = 'none'
-        document.getElementById('installer').style.display = 'none'
-        document.getElementById('ftp').style.display = 'none'
         document.getElementById('add').style.display = 'none'
         document.getElementById('line').style.opacity = '0'
 
         document.getElementById('logo').style.marginLeft = '72px'
+
+        let json = getData()
+        json.leftbar = false
+        updateData(json)
       } else {
-        document.getElementById('leftBar').style.width = '185px'
+        document.getElementById('leftBar').style.width = '155px'
         document.getElementById('leftBar').style.height = '100%'
         document.getElementById('leftBar').style.position = 'relative'
 
         document.getElementById('orionName').style.display = 'flex'
-        document.getElementById('store').style.display = 'flex'
-        document.getElementById('launcher').style.display = 'flex'
-        document.getElementById('themes').style.display = 'flex'
-        document.getElementById('installer').style.display = 'flex'
-        document.getElementById('ftp').style.display = 'flex'
-        document.getElementById('line').style.opacity = '0.5'
-        if (lastWin != 'launcher.html')
-          document.getElementById('add').style.display = 'none'
-        else
+        if (currentPath.endsWith('\\Launcher'))
           document.getElementById('add').style.display = 'block'
+        else
+          document.getElementById('add').style.display = 'none'
+        document.getElementById('line').style.opacity = '0.5'
+
         document.getElementById('logo').style.marginLeft = '20px'
+
+        let json = getData()
+        json.leftbar = true
+        updateData(json)
       }
     })
 
@@ -248,51 +284,6 @@
       ipcRenderer.send('exit')
     })
 
-    //STORE
-    addButtonListener('store', function() {
-      document.getElementById('store').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-    }, function() {
-      document.getElementById('store').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-    }, function() {
-      ipcRenderer.send('store')
-    })
-
-    //LAUNCHER
-    addButtonListener('launcher', function() {
-      document.getElementById('launcher').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-    }, function() {
-      document.getElementById('launcher').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-    }, function() {
-      ipcRenderer.send('launcher')
-    })
-
-    //THEMES
-    addButtonListener('themes', function() {
-      document.getElementById('themes').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-    }, function() {
-      document.getElementById('themes').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-    }, function() {
-      ipcRenderer.send('themes')
-    })
-
-    //FTP
-    addButtonListener('installer', function() {
-      document.getElementById('installer').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-    }, function() {
-      document.getElementById('installer').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-    }, function() {
-      ipcRenderer.send('installer')
-    })
-
-    //FTP
-    addButtonListener('ftp', function() {
-      document.getElementById('ftp').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-    }, function() {
-      document.getElementById('ftp').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-    }, function() {
-      ipcRenderer.send('ftp')
-    })
-
     //ADDFOLDER
     addButtonListener('addfolder', function() {
       document.getElementById('addfolder').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
@@ -316,8 +307,70 @@
     })
   }
 
-  //FTP
+
+  //MODULE FUNCTIONS
+  function updateModules() {
+    var children = document.getElementById('moduleButtons').childNodes;
+    children.forEach(function(item){
+      let id = item.id
+      let path = document.getElementById('path-'+id).innerHTML
+      addButtonListener(id, function() {
+        document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+      }, function() {
+        document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+      }, function() {
+        loadModule(path)
+      })
+
+      if (path.endsWith('Modules\\Launcher') && currentPath == '' && children.length > 0)
+        item.click()
+        //document.getElementById('moduleButtons').firstChild.click()
+    })
+  }
+
+  function loadModule(path, specialData) {
+    if (loading) return
+    let html = path+'\\main.html'
+    if (!fs.existsSync(html)) return
+    else console.log('exists')
+    if (currentPath == path) return
+    else currentPath = path
+
+    setbuttons()
+    ipcRenderer.removeAllListeners()
+
+    loading = true
+    $("#window").fadeOut(200)
+    setTimeout(function() {
+      document.getElementById('add').style.display = 'none'
+      document.getElementById('window').scrollTop = 0
+      var result = $("#window").load(html.replaceAll(' ', '%20'), function () {
+        $("#window").fadeIn(200)
+        ipcRenderer.send('loaded', path)
+        ipcRenderer.send('specialData', specialData)
+        updateModules()
+        a()
+        setTimeout(function() {loading = false}, 200);
+      })
+    }, 200);
+  }
+
+
+  //DATA FUNCTIONS
+  function getData() {
+    let jsonPath = data.root+'Data\\settings.json'
+    let rawdata = fs.readFileSync(jsonPath)
+    return JSON.parse(rawdata)
+  }
+
+  function updateData(json) {
+    fs.writeFileSync(data.root+'Data\\settings.json', JSON.stringify(json));
+  }
+
+
+  //FTP FUNCTIONS
   function initializeFTP() {
+    const Net = require('net');
     server = new Net.Server()
 
     server.on('error', function (e) {
@@ -358,11 +411,52 @@
     fullLog = fullLog+text
     if (document.getElementById('text') != null) {
       document.getElementById('text').innerText = fullLog
+      document.getElementById('textDiv').scrollTop = document.getElementById('textDiv').scrollHeight;
       
       var documentHeight = document.getElementById('rightBar').offsetHeight;
       document.getElementById('rightBar').scrollTo(0, documentHeight);
     }
   }   
+
+
+  //NOTI
+  function addNoti(name, title) {
+    notis.push(name)
+    if (title == undefined) title = 'Launching:'
+    notisTitle.push(title)
+    if (!showingNoti) notiAdmin()
+  }
+
+  function notiAdmin() {
+    n1()
+
+    function n1() { 
+      if (notis.length > 0) {
+        showingNoti = true
+        n2()
+      } else showingNoti = false
+    }
+
+    function n2() { 
+      let name = notis[0]
+      let title = notisTitle[0]
+      notis.shift()
+      notisTitle.shift()
+
+      document.getElementById('notiName').innerText = name
+      document.getElementById('notiTitle').innerText = title
+      $( "#noti" ).fadeTo( "fast" , 1, function() {
+        setTimeout(function() {
+          $( "#noti" ).fadeTo( "fast" , 0)
+        }, 1500)
+      })
+      
+      setTimeout(function() {
+        n1()
+      }, 2500)
+    }
+  }
+
 
   //BUTTON LISTENERS
   function addButtonListener(id, mousedown, mouseup, click) {

@@ -33,6 +33,25 @@
     --size1: 150px;
   }
 
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }	
+
+  ::-webkit-scrollbar-track {
+    background: var(--topColor);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollColor);
+    border: solid 2px var(--topColor);
+    border-radius: 5px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    border: solid 0px var(--topColor);
+  }
+
   ::placeholder {
     color: var(--placeholderColor);
   }
@@ -74,25 +93,24 @@
   const { ipcRenderer } = require('electron');
   window.$ = window.jQuery = require('jquery');
 
+  $("#themeDiv").load('Data\\themeSettings.html')
+
   ipcRenderer.on('load', (event, file, arg1, arg2) => {
-    if (file == 'addfolder.html') {
+    let tmpfile = file.substring(file.lastIndexOf('/')+1)
+    if (tmpfile == 'addfolder.html') {
       document.getElementById('title').innerText = 'Oriøn: Add Folder'
-    } else if (file == 'addgame.html') {
+    } else if (tmpfile == 'addgame.html') {
       document.getElementById('title').innerText = 'Oriøn: Add Game'
-    } else if (file == 'context-folder.html') {
+    } else if (tmpfile == 'context-folder.html') {
       document.getElementById('title').innerText = 'Oriøn: Folder Properties'
-    } else if (file == 'context-file.html') {
+    } else if (tmpfile == 'context-file.html') {
       document.getElementById('title').innerText = 'Oriøn: Game Properties'
     }
     $(function(){
-      var result = $("#window").load(file, function () {
-        ipcRenderer.send('loadedWin2', file, arg1, arg2)
+      var result = $("#window").load(file.replaceAll(' ', '%20'), function () {
+        ipcRenderer.send('loaded2', tmpfile, arg1, arg2)
       })
     })
-  })
-
-  ipcRenderer.on('theme', (event, theme) => {
-    $("#themeDiv").load(theme)
   })
 
   addButtonListener('exit', function() {

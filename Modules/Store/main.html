@@ -1,0 +1,522 @@
+<style>
+  .list {
+    font-family: ItemFont;
+    color: var(--textColor);
+    overflow: hidden;
+    overflow-x: auto;
+    display: flex;
+
+    padding-bottom: 5px;
+    margin-left: 5px; 
+    margin-right: 5px;
+  }
+
+  .list::-webkit-scrollbar-track {
+    border-radius: 5px;
+  }
+</style>
+
+<div id="storeList" style="padding: 10px;">
+  <div style="margin-left: 20px; margin-right: 20px; display: flex; align-items: center;">
+    <div id="discover" class="sbutton" style="height: 36px; min-width: 107px; background-image: url('./Data/Images/icon_description_launch.png');">Discover</div>
+    <input id='editText' placeholder="Search Games" type="text" maxlength="50" style="height: 32px; width: 100%; margin-left: 10px; margin-right: 10px; padding-left: 10px; padding-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
+    <div id="search" class="sbutton" style="height: 36px; min-width: 107px; background-image: url('./Data/Images/icon_description_launch.png');">Search</div>
+  </div>
+
+  <div style="margin-bottom: 20px; margin-top: 20px; margin-left: 50px; margin-right: 50px;">
+    <div style="display: flex; align-items: center; font-family: ItemFont; font-size: 20px; margin-top: 20px;">
+      <div id="Elamigos" style="color: var(--text2Color); padding: 5px; white-space: nowrap;">ElAmigos</div>
+      <div style="height: 1px; width: 100%; margin-left: 5px; margin-right: 5px; background-color: var(--lineColor);"></div>
+      <div id="moreElamigos" class="sbutton" style="color: var(--text2Color); padding: 5px;" onclick="openLink('https://www.elamigos-games.com/')">More</div>
+    </div>
+    <div class="list" id="listElamigos"></div>
+  
+    <div style="display: flex; align-items: center; font-family: ItemFont; font-size: 20px; margin-top: 20px;">
+      <div id="Fitgirl" style="color: var(--text2Color); padding: 5px; white-space: nowrap;">Fitgirl</div>
+      <div style="height: 1px; width: 100%; margin-left: 5px; margin-right: 5px; background-color: var(--lineColor);"></div>
+      <div id="moreFitgirl" class="sbutton" style="color: var(--text2Color); padding: 5px;" onclick="openLink('https://fitgirl-repacks.site/')">More</div>
+    </div>
+    <div class="list" id="listFitgirl"></div>
+  
+    <div style="display: flex; align-items: center; font-family: ItemFont; font-size: 20px; margin-top: 20px;">
+      <div id="Pivi" style="color: var(--text2Color); padding: 5px; white-space: nowrap;">Pivi</div>
+      <div style="height: 1px; width: 100%; margin-left: 5px; margin-right: 5px; background-color: var(--lineColor);"></div>
+      <div id="morePivi" class="sbutton" style="color: var(--text2Color); padding: 5px;" onclick="openLink('https://pivigames.blog/')">More</div>
+    </div>
+    <div class="list" id="listPivi"></div>
+  
+    <div style="display: flex; align-items: center; font-family: ItemFont; font-size: 20px; margin-top: 20px;">
+      <div id="SteamUnlocked" style="color: var(--text2Color); padding: 5px; white-space: nowrap;">Steam Unlocked</div>
+      <div style="height: 1px; width: 100%; margin-left: 5px; margin-right: 5px; background-color: var(--lineColor);"></div>
+      <div id="moreSteamUnlocked" class="sbutton" style="color: var(--text2Color); padding: 5px;" onclick="openLink('https://steamunlocked.net/')">More</div>
+    </div>
+    <div class="list" id="listSteamUnlocked"></div>
+  </div>
+</div>
+
+<script>
+  ipcRenderer.on('resized', (event, size) => {
+    s1 = size/6
+    if (s1 < 200) s1 = 200
+    if (s1 > 300) s1 = 300
+    document.body.style.setProperty('--size1', s1+'px')
+  })
+
+  lastStoreUpdated = 0
+
+  setStoreListeners()
+
+  ipcRenderer.on('specialData', (event, specialData) => {
+    if (specialData == undefined) specialData = ''
+    searchGames(specialData)
+  })
+
+  //SEARCH FUNCTIONS
+  function searchGames(orSearch) {
+    setbuttons()
+    updateModules()
+    setStoreListeners()
+
+    clearList()
+    document.getElementById('editText').value = orSearch
+    searchingResults('Elamigos')
+    searchingResults('Fitgirl')
+    searchingResults('Pivi')
+    searchingResults('SteamUnlocked')
+
+    let search = orSearch.toLowerCase().replaceAll(' ', '+')
+    let storeUpdated = Date.now()
+    lastStoreUpdated = storeUpdated
+
+    let fullURL = 'https://www.elamigos-games.com/?q='+search
+    if (search == '') fullURL = 'https://www.elamigos-games.com/'
+    getHTMLAgent(fullURL).then(function(result) {
+      if (result == undefined) noResults('Elamigos')
+      else elamigos(result, storeUpdated)
+    })
+    
+    fullURL = 'https://fitgirlrepacks.co/search/'+search
+    if (search == '' || search.length < 3) fullURL = 'https://fitgirlrepacks.co/'
+    getHTMLAgent(fullURL).then(function(result) {
+      if (result == undefined) noResults('Fitgirl')
+      else fitgirl(result, storeUpdated)
+    })
+
+    fullURL = 'https://pivigames.blog/?s='+search
+    if (search == '') fullURL = 'https://pivigames.blog/'
+    getHTMLAgent(fullURL).then(function(result) {
+      if (result == undefined) noResults('Pivi')
+      else pivi(result, storeUpdated)
+    })
+
+    fullURL = 'https://steamunlocked.net/?s='+search
+    if (search == '') fullURL = 'https://steamunlocked.net/'
+    getHTMLAgent(fullURL).then(function(result) {
+      if (result == undefined) noResults('SteamUnlocked')
+      else steamunlocked(result, search, storeUpdated)
+    })
+  }
+  
+  async function getHTMLAgent(url) {
+    //process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+    const superagent = require('superagent');
+    const response = await superagent.get(url).set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36').catch(function(err){ console.log(err) })
+    if (response != undefined) return response.text
+    else console.log('no va '+url)
+  }
+
+  //STORE FUNCTIONS
+  function elamigos(result, storeUpdated) {
+    if (currentPath != data.root+'Modules\\Store') return
+    if (storeUpdated != lastStoreUpdated) return
+    clearList('listElamigos')
+    let part = result.substring(result.indexOf('<div class="col-lg-2 '), result.indexOf('<!-- /.row -->'))
+    var si = part.split('<div class="col-lg-2 ')
+    var links = []
+    var names = []
+    var imgs = []
+    var infos = []
+    //LINKS & NAMES & IMAGES
+    for(i in si) {
+      if (links.length == 12) break
+      let tmp = si[i].substring(si[i].lastIndexOf('href="')+6)
+      tmp = tmp.substring(0, tmp.indexOf('<'))
+      let link = tmp.substring(0, tmp.indexOf('"'))
+      let name = tmp.substring(tmp.indexOf('>')+1)
+      let img = si[i].substring(si[i].indexOf('src="')+5)
+      img = 'https://www.elamigos-games.com'+img.substring(0, img.indexOf('"'))
+      let info = si[i].substring(si[i].lastIndexOf('<small>')+7)
+      info = info.substring(0, info.indexOf('</small>'))
+      info = info.replaceAll('+', '').trim()
+      if (link != '' && img != '' && link.startsWith('https://www.elamigos-games.com')) {
+        links.push(link)
+        names.push(titleCase(name))
+        imgs.push(img)
+        infos.push(info)
+      }
+    }
+    //HAS RESULTS
+    if (links.length == 0) noResults('Elamigos')
+    else hasResults('Elamigos')
+    //ADD GAMES
+    for(i in links) {
+      let id = `elamigos${i}-${Date.now()}`
+      let img = imgs[i]
+      let link = links[i]
+      let name = names[i]
+      let info = infos[i]
+      if (info != '') html = createStoreHTML2(id, null, img, name, info)
+      else html = createStoreHTML(id, null, img, name)
+      document.getElementById('listElamigos').insertAdjacentHTML('beforeend', html)
+      addListener(id, link)
+    }
+    $("#listElamigos").animate({height: $("#listElamigos").get(0).scrollHeight}, 500, function() {
+      document.getElementById('listElamigos').style.height = 'auto'
+    })
+  }
+
+  function fitgirl(result, storeUpdated) {
+    if (currentPath != data.root+'Modules\\Store') return
+    if (storeUpdated != lastStoreUpdated) return
+    if (!result.includes('<article class="post')) {
+      noResults('Fitgirl')
+      return
+    }
+    
+    clearList('listFitgirl')
+    let part = result.substring(result.indexOf('<article class="post'), result.indexOf('<nav class="navigation paging-navigation"'))
+    var si = part.split('<article class="post')
+    var links = []
+    var names = []
+    //LINKS & NAMES
+    for(i in si) {
+      let link = si[i].substring(si[i].indexOf('href="https://fitgirlrepacks.co/repack')+6)
+      link = link.substring(0, link.indexOf('"'))
+      let name = si[i].substring(si[i].indexOf('rel="bookmark">')+15)
+      name = name.substring(0, name.indexOf('<'))
+      if (link != '' && name != '' && name != 'Upcoming repacks') {
+        links.push(link)
+        names.push(titleCase(name))
+      }
+    }
+    //HAS RESULTS
+    if (storeUpdated != lastStoreUpdated) return
+    if (links.length == 0) noResults('Fitgirl')
+    else hasResults('Fitgirl')
+    //ADD GAMES
+    for(i in links) {
+      let id = `fitgirl${i}-${Date.now()}`
+      let tmp = links[i]
+      tmp = tmp.substring(tmp.lastIndexOf('/'))
+      tmp = tmp.substring(tmp.indexOf('-')+1)
+      let link = 'https://fitgirl-repacks.site/'+tmp
+      let name = names[i]
+      let name2 = ''
+      let info = ''
+      if (name.includes('&#8211;')) {
+        name2 = name.substring(0, name.indexOf('&#8211;')).trim()
+        info = name.substring(name.indexOf('&#8211;')+7).trim()
+      }
+      let img = i+link
+      let html
+      if (name2 != '' && info != '') html = createStoreHTML2(id, img, './Data/Images/icon_file.png', name2, info)
+      else html = createStoreHTML(id, img, './Data/Images/icon_file.png', name)
+      document.getElementById('listFitgirl').insertAdjacentHTML('beforeend', html)
+      addListener(id, link)
+      //IMAGE
+      fitgirlImg(links[i]).then((image) =>{ 
+        if (document.getElementById(img) != null)
+        document.getElementById(img).src = image
+      })
+    }
+    $("#listFitgirl").animate({height: $("#listFitgirl").get(0).scrollHeight}, 500, function() {
+      document.getElementById('listFitgirl').style.height = 'auto'
+    })
+
+    async function fitgirlImg(link) {
+      const superagent = require('superagent');
+      const response = await superagent.get(link)
+      let html = response.text
+      
+      let img = html.substring(html.indexOf('<h1 class="entry-title">'))
+      img = img.substring(img.indexOf('src="')+5)
+      img = img.substring(0, img.indexOf('"'))
+      return img
+    }
+  }
+
+  function pivi(result, storeUpdated) {
+    if (currentPath != data.root+'Modules\\Store') return
+    if (storeUpdated != lastStoreUpdated) return
+    clearList('listPivi')
+    let part = result.substring(result.indexOf('<div id="gp-content-wrapper"')) //remove top bar
+    part = part.substring(part.indexOf('<section class="gp-post-item gp-standard-post'))
+    var si = part.split('<section')
+    var links = []
+    var names = []
+    var imgs = []
+    //LINKS & NAMES & IMAGES
+    for(i in si) {
+      let tmp = si[i].toLowerCase()
+      if (!tmp.includes('>estrenos<') && !tmp.includes('>tops<') && !tmp.includes('>promociones<') && !tmp.includes('>oferta<') && !tmp.includes('>free to play<') && !tmp.includes('>destacadas<')) {
+        let link = si[i].substring(si[i].indexOf('href="')+6)
+        link = link.substring(0, link.indexOf('"')-1)
+        let name = si[i].substring(si[i].indexOf('title="')+7)
+        name = name.substring(0, name.indexOf('"'))
+        let img = si[i].substring(si[i].indexOf('src="')+5)
+        img = img.substring(0, img.indexOf('"'))
+        if (link != '' && name != '' && img != '' && link.startsWith('https://pivigames.blog/') && !links.includes(link)) {
+          links.push(link)
+          names.push(titleCase(name))
+          imgs.push(img)
+        }
+      }
+    }
+    //HAS RESULTS
+    if (storeUpdated != lastStoreUpdated) return
+    if (links.length == 0) noResults('Pivi')
+    else hasResults('Pivi')
+    //ADD GAMES
+    for(i in links) {
+      let id = `pivi${i}-${Date.now()}`
+      let img = imgs[i]
+      let link = links[i]
+      let name = names[i]
+      let name2 = ''
+      let info = ''
+      if (name.toLowerCase().includes('pc ')) {
+        name2 = name.substring(0, name.toLowerCase().indexOf('pc ')).trim()
+        info = name.substring(name.toLowerCase().indexOf('pc ')+2).replaceAll('+', '').trim()
+      }
+      if (name2 != '' && info != '') html = createStoreHTML2(id, null, img, name2, info)
+      else html = createStoreHTML(id, null, img, name)
+      document.getElementById('listPivi').insertAdjacentHTML('beforeend', html)
+      addListener(id, link)
+    }
+    $("#listPivi").animate({height: $("#listPivi").get(0).scrollHeight}, 500, function() {
+      document.getElementById('listPivi').style.height = 'auto'
+    })
+  }
+
+  function steamunlocked(result, search, storeUpdated) {
+    if (currentPath != data.root+'Modules\\Store') return
+    if (storeUpdated != lastStoreUpdated) return
+    clearList('listSteamUnlocked')
+    var si
+    if (search != '') {
+      let part = result.substring(result.indexOf('class="cover-items"')) //remove top
+      part = part.substring(0, part.indexOf('class="col-lg-4"')) //to bot
+      si = part.split('class="cover-item category"')
+    } else {
+      let part = result.substring(result.indexOf('class="vc_pageable-slide-wrapper vc_clearfix"')) //remove top
+      part = part.substring(0, part.indexOf('class="vc_pageable-load-more-btn"')) //to bot
+      si = part.split('class="vc_grid-item vc_clearfix')
+    }
+    var links = []
+    var names = []
+    var imgs = []
+    //LINKS & NAMES & IMAGES
+    for(i in si) {
+      if (links.length == 12) break
+      let link = si[i].substring(si[i].indexOf('href="')+6)
+      link = link.substring(0, link.indexOf('"')-1)
+      let name
+      if (search != '') {
+        name = si[i].substring(si[i].indexOf('<h1>')+4)
+        name = name.substring(0, name.indexOf('</h1>'))
+      } else {
+        name = si[i].substring(si[i].indexOf('title="')+7)
+        name = name.substring(0, name.indexOf('"'))
+      }
+      let img = si[i].substring(si[i].lastIndexOf('src="')+5)
+      img = img.substring(0, img.indexOf('"'))
+      if (link != '' && name != '' && img != '') {
+        links.push(link)
+        names.push(titleCase(name))
+        imgs.push(img)
+      }
+    }
+    //HAS RESULTS
+    if (storeUpdated != lastStoreUpdated) return
+    if (links.length == 0) noResults('SteamUnlocked')
+    else hasResults('SteamUnlocked')
+    //ADD GAMES
+    for(i in links) {
+      let id = `steamunlocked${i}-${Date.now()}`
+      let img = imgs[i]
+      let link = links[i]
+      let name = names[i]
+      let name2 = ''
+      let info = ''
+      if (name.toLowerCase().includes('free download')) {
+        name2 = name.substring(0, name.toLowerCase().indexOf('free download')).trim()
+        info = name.substring(name.toLowerCase().indexOf('free download')+13).trim()
+      }
+      if (name2 != '' && info != '') html = createStoreHTML2(id, null, img, name2, info)
+      else if (name2 != '') html = createStoreHTML(id, null, img, name2)
+      else html = createStoreHTML(id, null, img, name)
+      document.getElementById('listSteamUnlocked').insertAdjacentHTML('beforeend', html)
+      addListener(id, link)
+    }
+    $("#listSteamUnlocked").animate({height: $("#listSteamUnlocked").get(0).scrollHeight}, 500, function() {
+      document.getElementById('listSteamUnlocked').style.height = 'auto'
+    })
+  }
+
+  //RESULTS FUNCTIONS
+  function searchingResults(id) {
+    document.getElementById(id).style.color = 'gray'
+    document.getElementById('list'+id).style.display = 'none'
+    let name = id
+    if (name == 'Elamigos') name = 'ElAmigos'
+    if (name == 'SteamUnlocked') name = 'Steam Unlocked'
+    document.getElementById(id).innerHTML = name+' (searching)'
+  }
+
+  function hasResults(id) {
+    document.getElementById(id).style.color = 'var(--text2Color)'
+    document.getElementById('list'+id).style.display = 'flex'
+    let name = id
+    if (name == 'Elamigos') name = 'ElAmigos'
+    if (name == 'SteamUnlocked') name = 'Steam Unlocked'
+    document.getElementById(id).innerHTML = name
+  }
+
+  function noResults(id) {
+    document.getElementById(id).style.color = '#7E0D0E'
+    document.getElementById('list'+id).style.display = 'none'
+    let name = id
+    if (name == 'Elamigos') name = 'ElAmigos'
+    if (name == 'SteamUnlocked') name = 'Steam Unlocked'
+    document.getElementById(id).innerHTML = name+' (no results)'
+  }
+
+  //HTML FUNCTIONS
+  function titleCase(str) {
+    var splitStr = str.toLowerCase().split(' ');
+    for (var i = 0; i < splitStr.length; i++) {
+      splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);     
+    }
+    return splitStr.join(' '); 
+  }
+
+  function createStoreHTML(id, img, icon, name) {
+    let html = `<div id="${id}" class="sbutton" style="min-width: var(--size1); height: calc(var(--size1)/4*5); min-height: 250px; margin-top: 5px; margin-right: 5px; background-image: url('./Data/Images/icon_store_item.png'); background-repeat: no-repeat; background-size: cover; text-align: center; display: inline-block;">
+                  <div style="width: var(--size1); height: 80%;">
+                    <img id="${img}" style="width: 90%; height: 95%; margin: 10px; object-fit: contain; -webkit-user-drag: none;" src="${icon}"></img>
+                  </div>
+                  <div style="width: var(--size1); height: 20%; display: flex;">
+                    <div id="name-${id}" style="width: 90%; margin: auto; font-size: calc(var(--size1)/12); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${name}</div>
+                  </div>
+                </div>`
+    return html
+  }
+
+  function createStoreHTML2(id, img, icon, name, info) {
+    let html = `<div id="${id}" class="sbutton" style="min-width: var(--size1); height: calc(var(--size1)/4*5); min-height: 250px; margin-top: 5px; margin-right: 5px; background-image: url('./Data/Images/icon_store_item.png'); background-repeat: no-repeat; background-size: cover; text-align: center; display: inline-block;">
+                  <div style="width: var(--size1); height: 80%;">
+                    <img id="${img}" style="width: 90%; height: 95%; margin: 10px; object-fit: contain; -webkit-user-drag: none;" src="${icon}"></img>
+                  </div>
+                  <div style="width: var(--size1); height: 20%; display: flex;">
+                    <div style="width: 100%; margin: auto;">
+                      <div id="name-${id}" style="width: 90%; margin: auto; font-size: calc(var(--size1)/12); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}</div>
+                      <div style="width: 90%; margin: auto; font-size: calc(var(--size1)/15); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-top: 2px;">${info}</div>
+                    </div>
+                  </div>
+                </div>`
+    return html
+  }
+
+  //OTHER FUNCTIONS
+  function setStoreListeners() {
+    addButtonListener('discover', function() {
+      document.getElementById('discover').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+    }, function() {
+      document.getElementById('discover').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+    }, function() {
+      searchGames('')
+    })
+
+    $('#editText').bind('keydown', function(event) {
+      if (event.keyCode === 13) {
+        event.preventDefault();
+        let search = document.getElementById('editText').value
+        if (search == '') return
+        searchGames(search)
+        return false;
+      }
+    })
+
+    addButtonListener('search', function() {
+      document.getElementById('search').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+    }, function() {
+      document.getElementById('search').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+    }, function() {
+      let search = document.getElementById('editText').value
+      if (search == '') return
+      searchGames(search)
+    })
+
+    addScroll('listElamigos')
+
+    addScroll('listFitgirl')
+
+    addScroll('listPivi')
+
+    addScroll('listSteamUnlocked')
+  }
+
+  function addListener(id, link) {
+    addButtonListener(id, function() {
+      document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_store_item_clicked.png")';
+    }, function() {
+      if (document.getElementById(id) == null) return
+      document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_store_item.png")';
+    }, function() {
+      addNoti(document.getElementById('name-'+id).innerHTML, 'Store:')
+      openLink(link)
+    })
+
+    addRightButtonListener(id, function() {
+      document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_store_item_clicked.png")';
+    }, function() {
+      document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_store_item.png")';
+    }, function() {
+      addNoti(document.getElementById('name-'+id).innerHTML, 'Store:')
+      ipcRenderer.send('newCustomWindow', false, link)
+    })
+  }
+
+  function clearList(list) {
+    if (list == undefined) {
+      document.getElementById('listElamigos').style.height = '0';
+      document.getElementById('listElamigos').innerHTML = '';
+      document.getElementById('listFitgirl').style.height = '0';
+      document.getElementById('listFitgirl').innerHTML = '';
+      document.getElementById('listPivi').style.height = '0';
+      document.getElementById('listPivi').innerHTML = '';
+      document.getElementById('listSteamUnlocked').style.height = '0';
+      document.getElementById('listSteamUnlocked').innerHTML = '';
+    } else {
+      document.getElementById(list).style.height = '0';
+      document.getElementById(list).innerHTML = '';
+    }
+  }
+
+  function openLink(link) {
+    shell.openExternal(link)
+  }
+
+  function addScroll(id) {
+    $('#'+id).bind('wheel', function() {
+      if ($('#'+id).hasScrollBar()) {
+        this.scrollLeft -= (event.wheelDelta/1.5)
+        event.preventDefault()
+      }
+    })
+  }
+
+  jQuery.fn.hasScrollBar = function(direction) {
+    return this.get(0).scrollWidth > this.innerWidth();
+  }
+</script>
