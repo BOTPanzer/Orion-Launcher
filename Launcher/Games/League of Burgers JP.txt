@@ -1,0 +1,2 @@
+"D:\Games\Riot Games\League of Legends\LeagueClient.exe" --locale=ja_JP
+D:\Games\Riot Games\League of Legends\0burger.ico

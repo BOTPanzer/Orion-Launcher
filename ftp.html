@@ -6,9 +6,9 @@
 	<div id="list" style="width: calc(100% + 5px); transform: translate(-5px, 0); margin-left: 10px; margin-top: 20px; display: block; flex-wrap: wrap; font-family: ItemFont;">
     <div style="width: 100%; display: flex; align-items: center;">
       <input id='editText' placeholder="Send Text" type="text" maxlength="50" style="height: 32px; width: 250px; padding-left: 10px; padding-right: 10px; margin-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
-      <div id="send" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
-        <div style="font-family: ItemFont;">Send</div>
-      </div>
+      <div id="send" class="sbutton" style="height: 36px; min-width: 107px; background-image: url('./Data/Images/icon_description_launch.png');">Send</div>
+      <div style="width: 100%;"></div>
+      <div id="starts" class="sbutton" style="height: 36px; min-width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 20px;">Start: No</div>
     </div>
 
     <div id="text" style="margin-top: 10px; color: var(--text2Color); font-size: 16px; display: block; -moz-user-select: text; -ms-user-select: text; user-select: text;"></div>
@@ -17,6 +17,17 @@
 
 <script>
   document.getElementById('text').innerText = fullLog
+
+  ipcRenderer.send('getData', 1)
+  ipcRenderer.on('lineData', (event, text) => {
+    if (text == '1') {
+      starts = true
+      document.getElementById('starts').innerText = 'Start: Yes'
+    } else {
+      starts = false
+      document.getElementById('starts').innerText = 'Start: No'
+    }
+  })
   
   $('#editText').unbind()
   $('#editText').bind('keydown', function(event) {
@@ -44,6 +55,24 @@
         mainSocket.write(text);
         appendText('Sent: '+text)
       } catch(e) {}
+    }
+  })
+
+  addButtonListener('starts', function() {
+    document.getElementById('starts').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+  }, function() {
+    document.getElementById('starts').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+  }, function() {
+    if (starts) {
+      starts = 0
+      ipcRenderer.send('updateData', 1, '0')
+      document.getElementById('starts').innerText = 'Start: No'
+      appendText('Server Will Not Start After Restart\n')
+    } else if (!starts) {
+      starts = 1
+      ipcRenderer.send('updateData', 1, '1')
+      document.getElementById('starts').innerText = 'Start: Yes'
+      appendText('Server Will Start After Restart\n')
     }
   })
 </script>

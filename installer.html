@@ -6,7 +6,8 @@
 
 <div style="width: calc(100% - 40px); margin-left: 20px; display: flex;">
   <input id='path' placeholder="File Path (zip only)" type="text" style="height: 32px; width: calc(100% - 46px); margin-right: 10px; padding-left: 10px; padding-right: 10px; color: var(--text2Color); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
-  <div id="pathFolder" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png');">
+  
+  <div id="pathFolder" class="sbutton" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png');">
     <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/icon_folder.png"></img>
   </div>
 </div>
@@ -17,33 +18,31 @@
 
 <div style="width: calc(100% - 40px); margin-left: 20px; margin-top: 20px; display: flex;">
   <input id='destination' placeholder="Destination" type="text" style="height: 32px; width: calc(100% - 46px); margin-right: 10px; padding-left: 10px; padding-right: 10px; color: var(--text2Color); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
-  <div id="destinationFolder" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png');">
+  <div id="destinationFolder" class="sbutton" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png');">
     <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/icon_folder.png"></img>
   </div>
 </div>
 
 <div id="log" style="height: 20px; margin-left: 10px; padding: 10px; display: flex; align-items: center;  color: var(--text2Color); font-family: ItemFont;">Log</div>
 
-<div id="install" style="height: 36px; width: 107px; margin: 20px; margin-top: 0px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
-  <div style="font-family: ItemFont;">Install</div>
-</div>
+<div id="install" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin: 20px; margin-top: 0px;">Install</div>
 
 <script>
   log('Log')
 
-  //LOG
-  ipcRenderer.on('log', (event, text) => {
-    log(text)
+  ipcRenderer.on('dataFolder', (event, text) => {
+    dataFolder = text
   })
 
   function log(text) {
     document.getElementById('log').innerText = `(${Date.now()}) `+text
   }
 
-  ipcRenderer.on('gfolder', (event, text) => {
+  ipcRenderer.send('getData', 0)
+  ipcRenderer.on('lineData', (event, text) => {
     document.getElementById('destination').value = text
   })
-
+  
   //GET FILE
   addButtonListener('pathFolder', function() {
     document.getElementById('pathFolder').style.backgroundImage = 'url("./Data/Images/icon_description_folder_clicked.png")';
@@ -84,11 +83,23 @@
       log('File path is necesary')
       return
     }
-    //NAME
+    //PATH IS VALID
+    if (!path.toLowerCase().endsWith('.zip') && !path.toLowerCase().endsWith('.rar')) {
+      log('File must be ZIP or RAR')
+      return
+    }
+    //PATH EXISTS
+    if (!fs.existsSync(path)) {
+      log('File path does not exist')
+      return
+    }
+    //NAMES
     let name = document.getElementById('name').value
+    let customName = true
     if (name == '') {
       name = path.substring(path.lastIndexOf('\\')+1)
-      if (name.includes('.')) name = name.substring(0, name.lastIndexOf('.'))
+      name = name.substring(0, name.lastIndexOf('.'))
+      customName = false
     }
     //DESTINATION
     let destination = document.getElementById('destination').value
@@ -96,10 +107,106 @@
       log('Destination is necesary')
       return
     }
+    //DESTINATION EXISTS
+    if (!destination.endsWith('\\')) destination = destination+'\\'
+    if (!fs.existsSync(destination)) {
+      log('Destination does not exist')
+      return
+    }
+    //DESTINATION IS VALID
+    if (!fs.lstatSync(destination).isDirectory()) {
+      log('Destination must be a folder')
+      return
+    }
     //INSTALL
-    ipcRenderer.send('pause')
-    ipcRenderer.send('install', path, name, destination)
+    if (path.toLowerCase().endsWith('.zip')) {
+      ipcRenderer.send('pause')
+      var exec = require('child_process').exec
+      let zip = dataFolder+'7zip\\7za.exe'
+      //CHECK IF FILE CONTAINS A FOLDER INSIDE
+      exec(`"${zip}" l "${path}" -x!*\\*`, function (error, stdOut, stdErr) {
+        if (!(error || stdErr)) {
+          if (stdOut.replaceAll('\r', '').replaceAll('\n', '').endsWith('0 files, 1 folders')) { 
+            //HAS A FOLDER
+            exec(`"${zip}" l -slt "${path}" -x!*\\*`, function (error, stdOut, stdErr) {
+              if (!(error || stdErr)) {
+                //GET FOLDER NAME
+                let outSplit = stdOut.replaceAll('\r', '').split("\n")
+                let paths = []
+                for(i in outSplit) {
+                  if (outSplit[i].includes('Path = '))
+                    paths.push(outSplit[i].substring(7))
+                }  
+                let insideFolderName = paths[paths.length-1]
+                let finalDestination
+                if (customName) finalDestination = destination+name+'\\'
+                else finalDestination = destination+insideFolderName+'\\'
+                //CHECK IF INSTALLED
+                if (fs.existsSync(finalDestination)) {
+                  log(name+' is already installed')
+                  ipcRenderer.send('resume')
+                  return
+                }
+                //INSTALL
+                ipcRenderer.send('updateData', 0, destination)
+                log('Installing '+name+'...')
+                let tmpDestination = destination+'orion'+Date.now()+'\\'
+                exec(`"${zip}" x "${path}" -o"${tmpDestination}"`, function (error, stdOut, stdErr) {
+                  if (!(error || stdErr)) {
+                    fs.rename(tmpDestination+insideFolderName, finalDestination, function(err) {
+                      if (!err) {
+                        log('Installation successful')
+                        ipcRenderer.send('resume')
+                        ipcRenderer.send('showOnExplorer', finalDestination)
+                        //REMOVE TEMP FOLDER
+                        fs.rmdir(tmpDestination, function(err) {})
+                      } else {
+                        log('An error ocurred while renaming a folder')
+                        ipcRenderer.send('resume')
+                      }
+                    })
+                  } else {
+                    log('An error ocurred while unzipping')
+                    ipcRenderer.send('resume')
+                  }
+                })
+              } else {
+                log('An error ocurred while reading the file ~2')
+                ipcRenderer.send('resume')
+              }
+            })
+          } else {
+            //HAS NO FOLDER
+            let finalDestination = destination+name+'\\'
+            //CHECK IF INSTALLED
+            if (fs.existsSync(finalDestination)) {
+              log(name+' is already installed')
+              ipcRenderer.send('resume')
+              return
+            }
+            //INSTALL
+            ipcRenderer.send('updateData', 0, destination)
+            log('Installing '+name+'...')
+            exec(`"${zip}" x "${path}" -o"${finalDestination}"`, function (error, stdOut, stdErr) {
+              if (!(error || stdErr)) {
+                log('Installation successful')
+                ipcRenderer.send('resume')
+                ipcRenderer.send('showOnExplorer', finalDestination)
+              } else {
+                log('An error ocurred while unzipping')
+                ipcRenderer.send('resume')
+              }
+            })
+          }
+        } else {
+          log('An error ocurred while reading the file ~1')
+          ipcRenderer.send('resume')
+        }
+      })
+    } else if (path.toLowerCase().endsWith('.rar')) {
+      ipcRenderer.send('pause')
+      log('RAR work in progress')
+      ipcRenderer.send('resume')
+    }
   })
-
-
 </script>

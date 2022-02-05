@@ -10,7 +10,7 @@
     <div style="height: 20px; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Path:</div>
     <div style="align-items: center; margin: 20px; margin-top: 0px; display: flex;">
       <input id='pathText' type="text" style="height: 32px; width: 284px; padding-left: 10px; padding-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
-      <div id="folder" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px;">
+      <div id="folder" class="sbutton" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px;">
         <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/icon_folder.png"></img>
       </div>
     </div>
@@ -20,16 +20,14 @@
     <div style="height: 20px; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Icon Path (Optional):</div>
     <div style="align-items: center; margin: 20px; margin-top: 0px; display: flex;">
       <input id='iconText' type="text" style="height: 32px; width: 284px; padding-left: 10px; padding-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
-      <div id="folderIcon" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px;">
+      <div id="folderIcon" class="sbutton" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px;">
         <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/icon_folder.png"></img>
       </div>
     </div>
   </div>
 
   <div style="width: 100%; position: absolute; bottom: 20px; display: flex; align-items: center;">
-    <div id="addGame" style="height: 36px; width: 107px; margin-left: 20px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
-      <div style="font-family: ItemFont;">Add Game</div>
-    </div>
+    <div id="addGame" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin-left: 20px;">Add Game</div>
     <div id="log" style="margin-left: auto; margin-right: 25px; font-family: ItemFont; font-size: 16px; color: var(--text2Color);"></div>
   </div>
 </div>

@@ -57,6 +57,19 @@
   ::placeholder {
     color: var(--placeholderColor);
   }
+
+  .sbutton {
+    transition: transform .3s, background-image .1s ease-in-out;
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    font-family: ItemFont;
+    color: var(--textColor);
+  }
+
+  .sbutton:hover {
+    transform: translateY(-2px);
+  }
 </style>
 
 <div id="themeDiv" style="height: 0; width: 0;"></div>
@@ -76,35 +89,25 @@
   </div>
   
   <div style="height: calc(100% - 20px); width: 100%; display: flex; position: relative;">
-    <div id="leftBar" style="height: 100%; width: 185px; display: flex; position: relative; z-index: 999;">
-      <div style="height: 100%;">
+    <div id="leftBar" style="height: 100%; width: 185px; display: flex; position: relative; z-index: 404;">
+      <div style="display: flex; flex-flow: column; height: 100%;">
         <div style="display: flex; align-items: center; margin: 10px;">
-          <img id="orionLogo" style="min-height: 50px; min-width: 50px; max-height: 50px; max-width: 50px; -webkit-user-drag: none;" src="./Data/Images/icon.png"/>
+          <img id="orionLogo" class="sbutton" style="min-height: 50px; min-width: 50px; max-height: 50px; max-width: 50px; -webkit-user-drag: none;" src="./Data/Images/icon.png"/>
           <div id="orionName" style="margin-left: 5px; font-family: ItemFont; color: var(--text2Color);">Oriøn Launcher</div>
         </div>
-        <div id="store" style="height: 36px; width: 107px; margin: 20px; margin-left: 23px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
-          <div style="font-family: ItemFont;">Store</div>
-        </div>
-        <div id="launcher" style="height: 36px; width: 107px; margin: 20px; margin-left: 23px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
-          <div style="font-family: ItemFont;">Library</div>
-        </div>
-        <div id="themes" style="height: 36px; width: 107px; margin: 20px; margin-left: 23px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
-          <div style="font-family: ItemFont;">Themes</div>
-        </div>
-        <div id="installer" style="height: 36px; width: 107px; margin: 20px; margin-left: 23px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
-          <div style="font-family: ItemFont;">Installer</div>
-        </div>
-        <div id="ftp" style="height: 36px; width: 107px; margin: 20px; margin-left: 23px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
-          <div style="font-family: ItemFont;">Connect</div>
-        </div>
-  
-        <div id="add" style="position: absolute; bottom: 0; display: none;">
-          <div id="addfolder" style="height: 36px; width: 107px; margin: 20px; margin-left: 23px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
-            <div style="font-family: ItemFont;">Add Folder</div>
+        
+        <div style="display: flex; flex-flow: column; flex: 1 1 auto; overflow-y: auto;">
+          <div style="flex: 1 1 auto;">
+            <div id="store" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin: 20px; margin-left: 23px;">Store</div>
+            <div id="launcher" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin: 20px; margin-left: 23px;">Library</div>
+            <div id="themes" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin: 20px; margin-left: 23px;">Themes</div>
+            <div id="installer" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin: 20px; margin-left: 23px;">Installer</div>
+            <div id="ftp" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin: 20px; margin-left: 23px; margin-bottom: 0px;">Connect</div>
           </div>
   
-          <div id="addgame" style="height: 36px; width: 107px; margin: 20px; margin-left: 23px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
-            <div style="font-family: ItemFont;">Add Game</div>
+          <div id="add" style="flex: 0 1 auto;">
+            <div id="addfolder" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin: 20px; margin-left: 23px;">Add Folder</div>
+            <div id="addgame" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin: 20px; margin-left: 23px;">Add Game</div>
           </div>
         </div>
       </div>
@@ -134,11 +137,16 @@
   let lastWin = ''
   let button = ''
   let fullLog = ''
+  let starts = ''
   let mainSocket = null
+  //let dataFolder = ''
 
   a()
   setbuttons()
-  initializeFTP()
+  ipcRenderer.send('getData', 1)
+  ipcRenderer.on('lineData', (event, text) => {
+    if (text == '1') initializeFTP()
+  })
 
   function a() {
     ipcRenderer.on('load', (event, html) => {

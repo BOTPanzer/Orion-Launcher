@@ -115,9 +115,9 @@ if (!app.requestSingleInstanceLock()) {
     } else if (window == 'themes') {
       createThemeList()
     } else if (window == 'installer') {
-      
+      win.webContents.send('dataFolder', dataFolder)
     } else if (window == 'ftp') {
-      
+
     }
   })
 
@@ -304,11 +304,6 @@ if (!app.requestSingleInstanceLock()) {
       const { shell } = require('electron');
       shell.openPath(pathClean)
     }
-  })
-
-  ipcMain.on('showOnExplorer', (event, path) => {
-    const { shell } = require('electron');
-    shell.showItemInFolder(path)
   })
 
   //  /$$$$$$   /$$$$$$  /$$   /$$ /$$$$$$$$ /$$$$$$$$ /$$   /$$ /$$$$$$$$
@@ -881,81 +876,81 @@ if (!app.requestSingleInstanceLock()) {
     if (fs.existsSync(path)) win.webContents.send(sendReturn, await getFolder(title, path))
     else win.webContents.send(sendReturn, await getFolder(title))
   })
+
+  ipcMain.on('showOnExplorer', (event, path) => {
+    const { shell } = require('electron');
+    shell.showItemInFolder(path)
+  })
+
+  ipcMain.on('getData', async function(event, line) {
+    win.webContents.send('lineData', await getData(line))
+  })
+
+  ipcMain.on('updateData', async function(event, line, text) {
+    updateData(line, text)
+  })
   
   //INSTALLER
-  ipcMain.on('install', async function(event, path, name, destination) {
-    //PATH
-    if (!fs.existsSync(path)) {
-      win.webContents.send('log', 'File path does not exist')
-      resume()
-      return
-    }
-    //DESTINATION
-    if (!destination.endsWith('\\')) destination = destination+'\\'
-    if (!fs.existsSync(destination)) {
-      win.webContents.send('log', 'Destination does not exist')
-      resume()
-      return
-    }
-    //CHECK TO CREATE FOLDER
-    var exec = require('child_process').exec
-    let zip = dataFolder+'7zip\\7za.exe'
-    exec(`"${zip}" l "${path}" -x!*\\*`, function (error, stdOut, stdErr) {
-      if (error || stdErr) {
-        win.webContents.send('log', 'An error ocurred while reading the file')
-        resume()
-      } else {
-        stdOut = stdOut.replaceAll('\r', '').replaceAll('\n', '')
-        if (stdOut.endsWith('0 files, 1 folders')) {
-          exec(`"${zip}" l -slt "${path}" -x!*\\*`, function (error, stdOut, stdErr) {
-            if (error || stdErr) {
-              win.webContents.send('log', 'An error ocurred while reading the file')
-              resume()
-            } else {
-              let outSplit = stdOut.replaceAll('\r', '').split("\n")
-              let paths = []
-              for(i in outSplit) {
-                if (outSplit[i].includes('Path = ')) {
-                  paths.push(outSplit[i].substring(7))
-                }
-              }
-              let insideFolderName = paths[paths.length-1]
-              //FOLDER EXISTS
-              let destination2 = destination+insideFolderName+'\\'
-              if (fs.existsSync(destination2)) {
-                win.webContents.send('log', name+' is already installed')
-                resume()
-                return
-              }
-              //NAME
-              let tmpName = path.substring(path.lastIndexOf('\\')+1)
-              if (tmpName.includes('.')) tmpName = tmpName.substring(0, tmpName.lastIndexOf('.'))
-              //INSTALL
-              install(zip, path, tmpName, destination, destination, insideFolderName, name)
-            }
-          })
+  ipcMain.on('install', async function(event, path, name, destination, iszip) {
+    if (iszip) {
+      //CHECK TO CREATE FOLDER
+      var exec = require('child_process').exec
+      let zip = dataFolder+'7zip\\7za.exe'
+      exec(`"${zip}" l "${path}" -x!*\\*`, function (error, stdOut, stdErr) {
+        if (error || stdErr) {
+          win.webContents.send('log', 'An error ocurred while reading the file')
+          resume()
         } else {
-          //NAME
-          if (name == '') {
-            name = path.substring(path.lastIndexOf('\\')+1)
-            if (name.includes('.')) name = name.substring(0, name.lastIndexOf('.'))
+          stdOut = stdOut.replaceAll('\r', '').replaceAll('\n', '')
+          if (stdOut.endsWith('0 files, 1 folders')) {
+            exec(`"${zip}" l -slt "${path}" -x!*\\*`, function (error, stdOut, stdErr) {
+              if (error || stdErr) {
+                win.webContents.send('log', 'An error ocurred while reading the file')
+                resume()
+              } else {
+                let outSplit = stdOut.replaceAll('\r', '').split("\n")
+                let paths = []
+                for(i in outSplit) {
+                  if (outSplit[i].includes('Path = ')) {
+                    paths.push(outSplit[i].substring(7))
+                  }
+                }  
+                let insideFolderName = paths[paths.length-1]
+                //FOLDER EXISTS
+                let destination2 = destination+insideFolderName+'\\'
+                if (fs.existsSync(destination2)) {
+                  win.webContents.send('log', name+' is already installed')
+                  resume()
+                  return
+                }
+                //NAME
+                let tmpName = path.substring(path.lastIndexOf('\\')+1)
+                if (tmpName.includes('.')) tmpName = tmpName.substring(0, tmpName.lastIndexOf('.'))
+                //INSTALL
+                install(zip, path, tmpName, destination, destination, insideFolderName, name)
+              }
+            })
+          } else {
+            //NEW FOLDER EXISTS
+            let destination2 = destination+name+'\\'
+            if (fs.existsSync(destination2)) {
+              win.webContents.send('log', name+' is already installed')
+              resume()
+              return
+            }
+            //INSTALL
+            install(zip, path, name, destination, destination2)
           }
-          //NEW FOLDER EXISTS
-          let destination2 = destination+name+'\\'
-          if (fs.existsSync(destination2)) {
-            win.webContents.send('log', name+' is already installed')
-            resume()
-            return
-          }
-          //INSTALL
-          install(zip, path, name, destination, destination2)
         }
-      }
-    })
+      })
+    } else {
+      win.webContents.send('log', 'RAR work in progress')
+      resume()
+    }
   })
 
   function install(zip, path, name, destination, destination2, insideFolderName, nName) {
-    updateData('gfolder', destination)
+    updateData(0, destination)
     win.webContents.send('log', 'Installing '+name+'...')
     var exec = require('child_process').exec
     exec(`"${zip}" x "${path}" -o"${destination2}"`, function (error, stdOut, stdErr) {
@@ -1110,12 +1105,18 @@ function createTray() {
   tray = appIcon
 }
 
+function getData(line) {
+  let si = fs.readFileSync(dataFile).toString().trim().split('\n')
+  //destination = si[0]
+  //startServer = si[1]
+  return si[line]
+}
+
 function updateData(line, data) {
-  /*also update on loaded to get only the first line
-  fs.readFile(dataFile, 'utf8' , (err, data) => {
-    let data = gfolder+'\n'
-  })*/
-  fs.writeFile(dataFile, data, (err) => { if (err) console.log(err) })
+  let si = fs.readFileSync(dataFile).toString().trim().split('\n')
+  for (i in si) { si[i].replaceAll('\n', '') }
+  si[line] = data
+  fs.writeFile(dataFile, si.join('\n'), (err) => { if (err) console.log(err) })
 }
 
 function getFileInfo(argPath, fixed) {
@@ -1281,9 +1282,8 @@ function closeWin3() {
   win3.close()
 }
 
-
 function createDataHTML(id, img, icon, path, isFile, name, gamePath, iconPath, pathClean, argsClean) {
-  let html = `<div id="${id}" style="width: var(--size1); height: var(--size1); margin-top: 5px; margin-left: 5px; background-image: url('./Data/Images/icon_item.png'); background-repeat: no-repeat; background-size: cover; text-align: center; display: inline-block;">
+  let html = `<div id="${id}" class="sbutton" style="width: var(--size1); height: var(--size1); margin-top: 5px; margin-left: 5px; background-image: url('./Data/Images/icon_item.png'); background-repeat: no-repeat; background-size: cover; text-align: center; display: inline-block;">
                 
                 <div id="${'path-'+id}" style="display: none;">${path}</div>
                 <div id="${'isFile-'+id}" style="display: none;">${isFile}</div>
@@ -1305,7 +1305,7 @@ function createDataHTML(id, img, icon, path, isFile, name, gamePath, iconPath, p
 }
 
 function createStoreHTML(id, img, icon, name) {
-  let html = `<div id="${id}" style="min-width: var(--size1); height: calc(var(--size1)/4*5); min-height: 250px; margin-top: 5px; margin-right: 5px; background-image: url('./Data/Images/icon_store_item.png'); background-repeat: no-repeat; background-size: cover; text-align: center; display: inline-block;">
+  let html = `<div id="${id}" class="sbutton" style="min-width: var(--size1); height: calc(var(--size1)/4*5); min-height: 250px; margin-top: 5px; margin-right: 5px; background-image: url('./Data/Images/icon_store_item.png'); background-repeat: no-repeat; background-size: cover; text-align: center; display: inline-block;">
                 <div style="width: var(--size1); height: 80%;">
                   <img id="${img}" style="width: 90%; height: 95%; margin: 10px; object-fit: contain; -webkit-user-drag: none;" src="${icon}"></img>
                 </div>
@@ -1317,7 +1317,7 @@ function createStoreHTML(id, img, icon, name) {
 }
 
 function createStoreHTML2(id, img, icon, name, info) {
-  let html = `<div id="${id}" style="min-width: var(--size1); height: calc(var(--size1)/4*5); min-height: 250px; margin-top: 5px; margin-right: 5px; background-image: url('./Data/Images/icon_store_item.png'); background-repeat: no-repeat; background-size: cover; text-align: center; display: inline-block;">
+  let html = `<div id="${id}" class="sbutton" style="min-width: var(--size1); height: calc(var(--size1)/4*5); min-height: 250px; margin-top: 5px; margin-right: 5px; background-image: url('./Data/Images/icon_store_item.png'); background-repeat: no-repeat; background-size: cover; text-align: center; display: inline-block;">
                 <div style="width: var(--size1); height: 80%;">
                   <img id="${img}" style="width: 90%; height: 95%; margin: 10px; object-fit: contain; -webkit-user-drag: none;" src="${icon}"></img>
                 </div>

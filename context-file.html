@@ -14,7 +14,7 @@
     <div style="height: 20px; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Game Path:</div>
     <div style="align-items: center; margin: 20px; margin-top: 0px; display: flex;">
       <input id='pathText' type="text" style="height: 32px; width: 284px; padding-left: 10px; padding-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
-      <div id="folder" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px">
+      <div id="folder" class="sbutton" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px;">
         <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/icon_folder.png"></img>
       </div>
     </div>
@@ -24,7 +24,7 @@
     <div style="height: 20px; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Game Icon Path:</div>
     <div style="align-items: center; margin: 20px; margin-top: 0px; display: flex;">
       <input id='iconText' type="text" style="height: 32px; width: 284px; padding-left: 10px; padding-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
-      <div id="folderIcon" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px">
+      <div id="folderIcon" class="sbutton" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px;">
         <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/icon_folder.png"></img>
       </div>
     </div>
@@ -36,25 +36,15 @@
     <div style="width: 100%; position: absolute; bottom: 0; display: block;">
       <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
         <div></div> 
-        <div id="show" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px; color: var(--textColor);">
-          <div style="font-family: ItemFont;">Show</div>
-        </div>
-        <div id="showstore" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
-          <div style="font-family: ItemFont;">Store</div>
-        </div>
+        <div id="show" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px;">Show</div>
+        <div id="showstore" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png');;">Store</div>
         <div></div>
       </div>
 
       <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-        <div id="move" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px; color: var(--textColor);">
-          <div style="font-family: ItemFont;">Move</div>
-        </div>
-        <div id="remove" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px; color: var(--textColor);">
-          <div style="font-family: ItemFont;">Remove</div>
-        </div>
-        <div id="save" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
-          <div style="font-family: ItemFont;">Save</div>
-        </div>
+        <div id="move" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px;">Move</div>
+        <div id="remove" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px;">Remove</div>
+        <div id="save" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png');">Save</div>
       </div>
     </div>
   </div>

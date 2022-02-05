@@ -17,41 +17,37 @@
 
 <div style="margin: 10px;">
   <div style="margin-left: 20px; margin-right: 20px; display: flex; align-items: center;">
-    <div id="discover" style="height: 36px; min-width: 107px; margin-right: 10px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
-      <div style="font-family: ItemFont;">Discover</div>
-    </div>
-    <input id='editText' placeholder="Search Games" type="text" maxlength="50" style="height: 32px; width: 100%; padding-left: 10px; padding-right: 10px; margin-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
-    <div id="search" style="height: 36px; min-width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
-      <div style="font-family: ItemFont;">Search</div>
-    </div>
+    <div id="discover" class="sbutton" style="height: 36px; min-width: 107px; background-image: url('./Data/Images/icon_description_launch.png');">Discover</div>
+    <input id='editText' placeholder="Search Games" type="text" maxlength="50" style="height: 32px; width: 100%; margin-left: 10px; margin-right: 10px; padding-left: 10px; padding-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
+    <div id="search" class="sbutton" style="height: 36px; min-width: 107px; background-image: url('./Data/Images/icon_description_launch.png');">Search</div>
   </div>
 
   <div style="margin-bottom: 20px; margin-top: 20px; margin-left: 50px; margin-right: 50px;">
     <div style="display: flex; align-items: center; font-family: ItemFont; font-size: 20px; margin-top: 20px;">
       <div id="Elamigos" style="color: var(--text2Color); padding: 5px; white-space: nowrap;">ElAmigos</div>
       <div style="height: 1px; width: 100%; margin-left: 5px; margin-right: 5px; background-color: var(--lineColor);"></div>
-      <div id="moreElamigos" style="color: var(--text2Color); padding: 5px;" onclick="openLink('https://www.elamigos-games.com/')">More</div>
+      <div id="moreElamigos" class="sbutton" style="color: var(--text2Color); padding: 5px;" onclick="openLink('https://www.elamigos-games.com/')">More</div>
     </div>
     <div class="list" id="listElamigos"></div>
   
     <div style="display: flex; align-items: center; font-family: ItemFont; font-size: 20px; margin-top: 20px;">
-      <div id="Fitgirl" style="color: var(--text2Color); padding: 5px; white-space: nowrap;"">Fitgirl</div>
+      <div id="Fitgirl" style="color: var(--text2Color); padding: 5px; white-space: nowrap;">Fitgirl</div>
       <div style="height: 1px; width: 100%; margin-left: 5px; margin-right: 5px; background-color: var(--lineColor);"></div>
-      <div id="moreFitgirl" style="color: var(--text2Color); padding: 5px;" onclick="openLink('https://fitgirl-repacks.site/')">More</div>
+      <div id="moreFitgirl" class="sbutton" style="color: var(--text2Color); padding: 5px;" onclick="openLink('https://fitgirl-repacks.site/')">More</div>
     </div>
     <div class="list" id="listFitgirl"></div>
   
     <div style="display: flex; align-items: center; font-family: ItemFont; font-size: 20px; margin-top: 20px;">
-      <div id="Pivi" style="color: var(--text2Color); padding: 5px; white-space: nowrap;"">Pivi</div>
+      <div id="Pivi" style="color: var(--text2Color); padding: 5px; white-space: nowrap;">Pivi</div>
       <div style="height: 1px; width: 100%; margin-left: 5px; margin-right: 5px; background-color: var(--lineColor);"></div>
-      <div id="morePivi" style="color: var(--text2Color); padding: 5px;" onclick="openLink('https://pivigames.blog/')">More</div>
+      <div id="morePivi" class="sbutton" style="color: var(--text2Color); padding: 5px;" onclick="openLink('https://pivigames.blog/')">More</div>
     </div>
     <div class="list" id="listPivi"></div>
   
     <div style="display: flex; align-items: center; font-family: ItemFont; font-size: 20px; margin-top: 20px;">
       <div id="SteamUnlocked" style="color: var(--text2Color); padding: 5px; white-space: nowrap;">Steam Unlocked</div>
       <div style="height: 1px; width: 100%; margin-left: 5px; margin-right: 5px; background-color: var(--lineColor);"></div>
-      <div id="moreSteamUnlocked" style="color: var(--text2Color); padding: 5px;" onclick="openLink('https://steamunlocked.net/')">More</div>
+      <div id="moreSteamUnlocked" class="sbutton" style="color: var(--text2Color); padding: 5px;" onclick="openLink('https://steamunlocked.net/')">More</div>
     </div>
     <div class="list" id="listSteamUnlocked"></div>
   </div>
