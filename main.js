@@ -6,6 +6,7 @@ let paused = false
 let tray = null
 
 let window = ''
+let refreshTheme = true
 
 let win = null
 let win2 = null
@@ -40,21 +41,31 @@ if (!app.requestSingleInstanceLock()) {
     }
   })
 
+  // /$$      /$$  /$$$$$$  /$$$$$$ /$$   /$$
+  //| $$$    /$$$ /$$__  $$|_  $$_/| $$$ | $$
+  //| $$$$  /$$$$| $$  \ $$  | $$  | $$$$| $$
+  //| $$ $$/$$ $$| $$$$$$$$  | $$  | $$ $$ $$
+  //| $$  $$$| $$| $$__  $$  | $$  | $$  $$$$
+  //| $$\  $ | $$| $$  | $$  | $$  | $$\  $$$
+  //| $$ \/  | $$| $$  | $$ /$$$$$$| $$ \  $$
+  //|__/     |__/|__/  |__/|______/|__/  \__/
 
-  //ARGS
-  let startArg = app.commandLine.getSwitchValue("start")
-  startArg = startArg.replaceAll('|', ' ')
-
-
-  //MAIN
   dataFolder = app.getAppPath()+'\\Data\\'
   dataFile = dataFolder+'data'
   createWindow()
   createTray()
 
+  //WINDOWS
   win.on('close', function() {
     closeWin2()
     closeWin3()
+  })
+
+  win.webContents.on('dom-ready', function() {
+    if (window == '') {
+      win.webContents.send('load', 'launcher.html')
+      window = 'launcher'
+    }
   })
 
   ipcMain.on('launcher', (event) => {
@@ -85,7 +96,10 @@ if (!app.requestSingleInstanceLock()) {
   ipcMain.on('loaded', (event) => {
     var size = win.getSize()
     win.webContents.send('resized', size[0])
-    win.webContents.send('theme', theme)
+    if (refreshTheme) {
+      refreshTheme = false
+      win.webContents.send('theme', theme)
+    }
     if (window == 'launcher') {
       createList(actualPath)
     } else if (window == 'store') {
@@ -100,13 +114,7 @@ if (!app.requestSingleInstanceLock()) {
     }
   })
 
-  win.webContents.on('dom-ready', function() {
-    if (window == '') {
-      win.webContents.send('load', 'launcher.html')
-      window = 'launcher'
-    }
-  })
-
+  //FUNCTIONS
   win.on('resize', function () {    
     var size = win.getSize()
     win.webContents.send('resized', size[0])
@@ -146,27 +154,28 @@ if (!app.requestSingleInstanceLock()) {
     win.webContents.send('resume')
   }
 
-  ipcMain.on('exitContext', (event) => {
-    closeWin2();
-  })
+  // /$$        /$$$$$$  /$$   /$$ /$$   /$$  /$$$$$$  /$$   /$$ /$$$$$$$$ /$$$$$$$ 
+  //| $$       /$$__  $$| $$  | $$| $$$ | $$ /$$__  $$| $$  | $$| $$_____/| $$__  $$
+  //| $$      | $$  \ $$| $$  | $$| $$$$| $$| $$  \__/| $$  | $$| $$      | $$  \ $$
+  //| $$      | $$$$$$$$| $$  | $$| $$ $$ $$| $$      | $$$$$$$$| $$$$$   | $$$$$$$/
+  //| $$      | $$__  $$| $$  | $$| $$  $$$$| $$      | $$__  $$| $$__/   | $$__  $$
+  //| $$      | $$  | $$| $$  | $$| $$\  $$$| $$    $$| $$  | $$| $$      | $$  \ $$
+  //| $$$$$$$$| $$  | $$|  $$$$$$/| $$ \  $$|  $$$$$$/| $$  | $$| $$$$$$$$| $$  | $$
+  //|________/|__/  |__/ \______/ |__/  \__/ \______/ |__/  |__/|________/|__/  |__/
 
-  ipcMain.on('exitContext3', (event) => {
-    closeWin3();
-    if (win2 != null)
-    win2.show()
-  })
-
-
-  //FUNCTIONS LAUNCHER
   app.getFileIcon('', {size:"large"}).then((fileIcon) =>{ defImage = fileIcon.toDataURL() })
   launcherFolder = app.getAppPath()+'\\Launcher\\'
   actualPath = launcherFolder
   
+  //ARGS
+  let startArg = app.commandLine.getSwitchValue("start")
+  startArg = startArg.replaceAll('|', ' ')
   if (startArg != '') {
     actualPath = launcherFolder+startArg
     if (!fs.existsSync(actualPath)) actualPath = launcherFolder
   }
   
+  //FUNCTIONS
   ipcMain.on('loadPath', (event, path, search) => {
     createList(path, search)
   })
@@ -295,91 +304,80 @@ if (!app.requestSingleInstanceLock()) {
     shell.showItemInFolder(path)
   })
 
+  //  /$$$$$$   /$$$$$$  /$$   /$$ /$$$$$$$$ /$$$$$$$$ /$$   /$$ /$$$$$$$$
+  // /$$__  $$ /$$__  $$| $$$ | $$|__  $$__/| $$_____/| $$  / $$|__  $$__/
+  //| $$  \__/| $$  \ $$| $$$$| $$   | $$   | $$      |  $$/ $$/   | $$   
+  //| $$      | $$  | $$| $$ $$ $$   | $$   | $$$$$    \  $$$$/    | $$   
+  //| $$      | $$  | $$| $$  $$$$   | $$   | $$__/     >$$  $$    | $$   
+  //| $$    $$| $$  | $$| $$\  $$$   | $$   | $$       /$$/\  $$   | $$   
+  //|  $$$$$$/|  $$$$$$/| $$ \  $$   | $$   | $$$$$$$$| $$  \ $$   | $$   
+  // \______/  \______/ |__/  \__/   |__/   |________/|__/  |__/   |__/   
 
-  //FUNCTIONS LAUNCHER CONTEXT
-  ipcMain.on('contextFile', (event, path, img) => {
-    let data = getFileInfo(path, false)
-    let name = data.name
-    let gamePath = data.gamePath
-    let iconPath = data.iconPath
-    if (iconPath == undefined) iconPath = ''
-
-    createWin2('context.html', 420)
+  //WINDOWS
+  ipcMain.on('addfolder', (event) => {
+    createWin2('addfolder.html', 189)
 
     win2.on('close', function() {
       resume()
       win2 = null
-    });
-
-    win2.webContents.on('dom-ready', function() {
-      if (iconPath == '')
-        askForIconWin2(path, gamePath)
-      else
-        askForIconWin2(path, iconPath)
     })
-
-    win2.webContents.send('setLocation', path, img);
-    win2.webContents.send('setName', name);
-    win2.webContents.send('setPath', gamePath);
-    win2.webContents.send('setIconPath', iconPath);
   })
 
-  function askForIconWin2(argPath, path) {
-    if (fs.existsSync(path) && fs.statSync(path).isFile()) {
-      if (path.toLowerCase().endsWith('.exe')) {
-        app.getFileIcon(path, {size:"large"}).then((fileIcon) =>{
-          if (defImage != fileIcon.toDataURL()) {
-            win2.webContents.send('changeIcon', argPath, fileIcon.toDataURL())
-          }
-        })
-      } else {
-        win2.webContents.send('changeIcon', argPath, path)
-      }
-    }
-  }
-
-  ipcMain.on('contextFolder', (event, path) => {
-    createWin2('context.html', 189)
+  ipcMain.on('addgame', (event) => {
+    createWin2('addgame.html', 380)
 
     win2.on('close', function() {
       resume()
       win2 = null
-    });
+    })
+  })
 
-    win2.webContents.send('setLocation', path, "./Data/Images/icon_folder.png");
-    let name = path.substring(path.lastIndexOf("\\")+1)
-    win2.webContents.send('setName', name);
-    win2.webContents.send('setPath', undefined);
-    win2.webContents.send('setIconPath', undefined);
+  ipcMain.on('contextFile', (event, path, img) => {
+    createWin2('context-file.html', 420, path, img)
+
+    win2.on('close', function() {
+      resume()
+      win2 = null
+    })
+  })
+
+  ipcMain.on('contextFolder', (event, path) => {
+    createWin2('context-folder.html', 189, path)
+
+    win2.on('close', function() {
+      resume()
+      win2 = null
+    })
   })
 
   ipcMain.on('contextMulti', (event, paths) => {
-    if (paths.length <3) createWin2('context-multi.html', 195) //CORASONSITO :3
-    else createWin2('context-multi.html', 215)
+    if (paths.length <3) createWin2('context-multi.html', 195, paths) //CORASONSITO :3
+    else createWin2('context-multi.html', 215, paths)
 
     win2.on('close', function() {
       resume()
       win2 = null
     })
-
-    win2.webContents.send('setPaths', paths);
+  })  
+  
+  ipcMain.on('exitContext', (event) => {
+    closeWin2()
   })
 
-  ipcMain.on('getFileContext', async function(event, path) {
-    let apath = path.substring(0, path.lastIndexOf('\\')+1)
-    if (!fs.existsSync(apath)) win2.webContents.send('fileGotten', await getFile("Choose a Game"))
-    else win2.webContents.send('fileGotten', await getFile("Choose a Game", `${apath}`))
+  ipcMain.on('exitContextRefresh', (event) => {
+    closeWin2()
+    createList(actualPath)
   })
 
-  ipcMain.on('getFileIconContext', async function(event, path, argPath) {
-    let apath = path.substring(0, path.lastIndexOf('\\')+1)
-
-    let file = ''
-    if (!fs.existsSync(apath)) file = await getFile("Choose a Game")
-    else file = await getFile("Choose a Game", `${apath}`)
-
-    win2.webContents.send('fileGottenIcon', file)
-    askForIconWin2(argPath, file)
+  ipcMain.on('exitContext3', (event) => {
+    closeWin3();
+    if (win2 != null)
+    win2.show()
+  })
+  
+  //FUNCTIONS
+  ipcMain.on('askForIconWin2', async function(event, argPath, path) {
+    askForIconWin2(argPath, path)
   })
 
   ipcMain.on('move', async function(event, paths) {
@@ -503,67 +501,15 @@ if (!app.requestSingleInstanceLock()) {
     }
   })
 
-  ipcMain.on('addfolder', (event) => {
-    createWin2('addfolder.html', 189)
+  //  /$$$$$$  /$$$$$$$$ /$$$$$$  /$$$$$$$  /$$$$$$$$
+  // /$$__  $$|__  $$__//$$__  $$| $$__  $$| $$_____/
+  //| $$  \__/   | $$  | $$  \ $$| $$  \ $$| $$      
+  //|  $$$$$$    | $$  | $$  | $$| $$$$$$$/| $$$$$   
+  // \____  $$   | $$  | $$  | $$| $$__  $$| $$__/   
+  // /$$  \ $$   | $$  | $$  | $$| $$  \ $$| $$      
+  //|  $$$$$$/   | $$  |  $$$$$$/| $$  | $$| $$$$$$$$
+  // \______/    |__/   \______/ |__/  |__/|________/
 
-    win2.on('close', function() {
-      resume()
-      win2 = null
-    });
-
-    win2.webContents.send('setLocation', actualPath);
-  })
-
-  ipcMain.on('addgame', (event) => {
-    createWin2('addgame.html', 380)
-
-    win2.on('close', function() {
-      resume()
-      win2 = null
-    });
-
-    win2.webContents.send('setLocation', actualPath);
-  })
-
-  
-  //FUNCTIONS LAUNCHER CREATOR
-  ipcMain.on('getFile', async function(event, path) {
-    let apath = path.substring(0, path.lastIndexOf('\\')+1)
-    if (!fs.existsSync(apath)) win.webContents.send('fileGotten', await getFile("Choose a Game"))
-    else win.webContents.send('fileGotten', await getFile("Choose a Game", `${apath}`))
-  })
-
-  ipcMain.on('getFileIcon', async function(event, path) {
-    let apath = path.substring(0, path.lastIndexOf('\\')+1)
-    if (!fs.existsSync(apath)) win.webContents.send('fileGottenIcon', await getFile("Choose a Game"))
-    else win.webContents.send('fileGottenIcon', await getFile("Choose a Game", `${apath}`))
-  })
-
-  ipcMain.on('addFolderContext', (event, name) => {
-    let fullName = actualPath+name.trim()
-    if (!fs.existsSync(fullName)) {
-      fs.mkdirSync(fullName)
-      closeWin2()
-      createList(actualPath)
-      win.webContents.send('log', `Folder "${name}" Added`)
-    } else win.webContents.send('log', `Folder "${name}" Already Exists`)
-  })
-
-  ipcMain.on('addGameContext', (event, name, path, icon) => {
-    let fullName = actualPath+name.trim()+'.txt'
-    let data = path
-    if (icon != '') data = path+'\n'+icon
-    if (!fs.existsSync(fullName)) {
-      fs.writeFile(fullName, data, (err) => {
-        win.webContents.send('log', `Game "${name}" Added`);
-        closeWin2()
-        createList(actualPath)
-      })
-    } else win.webContents.send('log', `Game "${name}" Already Exists`);
-  })
-
-
-  //FUNCTIONS STORE
   ipcMain.on('searchGames', (event, orSearch) => {
     searchGames(orSearch)
   })
@@ -853,8 +799,15 @@ if (!app.requestSingleInstanceLock()) {
     return splitStr.join(' '); 
   }
 
+  // /$$$$$$$$ /$$   /$$ /$$$$$$$$ /$$      /$$ /$$$$$$$$
+  //|__  $$__/| $$  | $$| $$_____/| $$$    /$$$| $$_____/
+  //   | $$   | $$  | $$| $$      | $$$$  /$$$$| $$      
+  //   | $$   | $$$$$$$$| $$$$$   | $$ $$/$$ $$| $$$$$   
+  //   | $$   | $$__  $$| $$__/   | $$  $$$| $$| $$__/   
+  //   | $$   | $$  | $$| $$      | $$\  $ | $$| $$      
+  //   | $$   | $$  | $$| $$$$$$$$| $$ \/  | $$| $$$$$$$$
+  //   |__/   |__/  |__/|________/|__/     |__/|________/
 
-  //THEME MANAGER
   function createThemeList() {
     let argPath = app.getAppPath()+'\\Data\\Themes\\'
     if (!fs.existsSync(argPath)) return
@@ -882,6 +835,7 @@ if (!app.requestSingleInstanceLock()) {
     const fse = require('fs-extra');
     fse.copy(path, app.getAppPath(), { overwrite: true }).then(function() {
       window = ''
+      refreshTheme = true
       win.reload()
     }).catch(err => console.error(err))
   })
@@ -894,8 +848,28 @@ if (!app.requestSingleInstanceLock()) {
     }
   })
 
+  //  /$$$$$$  /$$$$$$$$ /$$   /$$ /$$$$$$$$ /$$$$$$$ 
+  // /$$__  $$|__  $$__/| $$  | $$| $$_____/| $$__  $$
+  //| $$  \ $$   | $$   | $$  | $$| $$      | $$  \ $$
+  //| $$  | $$   | $$   | $$$$$$$$| $$$$$   | $$$$$$$/
+  //| $$  | $$   | $$   | $$__  $$| $$__/   | $$__  $$
+  //| $$  | $$   | $$   | $$  | $$| $$      | $$  \ $$
+  //|  $$$$$$/   | $$   | $$  | $$| $$$$$$$$| $$  | $$
+  // \______/    |__/   |__/  |__/|________/|__/  |__/
+    
+  ipcMain.on('getFile', async function(event, path, title, sendReturn) {
+    if (title == undefined || title == '') title = 'Choose a File'
+    if (fs.existsSync(path)) win.webContents.send(sendReturn, await getFile(title, path))
+    else win.webContents.send(sendReturn, await getFile(title))
+  })
 
-  //OTHER
+  ipcMain.on('getFile2', async function(event, path, title, sendReturn) {
+    if (title == undefined || title == '') title = 'Choose a File'
+    if (fs.existsSync(path)) win2.webContents.send(sendReturn, await getFile(title, path))
+    else win2.webContents.send(sendReturn, await getFile(title))
+  })
+  
+  //INSTALLER
   ipcMain.on('install', async function(event, path, name, destination) {
     //PATH
     if (!fs.existsSync(path)) {
@@ -968,7 +942,7 @@ if (!app.requestSingleInstanceLock()) {
   })
 
   function install(zip, path, name, destination, destination2, insideFolderName, nName) {
-    updateData(destination)
+    updateData('gfolder', destination)
     win.webContents.send('log', 'Installing '+name+'...')
     var exec = require('child_process').exec
     exec(`"${zip}" x "${path}" -o"${destination2}"`, function (error, stdOut, stdErr) {
@@ -984,23 +958,30 @@ if (!app.requestSingleInstanceLock()) {
             shell.openPath(destination+insideFolderName)
           } else {
             //RENAME insideFolderName TO nName
-            let newPath = destination+nName+'\\'
-            if (fs.existsSync(newPath)) {
-              win.webContents.send('log', nName+' is already installed')
-              resume()
-              return
-            }
-            fs.rename(destination+insideFolderName, newPath, function(err) {
-              if (err) {
-                win.webContents.send('log', 'An error ocurred while renaming a folder')
+            let newPath = destination+nName
+            if (newPath != destination+insideFolderName) {
+              if (fs.existsSync(newPath)) {
+                win.webContents.send('log', nName+' is already installed')
                 resume()
-              } else {
-                win.webContents.send('log', 'Installation successful')
-                resume()
-                const { shell } = require('electron')
-                shell.openPath(newPath)
+                return
               }
-            })
+              fs.rename(destination+insideFolderName, newPath, function(err) {
+                if (err) {
+                  win.webContents.send('log', 'An error ocurred while renaming a folder')
+                  resume()
+                } else {
+                  win.webContents.send('log', 'Installation successful')
+                  resume()
+                  const { shell } = require('electron')
+                  shell.openPath(newPath)
+                }
+              })
+            } else {
+              win.webContents.send('log', 'Installation successful')
+              resume()
+              const { shell } = require('electron')
+              shell.openPath(newPath)
+            }
           }
         } else {
           win.webContents.send('log', 'Installation successful')
@@ -1011,14 +992,6 @@ if (!app.requestSingleInstanceLock()) {
       }
     })
   }
-
-  ipcMain.on('getFileOther', async function(event) {
-    win.webContents.send('gottenFileOther', await getFile("Choose a File", app.getPath('downloads')))
-  })
-
-  ipcMain.on('getDestinationOther', async function(event) {
-    win.webContents.send('gottenDestinationOther', await getFolder("Choose a Destination"))
-  })
 })
 
 //FUNCTIONS ALL
@@ -1088,7 +1061,7 @@ function createTray() {
       }
     },
     {
-      label: 'Other', click: function () {
+      label: 'Installer', click: function () {
         if (paused) return
         if (window != 'other') {
           win.webContents.send('load', 'other.html')
@@ -1114,12 +1087,12 @@ function createTray() {
   tray = appIcon
 }
 
-function updateData(gfolder) {
+function updateData(line, data) {
   /*also update on loaded to get only the first line
   fs.readFile(dataFile, 'utf8' , (err, data) => {
     let data = gfolder+'\n'
   })*/
-  fs.writeFile(dataFile, gfolder, (err) => { if (err) console.log(err) })
+  fs.writeFile(dataFile, data, (err) => { if (err) console.log(err) })
 }
 
 function getFileInfo(argPath, fixed) {
@@ -1176,7 +1149,7 @@ function getPathInfo(gamePath) {
   return data
 }
 
-function createWin2(file, size) {
+function createWin2(file, size, arg1, arg2) {
   win2 = new BrowserWindow({
     height: size,
     width: 390,
@@ -1193,15 +1166,60 @@ function createWin2(file, size) {
   })
   
   win2.hide()
-  win2.loadFile(file)
+  win2.loadFile('win2.html')
   win2.removeMenu()
-  //win2.openDevTools()
+  win2.openDevTools()
 
   win2.webContents.on('dom-ready', () => {
-    win2.webContents.send('theme', theme);
+    win2.webContents.send('load', file, arg1, arg2)
     win2.show()
   })
 }
+
+function askForIconWin2(argPath, path) {
+  if (fs.existsSync(path) && fs.statSync(path).isFile()) {
+    if (path.toLowerCase().endsWith('.exe')) {
+      app.getFileIcon(path, {size:"large"}).then((fileIcon) =>{
+        if (defImage != fileIcon.toDataURL()) {
+          win2.webContents.send('changeIcon', argPath, fileIcon.toDataURL())
+        }
+      })
+    } else {
+      win2.webContents.send('changeIcon', argPath, path)
+    }
+  }
+}
+
+ipcMain.on('loadedWin2', (event, window, arg1, arg2) => {
+  win2.webContents.send('theme', theme)
+  if (window == 'addfolder.html' || window == 'addgame.html') {
+    win2.webContents.send('setLocation', actualPath);
+  } else if (window == 'context-folder.html') {
+    win2.webContents.send('setLocation', arg1)
+    let name = arg1.substring(arg1.lastIndexOf("\\")+1)
+    win2.webContents.send('setName', name)
+    win2.webContents.send('setPath', undefined)
+    win2.webContents.send('setIconPath', undefined)
+  } else if (window == 'context-file.html') {
+    let data = getFileInfo(arg1, false)
+    let name = data.name
+    let gamePath = data.gamePath
+    let iconPath = data.iconPath
+    if (iconPath == undefined) iconPath = ''
+
+    if (iconPath == '')
+      askForIconWin2(arg1, gamePath)
+    else
+      askForIconWin2(arg1, iconPath)
+
+    win2.webContents.send('setLocation', arg1, arg2)
+    win2.webContents.send('setName', name)
+    win2.webContents.send('setPath', gamePath)
+    win2.webContents.send('setIconPath', iconPath)
+  } else if (window == 'context-multi.html') {
+    win2.webContents.send('setPaths', arg1)
+  }
+})
 
 function closeWin2() {
   if (win2 != null)

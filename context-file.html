@@ -1,57 +1,4 @@
-<!doctype html>
-<html lang="en">
-<head>
-<title>Oriøn: Properties</title>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=0">
-
-<style>
-@font-face { font-family: BodyFont; src: url('Data/Fonts/font_body.ttf'); } 
-@font-face { font-family: ItemFont; src: url('Data/Fonts/font_item.ttf'); } 
-
-body {
-  background: #000000;
-  font-family: BodyFont;
-  overflow:hidden;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-
-  --buttonColor: #000000;
-  --topColor: #000000;
-  --lineColor: #000000;
-  --scrollColor: #000000;
-  --boxColor: #000000;
-  --boxBorderColor: #000000;
-  --placeholderColor: #000000;
-  --textColor: #000000;
-  --text2Color: #000000;
-  --round: 0px;
-  --size1: 150px;
-}
-
-::placeholder {
-  color: var(--placeholderColor);
-}
-</style>
-</head>
-
-<div id="themeDiv" style="height: 0; width: 0;"></div>
-
-<body style="height: 100%; width: 100%; margin: 0px; padding: 0px;">
-  <div style="height: 20px; width: 100%; display: flex; background-color: var(--topColor);">
-    <div style="height: 16px; margin-top: 2px; margin-left: 5px; position: absolute; font-family: ItemFont; font-size: 16px; color: var(--text2Color);">Oriøn: Properties</div>
-    <div style="height: 15px; width: 100%; margin-left: 5px; margin-top: 5px; -webkit-app-region: drag; align-items: center;"></div>
-    <div style="display: flex; font-family: Franklin Gothic Medium">
-      <div style="display: flex; align-items: center;">
-        <div id="exit" style="height: 20px; width: 30px; color: var(--textColor); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">x</div>
-      </div>
-    </div>
-  </div>
-
+<div style="height: 100%; width: 100%; margin: 0px; padding: 0px;">
   <div id="name" style="color: var(--text2Color); height: 70px; margin-top: 15px; display: flex;">
     <div style="display: block;">
       <div style="height: 20px; font-family: ItemFont; font-size: 20px; margin-left: 10px; margin-bottom: 10px; padding: 5px; padding-left: 10px;">Name:</div>
@@ -111,33 +58,18 @@ body {
       </div>
     </div>
   </div>
-</body>
+</div>
 
 <script>
-  const { ipcRenderer } = require('electron');
-  window.$ = window.jQuery = require('jquery');
   let actualPath = ''
   let oldName = ''
   let oldPath = ''
   let oldIcon = ''
   let showPath = ''
-
-  addButtonListener('exit', function() {
-    document.getElementById('exit').style.backgroundColor = 'var(--buttonColor)';
-  }, function() {
-    document.getElementById('exit').style.backgroundColor = 'rgba(0, 0, 0, 0)';
-  }, function() {
-    ipcRenderer.send('exitContext')
-  })
-
-  ipcRenderer.on('theme', (event, theme) => {
-    $("#themeDiv").load(theme)
-  })
-  
+ 
   ipcRenderer.on('setLocation', (event, path, img) => {
     actualPath = path
     document.getElementById('show').style.display = 'none'
-    if (img == "./Data/Images/icon_folder.png") document.getElementById('showstore').style.display = 'none'
     document.getElementById('img').src = img
   })
 
@@ -152,30 +84,22 @@ body {
   })
 
   ipcRenderer.on('setPath', (event, path) => {
-    if (path == undefined) {
-      document.getElementById('path').style.display = 'none'
+    document.getElementById('pathText').value = path
+    oldPath = path
+    const fs = require('fs');
+    let gamePathArg = getPathInfo(path)
+    showPath = gamePathArg.pathClean
+    if (showPath.startsWith('?:')) showPath = showPath.replace('?:', actualPath.substring(0, 2))
+    if (fs.existsSync(showPath)) {
+      document.getElementById('show').style.display = 'flex'
     } else {
-      document.getElementById('pathText').value = path
-      oldPath = path
-      const fs = require('fs');
-      let gamePathArg = getPathInfo(path)
-      showPath = gamePathArg.pathClean
-      if (showPath.startsWith('?:')) showPath = showPath.replace('?:', actualPath.substring(0, 2))
-      if (fs.existsSync(showPath)) {
-        document.getElementById('show').style.display = 'flex'
-      } else {
-        document.getElementById('show').style.display = 'none'
-      } 
-    }
+      document.getElementById('show').style.display = 'none'
+    } 
   })
 
   ipcRenderer.on('setIconPath', (event, path) => {
-    if (path == undefined) {
-      document.getElementById('iconPath').style.display = 'none'
-    } else {
-      document.getElementById('iconText').value = path
-      oldIcon = path
-    }
+    document.getElementById('iconText').value = path
+    oldIcon = path
   })
 
   addButtonListener('folder', function() {
@@ -185,14 +109,15 @@ body {
   }, function() {
     let a = document.getElementById('pathText').value
     let gamePathArg = getPathInfo(a)
-    ipcRenderer.send('getFileContext', gamePathArg.pathClean)
+    let path = gamePathArg.pathClean.substring(0, gamePathArg.pathClean.lastIndexOf('\\')+1)
+    ipcRenderer.send('getFile2', path, 'Choose a Game', 'fileGotten')
   })
 
   ipcRenderer.on('fileGotten', (event, path) => {
     if (path != '')
-    document.getElementById('pathText').value = path
+      document.getElementById('pathText').value = path
     if (document.getElementById('nameText').value == '')
-    document.getElementById('nameText').value = path.substring(path.lastIndexOf('\\')+1)
+      document.getElementById('nameText').value = path.substring(path.lastIndexOf('\\')+1)
   })
   
   addButtonListener('folderIcon', function() {
@@ -203,12 +128,14 @@ body {
     let a = document.getElementById('pathText').value
     if (document.getElementById('iconText').value != '') a = document.getElementById('iconText').value
     let gamePathArg = getPathInfo(a)
-    ipcRenderer.send('getFileIconContext', gamePathArg.pathClean, actualPath)
+    let path = gamePathArg.pathClean.substring(0, gamePathArg.pathClean.lastIndexOf('\\')+1)
+    ipcRenderer.send('getFile2', path, 'Choose an Icon', 'fileGottenIcon')
   })
 
   ipcRenderer.on('fileGottenIcon', (event, path) => {
     if (path != '')
-    document.getElementById('iconText').value = path
+      document.getElementById('iconText').value = path
+    ipcRenderer.send('askForIconWin2', actualPath, path)
   })
 
   addButtonListener('show', function() {
@@ -256,49 +183,11 @@ body {
     if (oldName != document.getElementById('nameText').value) newName = document.getElementById('nameText').value
     let newPath = document.getElementById('pathText').value
     let newIcon = document.getElementById('iconText').value
+
     ipcRenderer.send('save', actualPath, newName, newPath, newIcon)
   })
 
   ipcRenderer.on('log', (event, text) => {
     document.getElementById('log').innerText = text
   })
-
-  function getPathInfo(gamePath) {
-    gamePath = gamePath.trim()
-    let pathClean = gamePath
-    let argsClean = ''
-    if (gamePath.includes('--') && gamePath.includes(' ') && !gamePath.endsWith('"')) {
-      if (gamePath.startsWith('"') ) {
-        pathClean = gamePath.substring(1, gamePath.lastIndexOf('"'))
-        let args = gamePath.substring(pathClean.length+2).trim()
-        argsClean = args.split(' ')
-        argsClean.unshift("/c", pathClean)
-      } else {
-        pathClean = gamePath.substring(0, gamePath.lastIndexOf(' '))
-        let args = gamePath.substring(pathClean.length+2).trim()
-        argsClean = args.split(' ')
-        argsClean.unshift("/c", pathClean)
-      }
-    }
-    let data = {pathClean, argsClean}
-    return data
-  }
-
-  function addButtonListener(id, mousedown, mouseup, click) {
-    $('#'+id).bind('mousedown', function() {
-      if (event.which != 1) return
-      mousedown()
-    })
-
-    $(window).bind('mouseup', function() {
-      if (event.which != 1) return
-      mouseup()
-    })
-
-    $('#'+id).bind('click', function() {
-      if (event.which != 1) return
-      click()
-    })
-  }
 </script>
-</html>

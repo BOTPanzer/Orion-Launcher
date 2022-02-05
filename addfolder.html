@@ -1,57 +1,4 @@
-<!doctype html>
-<html lang="en">
-<head>
-<title>Oriøn: Add Folder</title>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=0">
-
-<style>
-@font-face { font-family: BodyFont; src: url('Data/Fonts/font_body.ttf'); } 
-@font-face { font-family: ItemFont; src: url('Data/Fonts/font_item.ttf'); } 
-
-body {
-  background: #000000;
-  font-family: BodyFont;
-  overflow:hidden;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-
-  --buttonColor: #000000;
-  --topColor: #000000;
-  --lineColor: #000000;
-  --scrollColor: #000000;
-  --boxColor: #000000;
-  --boxBorderColor: #000000;
-  --placeholderColor: #000000;
-  --textColor: #000000;
-  --text2Color: #000000;
-  --round: 0px;
-  --size1: 150px;
-}
-
-::placeholder {
-  color: var(--placeholderColor);
-}
-</style>
-</head>
-
-<div id="themeDiv" style="height: 0; width: 0;"></div>
-
-<body style="height: 100%; width: 100%; margin: 0px; padding: 0px;">
-  <div style="height: 20px; width: 100%; display: flex; background-color: var(--topColor);">
-    <div style="height: 16px; margin-top: 2px; margin-left: 5px; position: absolute; font-family: ItemFont; font-size: 16px; color: var(--text2Color);">Oriøn: Add Folder</div>
-    <div style="height: 15px; width: 100%; margin-left: 5px; margin-top: 5px; -webkit-app-region: drag; align-items: center;"></div>
-    <div style="display: flex; font-family: Franklin Gothic Medium">
-      <div style="display: flex; align-items: center;">
-        <div id="exit" style="height: 20px; width: 30px; color: var(--textColor); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">x</div>
-      </div>
-    </div>
-  </div>
-
+<div style="height: 100%; width: 100%; margin: 0px; padding: 0px;">
   <div id="name" style="color: var(--text2Color);">
     <div style="height: 20px; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 15px; padding: 5px; padding-left: 10px;">Name:</div>
     <div style="align-items: center; margin: 20px; margin-top: 0px;">
@@ -65,28 +12,13 @@ body {
     </div>
     <div id="log" style="margin-left: auto; margin-right: 25px; font-family: ItemFont; font-size: 16px; color: var(--text2Color);"></div>
   </div>
-
+</div>
 
 <script>
-  const { ipcRenderer } = require('electron');
-  window.$ = window.jQuery = require('jquery');
   let actualPath = ''
 
-  addButtonListener('exit', function() {
-    document.getElementById('exit').style.backgroundColor = 'var(--buttonColor)';
-  }, function() {
-    document.getElementById('exit').style.backgroundColor = 'rgba(0, 0, 0, 0)';
-  }, function() {
-    ipcRenderer.send('exitContext')
-  })
-
-  ipcRenderer.on('theme', (event, theme) => {
-    $("#themeDiv").load(theme)
-  })
-  
   ipcRenderer.on('setLocation', (event, path) => {
     actualPath = path
-    document.getElementById('show').style.display = 'none'
   })
 
   addButtonListener('addFolder', function() {
@@ -99,26 +31,14 @@ body {
       document.getElementById('log').innerText = 'Name Is Necesary'
       return
     }
-    document.body.replaceWith(document.body.cloneNode(true));
-    ipcRenderer.send('addFolderContext', name)
+    
+    const fs = require('fs')
+    let fullName = actualPath+name.trim()
+    if (!fs.existsSync(fullName)) {
+      fs.mkdirSync(fullName)
+      document.getElementById('log').innerText = `Folder "${name}" Added`
+      ipcRenderer.send('exitContextRefresh')
+    } else document.getElementById('log').innerText = `Folder "${name}" Already Exists`
   })
-
-  function addButtonListener(id, mousedown, mouseup, click) {
-    $('#'+id).bind('mousedown', function() {
-      if (event.which != 1) return
-      mousedown()
-    })
-
-    $(window).bind('mouseup', function() {
-      if (event.which != 1) return
-      mouseup()
-    })
-
-    $('#'+id).bind('click', function() {
-      if (event.which != 1) return
-      click()
-    })
-  }
 </script>
-</body>
 </html>

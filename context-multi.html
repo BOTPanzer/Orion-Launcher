@@ -1,72 +1,21 @@
-<!doctype html>
-<html lang="en">
-<head>
-<title>Oriøn: Selected</title>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=0">
-
 <style>
-@font-face { font-family: BodyFont; src: url('Data/Fonts/font_body.ttf'); } 
-@font-face { font-family: ItemFont; src: url('Data/Fonts/font_item.ttf'); } 
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }	
 
-body {
-  background: #000000;
-  font-family: BodyFont;
-  overflow:hidden;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-
-  --buttonColor: #000000;
-  --topColor: #000000;
-  --lineColor: #000000;
-  --scrollColor: #000000;
-  --boxColor: #000000;
-  --boxBorderColor: #000000;
-  --placeholderColor: #000000;
-  --textColor: #000000;
-  --text2Color: #000000;
-  --round: 0px;
-  --size1: 150px;
-}
-
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-track {
-  border-radius: 5px;
-  background: var(--c1); 
-}
-
-::-webkit-scrollbar-thumb {
-  border-radius: 5px;
-  background: var(--c2); 
-}
-
-::placeholder {
-  color: var(--placeholderColor);
-}
+  ::-webkit-scrollbar-track {
+    border-radius: 5px;
+    background: var(--topColor);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    background: var(--scrollColor);
+  }
 </style>
-</head>
 
-<div id="themeDiv" style="height: 0; width: 0;"></div>
-
-<body style="height: 100%; width: 100%; margin: 0px; padding: 0px;">
-  <div style="height: 20px; width: 100%; display: flex; background-color: var(--topColor);">
-    <div style="height: 16px; margin-top: 2px; margin-left: 5px; position: absolute; font-family: ItemFont; font-size: 16px; color: var(--text2Color);">Oriøn: Selected</div>
-    <div style="height: 15px; width: 100%; margin-left: 5px; margin-top: 5px; -webkit-app-region: drag; align-items: center;"></div>
-    <div style="display: flex; font-family: Franklin Gothic Medium">
-      <div style="display: flex; align-items: center;">
-        <div id="exit" style="height: 20px; width: 30px; color: var(--textColor); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">x</div>
-      </div>
-    </div>
-  </div>
-
+<div style="height: 100%; width: 100%; margin: 0px; padding: 0px;">
   <div style="color: var(--text2Color);">
     <div id="title" style="height: 20px; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 15px; padding: 5px; padding-left: 10px;">Games/Folders Selected:</div>
     <div id="list" style="height: 60px; font-family: ItemFont; font-size: 16px; margin-left: 20px; margin-right: 20px; padding-left: 5px; padding-right: 5px; overflow-y: auto; color: var(--textColor);">
@@ -84,28 +33,14 @@ body {
       </div>
     </div>
   </div>
-</body>
+</div>
 
 <script>
-  const { ipcRenderer } = require('electron')
-  window.$ = window.jQuery = require('jquery');
   let paths = []
-
-  addButtonListener('exit', function() {
-    document.getElementById('exit').style.backgroundColor = 'var(--buttonColor)';
-  }, function() {
-    document.getElementById('exit').style.backgroundColor = 'rgba(0, 0, 0, 0)';
-  }, function() {
-    ipcRenderer.send('exitContext')
-  })
-
-  ipcRenderer.on('theme', (event, theme) => {
-    $("#themeDiv").load(theme)
-  })
 
   ipcRenderer.on('setPaths', (event, argPaths) => {
     paths = argPaths
-    document.getElementById('title').innerText = argPaths.length+' Games/Folders Selected:'
+    document.getElementById('title').innerText = 'Oriøn: '+argPaths.length+' Games/Folders Selected:'
     for(i in paths) {
       let text = paths[i].substring(paths[i].lastIndexOf('\\')+1)
       if (text.endsWith('.txt')) text = text.slice(0,-4)
@@ -141,43 +76,4 @@ body {
     let newIcon = document.getElementById('iconText').value
     ipcRenderer.send('save', actualPath, newName, newPath, newIcon)
   })
-
-  function getPathInfo(gamePath) {
-    gamePath = gamePath.trim()
-    let pathClean = gamePath
-    let argsClean = ''
-    if (gamePath.includes('--') && gamePath.includes(' ') && !gamePath.endsWith('"')) {
-      if (gamePath.startsWith('"') ) {
-        pathClean = gamePath.substring(1, gamePath.lastIndexOf('"'))
-        let args = gamePath.substring(pathClean.length+2).trim()
-        argsClean = args.split(' ')
-        argsClean.unshift("/c", pathClean)
-      } else {
-        pathClean = gamePath.substring(0, gamePath.lastIndexOf(' '))
-        let args = gamePath.substring(pathClean.length+2).trim()
-        argsClean = args.split(' ')
-        argsClean.unshift("/c", pathClean)
-      }
-    }
-    let data = {pathClean, argsClean}
-    return data
-  }
-
-  function addButtonListener(id, mousedown, mouseup, click) {
-    $('#'+id).bind('mousedown', function() {
-      if (event.which != 1) return
-      mousedown()
-    })
-
-    $(window).bind('mouseup', function() {
-      if (event.which != 1) return
-      mouseup()
-    })
-
-    $('#'+id).bind('click', function() {
-      if (event.which != 1) return
-      click()
-    })
-  }
 </script>
-</html>

@@ -91,9 +91,6 @@
         <div id="themes" style="height: 36px; width: 107px; margin: 20px; margin-left: 23px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
           <div style="font-family: ItemFont;">Themes</div>
         </div>
-        <div id="other" style="height: 36px; width: 107px; margin: 20px; margin-left: 23px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
-          <div style="font-family: ItemFont;">Installer</div>
-        </div>
   
         <div id="add" style="position: absolute; bottom: 0; display: none;">
           <div id="addfolder" style="height: 36px; width: 107px; margin: 20px; margin-left: 23px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
@@ -257,15 +254,6 @@
       ipcRenderer.send('themes')
     })
 
-    //OTHER
-    addButtonListener('other', function() {
-      document.getElementById('other').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-    }, function() {
-      document.getElementById('other').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-    }, function() {
-      ipcRenderer.send('other')
-    })
-
     //ADDFOLDER
     addButtonListener('addfolder', function() {
       document.getElementById('addfolder').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
@@ -328,5 +316,4 @@
     })
   }
 </script>
-</body>
 </html>
