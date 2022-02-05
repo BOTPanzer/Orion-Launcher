@@ -13,6 +13,7 @@ let rootFolder = null
 let dataFolder = null
 let modulesFolder = null
 
+let launcherModule = null
 let launcherFolder = null
 let currentModule = null
 
@@ -42,7 +43,8 @@ if (!app.requestSingleInstanceLock()) {
   dataFolder = rootFolder+'Data\\'
   modulesFolder = rootFolder+'Modules\\'
 
-  launcherFolder = modulesFolder+'Launcher\\Launcher\\'
+  launcherModule = modulesFolder+'Library\\'
+  launcherFolder = launcherModule+'Launcher\\'
 
   createWindow()
   createTray()
@@ -64,11 +66,11 @@ if (!app.requestSingleInstanceLock()) {
     setTimeout(() => {
       win.setOpacity(1);
     }, 200);
-  });
+  })
   
   win.on('hide', () => {
     win.setOpacity(0);
-  });
+  })
 
   win.on('resize', function () {
     win.webContents.send('resized', win.getSize())
@@ -127,65 +129,62 @@ if (!app.requestSingleInstanceLock()) {
   // \______/  \______/ |__/  \__/   |__/   |________/|__/  |__/   |__/   
 
   //WINDOWS
-  ipcMain.on('addfolder', (event) => {
-    createWin2('addfolder.html', 189)
+  ipcMain.on('createContext', (event, context, arg1, arg2) => {
+    switch(context) {
+      case 'addfolder':
+        createWin2('addfolder.html', 189)
 
-    win2.on('close', function() {
-      resume()
-      win2 = null
-    })
+        win2.on('close', function() {
+          resume()
+          win2 = null
+        })
+        break
+      case 'addgame':
+        createWin2('addgame.html', 380)
+
+        win2.on('close', function() {
+          resume()
+          win2 = null
+        })
+        break
+      case 'contextFile':
+        createWin2('context-file.html', 420, arg1, arg2)
+
+        win2.on('close', function() {
+          resume()
+          win2 = null
+        })
+        break
+      case 'contextFolder':
+        createWin2('context-folder.html', 189, arg1)
+
+        win2.on('close', function() {
+          resume()
+          win2 = null
+        })
+        break
+      case 'contextMulti':
+        if (arg1.length <3) createWin2('context-multi.html', 195, arg1) //CORASONSITO :3
+        else createWin2('context-multi.html', 215, arg1)
+    
+        win2.on('close', function() {
+          resume()
+          win2 = null
+        })
+        break
+    }
   })
-
-  ipcMain.on('addgame', (event) => {
-    createWin2('addgame.html', 380)
-
-    win2.on('close', function() {
-      resume()
-      win2 = null
-    })
-  })
-
-  ipcMain.on('contextFile', (event, path, img) => {
-    createWin2('context-file.html', 420, path, img)
-
-    win2.on('close', function() {
-      resume()
-      win2 = null
-    })
-  })
-
-  ipcMain.on('contextFolder', (event, path) => {
-    createWin2('context-folder.html', 189, path)
-
-    win2.on('close', function() {
-      resume()
-      win2 = null
-    })
-  })
-
-  ipcMain.on('contextMulti', (event, paths) => {
-    if (paths.length <3) createWin2('context-multi.html', 195, paths) //CORASONSITO :3
-    else createWin2('context-multi.html', 215, paths)
-
-    win2.on('close', function() {
-      resume()
-      win2 = null
-    })
-  })  
   
-  ipcMain.on('exitContext', (event) => {
+  ipcMain.on('exitContext', (event, refresh) => {
     closeWin2()
-  })
-
-  ipcMain.on('exitContextRefresh', (event) => {
-    closeWin2()
-    win.webContents.send('refreshLauncher')
-  })
-
-  ipcMain.on('exitContext2', (event) => {
-    closeWin3();
-    if (win2 != null)
-    win2.show()
+    if (refresh) win.webContents.send('refreshLauncher')
+  }) 
+  
+  ipcMain.on('resizeContext', async function(event, height) {
+    win2.setResizable(true)
+    win2.setSize(390, height)
+    win2.setResizable(false)
+    win2.center()
   })
 
   //FUNCTIONS
@@ -231,17 +230,6 @@ if (!app.requestSingleInstanceLock()) {
     }
   })
 
-  ipcMain.on('remove', (event, paths) => {
-    createWin3('win3.html')
-    win2.hide()
-    
-    win3.on('close', function() {
-      win3 = null
-    });
-
-    win3.webContents.send('setPaths', paths);
-  })
-
   ipcMain.on('removefinal', (event, paths) => {
     for (i in paths) {
       let path = paths[i]
@@ -250,7 +238,6 @@ if (!app.requestSingleInstanceLock()) {
           fs.unlink(path, (err) => {
             if (i == paths.length-1) {
               closeWin2()
-              closeWin3()
               win.webContents.send('refreshLauncher')
             }
           })
@@ -259,14 +246,12 @@ if (!app.requestSingleInstanceLock()) {
           rimraf(path, (err) => {
             if (i == paths.length-1) {
               closeWin2()
-              closeWin3()
               win.webContents.send('refreshLauncher')
             }
           })
         }
       } else if (i == paths.length-1) {
         closeWin2()
-        closeWin3()
       }
     }
   })
@@ -412,7 +397,7 @@ if (!app.requestSingleInstanceLock()) {
 //WINDOW 1
 function createWindow() {
   win = new BrowserWindow({
-    height: 530,
+    height: 550,
     width: 962,
     minHeight: 460,
     minWidth: 800,
@@ -456,9 +441,9 @@ function createTray() {
   if (modulestmp.includes('Store')) {
     modules.push('Store')
     modulestmp.splice(modulestmp.indexOf('Store'), 1);
-  } if (modulestmp.includes('Launcher')) {
-    modules.push('Launcher')
-    modulestmp.splice(modulestmp.indexOf('Launcher'), 1);
+  } if (modulestmp.includes('Library')) {
+    modules.push('Library')
+    modulestmp.splice(modulestmp.indexOf('Library'), 1);
   } if (modulestmp.includes('Themes')) {
     modules.push('Themes')
     modulestmp.splice(modulestmp.indexOf('Themes'), 1);
@@ -505,10 +490,7 @@ function createWin2(file, size, arg1, arg2) {
   win2 = new BrowserWindow({
     height: size,
     width: 390,
-    minHeight: size,
-    minWidth: 390,
-    maxHeight: size,
-    maxWidth: 390,
+    resizable: false,
     frame: false,
     transparent: true,
     webPreferences: {
@@ -524,7 +506,7 @@ function createWin2(file, size, arg1, arg2) {
   //win2.openDevTools()
 
   win2.webContents.on('dom-ready', () => {
-    win2.webContents.send('load', modulesFolder+'Launcher/'+file, arg1, arg2)
+    win2.webContents.send('load', launcherModule+file, arg1, arg2)
     win2.show()
   })
 }
@@ -577,41 +559,9 @@ ipcMain.on('loaded2', (event, window, arg1, arg2) => {
   } else if (window == 'context-multi.html') {
     win2.webContents.send('setPaths', arg1)
   }
+  let size = win2.getSize()
+  win2.webContents.send('height', size[1])
 })
-
-
-//WINDOW 3
-function createWin3(file) {
-  win3 = new BrowserWindow({
-    height: 136,
-    width: 390,
-    minHeight: 136,
-    minWidth: 390,
-    maxHeight: 136,
-    maxWidth: 390,
-    frame: false,
-    transparent: true,
-    webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-      enableRemoteModule: true
-    }
-  })
-
-  win3.hide()
-  win3.loadFile(file)
-  win3.removeMenu()
-  //win3.openDevTools()
-
-  win3.webContents.on('dom-ready', () => {
-    win3.show()
-  })
-}
-
-function closeWin3() {
-  if (win3 != null)
-  win3.close()
-}
 
 
 //OTHER
@@ -651,10 +601,6 @@ function getData() {
   let jsonPath = dataFolder+'settings.json'
   let rawdata = fs.readFileSync(jsonPath)
   return JSON.parse(rawdata)
-}
-
-function updateData(json) {
-  fs.writeFileSync(dataFolder+'settings.json', JSON.stringify(json));
 }
 
 

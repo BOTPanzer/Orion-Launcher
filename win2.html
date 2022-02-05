@@ -95,7 +95,7 @@
   .longButton {
     transition: all .15s, transform .3s;
 
-    background-image: url('./Data/Images/longButton.png'); 
+    background-image: url('./Data/Images/buttonLong.png'); 
     background-repeat: no-repeat;
     background-size: contain;
 
@@ -112,7 +112,7 @@
   }
   
   .longButton:active {
-    background-image: url('./Data/Images/longButtonClicked.png');
+    background-image: url('./Data/Images/buttonLongClicked.png');
     color: var(--buttonTextColorPressed);
   }
   
@@ -120,11 +120,11 @@
     transform: translateY(-2px);
   }
 
-  /* shortButton */
+  /* smallButton */
   .shortButton {
     transition: all .15s, transform .3s;
 
-    background-image: url('./Data/Images/shortButton.png'); 
+    background-image: url('./Data/Images/buttonSmall.png'); 
     background-repeat: no-repeat;
     background-size: contain;
 
@@ -133,7 +133,7 @@
   }
   
   .shortButton:active {
-    background-image: url('./Data/Images/shortButtonClicked.png');
+    background-image: url('./Data/Images/buttonSmallClicked.png');
   }
   
   .shortButton:hover {
@@ -144,13 +144,24 @@
 
 <div id="themeDiv" style="height: 0; width: 0;"></div>
 
-<body style="height: 100%; width: 100%; margin: 0px; padding: 0px;">
+<body id="body" style="height: 100%; width: 100%; margin: 0px; padding: 0px;">
   <div style="height: 20px; width: 100%; display: flex; background-color: var(--topColor);">
     <div id="title" style="height: 16px; margin-top: 2px; margin-left: 5px; position: absolute; font-family: ItemFont; font-size: 16px; color: var(--textColor2);">Oriøn:</div>
     <div style="height: 15px; width: 100%; margin-left: 5px; margin-top: 5px; -webkit-app-region: drag; align-items: center;"></div>
     <div style="display: flex; font-family: Franklin Gothic Medium">
       <div style="display: flex; align-items: center;">
         <div class="topButton" id="exit" style="height: 20px; width: 30px; text-align: center; align-items: center;">x</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="removeWindow" style="display: none;">
+    <div id="removeWindowTitle" style="height: 20px; margin: 20px; color: var(--textColor2); font-size: 20px; font-family: ItemFont;"></div>
+
+    <div style="width: 100%; position: absolute; bottom: 20px; display: block;">
+      <div style="display: flex; align-items: center; justify-content: center;">
+        <div id="removeWindowRemove" class="longButton" style="margin-right: 10px;">Remove</div>
+        <div id="removeWindowCancel" class="longButton" style="margin-right: 10px;">Cancel</div>
       </div>
     </div>
   </div>
@@ -163,11 +174,14 @@
 <script>
   const { ipcRenderer } = require('electron');
   window.$ = window.jQuery = require('jquery');
+  const fs = require('fs')
+  let removePaths = []
+  let windowH = 0
 
   $("#themeDiv").load('Data\\themeSettings.html')
 
   ipcRenderer.on('load', (event, file, arg1, arg2) => {
-    let tmpfile = file.substring(file.lastIndexOf('/')+1)
+    let tmpfile = file.substring(file.lastIndexOf('\\')+1)
     if (tmpfile == 'addfolder.html') {
       document.getElementById('title').innerText = 'Oriøn: Add Folder'
     } else if (tmpfile == 'addgame.html') {
@@ -182,6 +196,37 @@
     })
   })
 
+  ipcRenderer.on('height', (event, height) => {
+    windowH = height
+  })
+
+  //REMOVE WINDOW
+  function showRemoveWindow(argPaths) {
+    document.getElementById('window').style.display = 'none'
+    document.getElementById('removeWindow').style.display = 'block'
+    ipcRenderer.send('resizeContext', 136)
+
+    removePaths = argPaths
+    if (removePaths.length == 1) {
+      let path = removePaths[0]
+      if (path.endsWith('.txt')) path = path.slice(0,-4)
+      document.getElementById('removeWindowTitle').innerText = 'Remove "' + path.substring(path.lastIndexOf('\\')+1) + '"?'
+    } else {
+      document.getElementById('removeWindowTitle').innerText = 'Remove ' + removePaths.length + ' Games/Folders?'
+    }
+  }
+
+  addSimpleButtonListener('removeWindowRemove', function() {
+    ipcRenderer.send('removefinal', removePaths)
+  })
+
+  addSimpleButtonListener('removeWindowCancel', function() {
+    document.getElementById('window').style.display = 'block'
+    document.getElementById('removeWindow').style.display = 'none'
+    ipcRenderer.send('resizeContext', windowH)
+  })
+
+  //OTHER
   addSimpleButtonListener('exit', function() {
     ipcRenderer.send('exitContext')
   })
