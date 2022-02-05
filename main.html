@@ -27,43 +27,53 @@
     -ms-user-select: none;
     user-select: none;
   
-    --buttonColor: #000000;
     --topColor: #000000;
-    --lineColor: #000000;
+    --topButtonColor: #000000;
+    --topButtonTextColor: #000000;
+    --topButtonTextColorPressed: #000000;
     --scrollColor: #000000;
+    --lineColor: #000000;
+    --buttonTextColor: #000000;
+    --buttonTextColorPressed: #000000;
+    --textColor: #000000;
+    --textColor2: #000000;
+    --placeholderColor: #000000;
     --boxColor: #000000;
     --boxBorderColor: #000000;
-    --placeholderColor: #000000;
-    --textColor: #000000;
-    --text2Color: #000000;
     --round: 0px;
+    
     --size1: 150px;
-  }
-  
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-  }	
-
-  ::-webkit-scrollbar-track {
-    background: var(--topColor);
-  }
-  
-  ::-webkit-scrollbar-thumb {
-    background: var(--scrollColor);
-    border: solid 2px var(--topColor);
-    border-radius: 5px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    border: solid 0px var(--topColor);
+    --sizeW: 0px;
+    --sizeH: 0px;
   }
 
   ::placeholder {
     color: var(--placeholderColor);
   }
 
-  .sbutton {
+  input:focus {
+    outline: none;
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }	
+  
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollColor);
+    border: solid 2px transparent;
+    border-radius: 5px;
+    background-clip: content-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    border: solid 1px transparent;
+  }
+
+  /* generalButton */
+  .generalButton {
     transition: transform .3s, background-image .1s ease-in-out;
     display: flex; 
     justify-content: center; 
@@ -72,7 +82,68 @@
     color: var(--textColor);
   }
 
-  .sbutton:hover {
+  .generalButton:hover {
+    transform: translateY(-2px);
+  }
+
+  /* topButton */
+  .topButton {
+    transition: all .15s;
+    color: var(--topButtonTextColor);
+    background-color: rgba(0, 0, 0, 0);
+  }
+  
+  .topButton:active {
+    color: var(--topButtonTextColorPressed);
+    background-color: var(--topButtonColor);
+  }
+
+  /* longButton */
+  .longButton {
+    transition: all .15s, transform .3s;
+
+    background-image: url('./Data/Images/longButton.png'); 
+    background-repeat: no-repeat;
+    background-size: contain;
+
+    height: 36px;
+    line-height: 36px;
+    width: 107px;
+
+    display: inline-block;
+
+    color: var(--buttonTextColor);
+    text-align: center;
+    font-family: ItemFont;
+    font-size: 16px;
+  }
+  
+  .longButton:active {
+    background-image: url('./Data/Images/longButtonClicked.png');
+    color: var(--buttonTextColorPressed);
+  }
+  
+  .longButton:hover {
+    transform: translateY(-2px);
+  }
+
+  /* shortButton */
+  .shortButton {
+    transition: all .15s, transform .3s;
+
+    background-image: url('./Data/Images/shortButton.png'); 
+    background-repeat: no-repeat;
+    background-size: contain;
+
+    height: 36px;
+    width: 36px;
+  }
+  
+  .shortButton:active {
+    background-image: url('./Data/Images/shortButtonClicked.png');
+  }
+  
+  .shortButton:hover {
     transform: translateY(-2px);
   }
 </style>
@@ -86,41 +157,45 @@
     <div style="height: 15px; width: 100%; margin-left: 5px; margin-top: 5px; -webkit-app-region: drag;"></div>
     <div style="display: flex; font-family: Franklin Gothic Medium">
       <div style="display: flex; align-items: center;">
-        <div id="mini" style="height: 20px; width: 30px; color: var(--buttonColor2); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">–</div>
-        <div id="maxi" style="height: 20px; width: 30px; color: var(--buttonColor2); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">o</div>
-        <div id="exit" style="height: 20px; width: 30px; color: var(--buttonColor2); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">x</div>
+        <div class="topButton" id="mini" style="height: 20px; width: 30px; text-align: center; align-items: center;">–</div>
+        <div class="topButton" id="maxi" style="height: 20px; width: 30px; text-align: center; align-items: center;">o</div>
+        <div class="topButton" id="exit" style="height: 20px; width: 30px; text-align: center; align-items: center;">x</div>
       </div>
     </div>
   </div>
   
   <div style="height: calc(100% - 20px); width: 100%; display: flex; position: relative;">
-    <div id="leftBar" style="height: 100%; min-width: 155px; width: 155px; max-width: 155px; overflow: hidden; position: relative; z-index: 404; opacity: 0;">
+    <div id="leftBar" style="height: 100%; min-width: 150px; width: 20%; max-width: 200px; overflow: hidden; position: relative; z-index: 404; opacity: 0;">
       <div style="display: flex; align-items: center; margin: 10px;">
-        <img id="orionLogo" class="sbutton" style="min-height: 50px; max-height: 50px; min-width: 50px; max-width: 50px; -webkit-user-drag: none;" src="./Data/Images/icon.png"/>
-        <div id="orionName" style="margin-left: 5px; font-family: ItemFont; color: var(--text2Color);">Oriøn Launcher</div>
+        <img id="orionLogo" class="generalButton" style="height: 50px; min-width: 50px; max-width: 50px; -webkit-user-drag: none;" src="./Data/Images/icon.png"/>
+        <div style="margin-left: auto; margin-right: auto;">
+          <div id="orionName" style="margin-left: 5px; font-family: ItemFont; color: var(--textColor2);">Oriøn Launcher</div>
+        </div>
       </div>
       
-      <div style="height: calc(100% - 70px); display: flex; flex-flow: column; flex: 1 1 auto; overflow-y: auto;">
-        <div id="moduleButtons" style="flex: 1 1 auto;"></div>
+      <div style="height: calc(100% - 70px); display: flex; flex-flow: column; flex: 1 1 auto; text-align: center; overflow-y: auto;">        
+        <div id="moduleButtons" style="flex: 1 1 auto;">
 
-        <div id="add" style="display: none; flex: 0 1 auto;">
-          <div id="addfolder" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin-bottom: 20px; margin-left: auto; margin-right: auto;">Add Folder</div>
-          <div id="addgame" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin-bottom: 20px; margin-left: auto; margin-right: auto;">Add Game</div>
+        </div>
+
+        <div id="add" style="flex: 0 1 auto; display: none;">
+          <div id="addfolder" class="longButton" style="margin-top: 10px; margin-bottom: 10px;">Add Folder</div>
+          <div id="addgame" class="longButton" style="margin-top: 10px; margin-bottom: 20px;">Add Game</div>
         </div>
       </div>
     </div>
 
-    <div id="line" style="width: 2px; margin-top: 5px; margin-bottom: 5px; background-color: var(--lineColor); opacity: 0.5;"></div>
+    <div id="line" style="width: 1px; margin-top: 5px; margin-bottom: 5px; background-color: var(--lineColor); opacity: 0.5;"></div>
 
-    <div id="rightBar" style="width: 100%; overflow-y: scroll; z-index: 0;">
-      <img id="logo" style="height: 120px; margin: 20px; -webkit-user-drag: none;" src="./Data/Images/logo.png"/> 
+    <div id="rightBar" style="width: 100%; overflow-y: auto; z-index: 0;">
+      <img id="logo" style="height: 20%; margin: 2%; margin-bottom: 0; -webkit-user-drag: none; object-fit: contain;" src="./Data/Images/logo.png"/> 
       <div id="window"></div>
       <div id="start" style="display: none;"></div>
     </div>
     
     <div id="noti" style="height: 70px; width: 200px; position: fixed; bottom: 20px; right: 20px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round); pointer-events: none; opacity: 0; display: flex; justify-content: space-between; flex-direction: column;">
       <div></div>
-      <div id="notiTitle" style="margin-left: 10px; font-size: 17px; color: var(--text2Color);">Launching:</div>
+      <div id="notiTitle" style="margin-left: 10px; font-size: 17px; color: var(--textColor2);">Launching:</div>
       <div id="notiName" style="width: 160px; margin-left: 20px; font-size: 17px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: var(--textColor);">Game</div>
       <div></div>
     </div>
@@ -128,9 +203,9 @@
 </body>
 
 <script>
-  const { app, ipcRenderer, shell } = require('electron');
-  window.$ = window.jQuery = require('jquery');
-  const fs = require('fs');
+  const { app, ipcRenderer, shell } = require('electron')
+  window.$ = window.jQuery = require('jquery')
+  const fs = require('fs')
 
   //DATA
   let data = {} //root, data, modules (folder paths)
@@ -148,6 +223,11 @@
   function a() {
     ipcRenderer.on('theme', (event) => {
       $("#themeDiv").load('Data\\themeSettings.html')
+    })
+
+    ipcRenderer.on('resized', (event, size) => {
+      document.body.style.setProperty('--sizeW', size[0]+'px')
+      document.body.style.setProperty('--sizeH', size[1]+'px')
     })
 
     ipcRenderer.on('data', (event, argData) => {
@@ -181,7 +261,7 @@
         let id = 'module'+i
         let name = modules[i]
         let path = data.modules+name
-        let html = `<div id="${id}" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin-bottom: 20px; margin-left: auto; margin-right: auto; margin-top: 10px;">
+        let html = `<div id="${id}" class="longButton" style="margin-top: 10px; margin-bottom: 10px;">
                       ${name}
                       <div id="${'path-'+id}" style="display: none;">${path}</div>
                     </div>`
@@ -221,7 +301,7 @@
     $('*').unbind()
 
     //ORIONLOGO
-    addButtonListener('orionLogo', function() {}, function() {}, function() {
+    addSimpleButtonListener('orionLogo', function() {
       if (document.getElementById('orionName').style.display != 'none') {
         document.getElementById('leftBar').style.width = '72px'
         document.getElementById('leftBar').style.height = '70px'
@@ -237,7 +317,7 @@
         json.leftbar = false
         updateData(json)
       } else {
-        document.getElementById('leftBar').style.width = '155px'
+        document.getElementById('leftBar').style.width = '20%'
         document.getElementById('leftBar').style.height = '100%'
         document.getElementById('leftBar').style.position = 'relative'
 
@@ -257,49 +337,29 @@
     })
 
     //MINI
-    addButtonListener('mini', function() {
-      document.getElementById('mini').style.backgroundColor = 'var(--buttonColor)';
-    }, function() {
-      document.getElementById('mini').style.backgroundColor = 'rgba(0, 0, 0, 0)';
-    }, function() {
+    addSimpleButtonListener('mini', function() {
       ipcRenderer.send('mini');
     })
 
     //MAXI
-    addButtonListener('maxi', function() {
-      document.getElementById('maxi').style.backgroundColor = 'var(--buttonColor)';
-    }, function() {
-      document.getElementById('maxi').style.backgroundColor = 'rgba(0, 0, 0, 0)';
-    }, function() {
+    addSimpleButtonListener('maxi', function() {
       ipcRenderer.send('maxi');
     })
 
     //EXIT
-    addButtonListener('exit', function() {
-      document.getElementById('exit').style.backgroundColor = 'var(--buttonColor)';
-    }, function() {
-      document.getElementById('exit').style.backgroundColor = 'rgba(0, 0, 0, 0)';
-    }, function() {
+    addSimpleButtonListener('exit', function() {
       ipcRenderer.send('exit')
     })
 
     //ADDFOLDER
-    addButtonListener('addfolder', function() {
-      document.getElementById('addfolder').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-    }, function() {
-      document.getElementById('addfolder').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-    }, function() {
+    addSimpleButtonListener('addfolder', function() {
       window.scrollTo(0, 0);
       ipcRenderer.send('pause')
       ipcRenderer.send('addfolder')
     })
 
     //ADDGAME
-    addButtonListener('addgame', function() {
-      document.getElementById('addgame').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-    }, function() {
-      document.getElementById('addgame').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-    }, function() {
+    addSimpleButtonListener('addgame', function() {
       window.scrollTo(0, 0);
       ipcRenderer.send('pause')
       ipcRenderer.send('addgame')
@@ -313,11 +373,7 @@
     children.forEach(function(item){
       let id = item.id
       let path = document.getElementById('path-'+id).innerHTML
-      addButtonListener(id, function() {
-        document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-      }, function() {
-        document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-      }, function() {
+      addSimpleButtonListener(id, function() {
         loadModule(path)
       })
 
@@ -407,6 +463,13 @@
 
 
   //BUTTON LISTENERS
+  function addSimpleButtonListener(id, click) {
+    $('#'+id).bind('click', function() {
+      if (event.which != 1) return
+      click()
+    })
+  }
+
   function addButtonListener(id, mousedown, mouseup, click) {
     $('#'+id).bind('mousedown', function() {
       if (event.which != 1) return
@@ -420,6 +483,13 @@
 
     $('#'+id).bind('click', function() {
       if (event.which != 1) return
+      click()
+    })
+  }
+
+  function addSimpleRightButtonListener(id, click) {
+    $('#'+id).bind('contextmenu', function() {
+      if (event.which != 3) return
       click()
     })
   }

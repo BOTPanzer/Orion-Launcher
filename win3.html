@@ -19,34 +19,65 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-
-    --buttonColor: #000000;
+  
     --topColor: #000000;
-    --lineColor: #000000;
+    --topButtonColor: #000000;
+    --topButtonTextColor: #000000;
+    --topButtonTextColorPressed: #000000;
     --scrollColor: #000000;
+    --lineColor: #000000;
+    --buttonTextColor: #000000;
+    --buttonTextColorPressed: #000000;
+    --textColor: #000000;
+    --textColor2: #000000;
+    --placeholderColor: #000000;
     --boxColor: #000000;
     --boxBorderColor: #000000;
-    --placeholderColor: #000000;
-    --textColor: #000000;
-    --text2Color: #000000;
     --round: 0px;
+    
     --size1: 150px;
+    --sizeW: 0px;
+    --sizeH: 0px;
   }
 
-  ::placeholder {
-    color: var(--placeholderColor);
+  /* topButton */
+  .topButton {
+    transition: all .15s;
+    color: var(--topButtonTextColor);
+    background-color: rgba(0, 0, 0, 0);
+  }
+  
+  .topButton:active {
+    color: var(--topButtonTextColorPressed);
+    background-color: var(--topButtonColor);
   }
 
-  .sbutton {
-    transition: transform .3s, background-image .1s ease-in-out;
-    display: flex; 
-    justify-content: center; 
-    align-items: center;
+  /* longButton */
+  .longButton {
+    transition: all .15s, transform .3s;
+
+    background-image: url('./Data/Images/longButton.png'); 
+    background-repeat: no-repeat;
+    background-size: contain;
+
+    height: 36px;
+    line-height: 36px;
+    width: 107px;
+
+    display: inline-block;
+
+    color: var(--buttonTextColor);
+    text-align: center;
     font-family: ItemFont;
-    color: var(--textColor);
+    font-size: 16px;
   }
-
-  .sbutton:hover {
+  
+  .longButton:active {
+    background-image: url('./Data/Images/longButtonClicked.png');
+    color: var(--buttonTextColorPressed);
+  }
+  
+  .longButton:hover {
     transform: translateY(-2px);
   }
 </style>
@@ -56,21 +87,21 @@
 	
 <body style="height: 100%; width: 100%; margin: 0px; padding: 0px;">
   <div style="height: 20px; width: 100%; display: flex; background-color: var(--topColor);">
-    <div style="height: 16px; margin-top: 2px; margin-left: 5px; position: absolute; font-family: ItemFont; font-size: 16px; color: var(--text2Color);">Oriøn: Remove</div>
+    <div style="height: 16px; margin-top: 2px; margin-left: 5px; position: absolute; font-family: ItemFont; font-size: 16px; color: var(--textColor2);">Oriøn: Remove</div>
     <div style="height: 15px; width: 100%; margin-left: 5px; margin-top: 5px; -webkit-app-region: drag; align-items: center;"></div>
     <div style="display: flex; font-family: Franklin Gothic Medium">
       <div style="display: flex; align-items: center;">
-        <div id="exit" style="height: 20px; width: 30px; color: var(--textColor); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">x</div>
+        <div class="topButton" id="exit" style="height: 20px; width: 30px; text-align: center; align-items: center;">x</div>
       </div>
     </div>
   </div>
 
-  <div id="nameText" style="height: 20px; margin: 20px; color: var(--text2Color); font-size: 20px; font-family: ItemFont;"></div>
+  <div id="nameText" style="height: 20px; margin: 20px; color: var(--textColor2); font-size: 20px; font-family: ItemFont;"></div>
 
   <div style="width: 100%; position: absolute; bottom: 20px; display: block;">
     <div style="display: flex; align-items: center; justify-content: center;">
-      <div id="remove" class="sbutton" style="height: 36px; width: 107px; background-image: url('Data/Images/icon_description_launch.png'); margin-right: 10px; ">Remove</div>
-      <div id="cancel" class="sbutton" style="height: 36px; width: 107px; background-image: url('Data/Images/icon_description_launch.png'); margin-right: 10px; ">Cancel</div>
+      <div id="remove" class="longButton" style="margin-right: 10px;">Remove</div>
+      <div id="cancel" class="longButton" style="margin-right: 10px;">Cancel</div>
     </div>
   </div>
 
@@ -81,11 +112,7 @@
   
   $("#themeDiv").load('Data\\themeSettings.html')
 
-  addButtonListener('exit', function() {
-    document.getElementById('exit').style.backgroundColor = 'var(--buttonColor)';
-  }, function() {
-    document.getElementById('exit').style.backgroundColor = 'rgba(0, 0, 0, 0)';
-  }, function() {
+  addSimpleButtonListener('exit', function() {
     ipcRenderer.send('exitContext2')
   })
 
@@ -100,33 +127,15 @@
     }
   })
 
-  addButtonListener('remove', function() {
-    document.getElementById('remove').style.backgroundImage = 'url("Data/Images/icon_description_launch_clicked.png")';
-  }, function() {
-    document.getElementById('remove').style.backgroundImage = 'url("Data/Images/icon_description_launch.png")';
-  }, function() {
+  addSimpleButtonListener('remove', function() {
     ipcRenderer.send('removefinal', paths)
   })
 
-  addButtonListener('cancel', function() {
-    document.getElementById('cancel').style.backgroundImage = 'url("Data/Images/icon_description_launch_clicked.png")';
-  }, function() {
-    document.getElementById('cancel').style.backgroundImage = 'url("Data/Images/icon_description_launch.png")';
-  }, function() {
+  addSimpleButtonListener('cancel', function() {
     ipcRenderer.send('exitContext2')
   })
 
-  function addButtonListener(id, mousedown, mouseup, click) {
-    $('#'+id).bind('mousedown', function() {
-      if (event.which != 1) return
-      mousedown()
-    })
-
-    $(window).bind('mouseup', function() {
-      if (event.which != 1) return
-      mouseup()
-    })
-
+  function addSimpleButtonListener(id, click) {
     $('#'+id).bind('click', function() {
       if (event.which != 1) return
       click()

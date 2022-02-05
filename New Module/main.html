@@ -1,19 +1,19 @@
-<div style="padding: 10px;">
+<div style="padding: 5%;">
   <!-- TITLE BAR -->
   <div style="width: 100%; display: flex; align-items: center;">
-    <div id="title" style="color: var(--text2Color); font-size: 40px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">New Module</div>
+    <div id="title" style="color: var(--textColor2); font-size: 40px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">Connect</div>
   </div>
 
   <!-- NORMAL INPUT -->
-  <input id='input' placeholder="Input" type="text" style="height: 32px; width: 200px; padding-left: 10px; padding-right: 10px; color: var(--text2Color); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round); margin-top: 20px"></input>
+  <input id='input' spellcheck="false" placeholder="Input" type="text" style="height: 32px; width: 200px; padding-left: 10px; padding-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round); margin-top: 20px"></input>
 
   <!-- FOLDER BUTTON -->
-  <div id="buttonFolder" class="sbutton" style="height: 36px; min-width: 36px; max-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-top: 20px">
+  <div id="buttonFolder" class="shortButton" style="margin-top: 20px;">
     <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/icon_folder.png"></img>
   </div>
 
   <!-- NORMAL BUTTON -->
-  <div id="button" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin-top: 20px;">Button</div>
+  <div id="button" class="longButton" style="margin-top: 20px;">Button</div>
 </div>
 
 <script>
@@ -29,28 +29,10 @@
     }
   })
 
-  //FOLDER BUTTON LISTENER
-  addButtonListener('buttonFolder', function() {
-    //WHEN MOUSE GOES DOWN
-    document.getElementById('buttonFolder').style.backgroundImage = 'url("./Data/Images/icon_description_folder_clicked.png")';
-  }, function() {
-    //WHEN MOUSE GOES UP
-    document.getElementById('buttonFolder').style.backgroundImage = 'url("./Data/Images/icon_description_folder.png")';
-  }, function() {
-    //WHEN CLICK FINISHES
-
-  })
-
-  //NORMAL BUTTON LISTENER
-  addButtonListener('button', function() {
-    //WHEN MOUSE GOES DOWN
-    document.getElementById('button').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-  }, function() {
-    //WHEN MOUSE GOES UP
-    document.getElementById('button').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-  }, function() {
-    //WHEN CLICK FINISHES
-
+  //SIMPLE BUTTON LISTENER
+  addSimpleButtonListener('button', function() {
+    //DO AFTER CLICK
+    document.getElementById('title').innerHTML = document.getElementById('input').value
   })
 
   //--LIST OF SOME CUSTOM COMMANDS--
@@ -64,9 +46,9 @@
   //ipcRenderer.send('reloadTheme') 
   //RELOADS LAUNCHER TO RELOAD THEME
 
-  //ipcRenderer.send('newCustomWindow', <isFile> (true/false), <Path>) 
+  //ipcRenderer.send('newCustomWindow', <Path>, <isFile>, <isResizable>, <hasFrame>, <height>, <width>, <specialData>) 
   //CREATES A WINDOW WITH A FILE OR A LINK
 
   //ipcRenderer.send('showOnExplorer', <Path>, <Show> (true to show / false to open))
-  //OPENS A FILE OR SHOWS IT ON HTE EXPLORER
+  //OPENS A FILE OR SHOWS IT ON THE EXPLORER
 </script>

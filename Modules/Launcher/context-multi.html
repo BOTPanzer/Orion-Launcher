@@ -1,11 +1,5 @@
-<style>
-  ::-webkit-scrollbar-track {
-    border-radius: 5px;
-  }
-</style>
-
 <div style="height: 100%; width: 100%; margin: 0px; padding: 0px;">
-  <div style="color: var(--text2Color);">
+  <div style="color: var(--textColor2);">
     <div id="title" style="height: 20px; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 15px; padding: 5px; padding-left: 10px;">Games/Folders Selected:</div>
     <div id="list" style="height: 60px; font-family: ItemFont; font-size: 16px; margin-left: 20px; margin-right: 20px; padding-left: 5px; padding-right: 5px; overflow-y: auto; color: var(--textColor);">
       
@@ -14,8 +8,8 @@
 
   <div style="width: 100%; position: absolute; bottom: 20px; display: block;">
     <div style="display: flex; align-items: center; justify-content: center;">
-      <div id="move" class="sbutton" style="height: 36px; width: 107px; background-image: url('Data/Images/icon_description_launch.png'); margin-right: 10px;">Move</div>
-      <div id="remove" class="sbutton" style="height: 36px; width: 107px; background-image: url('Data/Images/icon_description_launch.png'); margin-right: 10px;">Remove</div>
+      <div id="move" class="longButton" style="margin-right: 10px;">Move</div>
+      <div id="remove" class="longButton" style="margin-right: 10px;">Remove</div>
     </div>
   </div>
 </div>
@@ -34,19 +28,11 @@
     }
   })
   
-  addButtonListener('move', function() {
-    document.getElementById('move').style.backgroundImage = 'url("Data/Images/icon_description_launch_clicked.png")';
-  }, function() {
-    document.getElementById('move').style.backgroundImage = 'url("Data/Images/icon_description_launch.png")';
-  }, function() {
+  addSimpleButtonListener('move', function() {
     ipcRenderer.send('move', paths)
   })
   
-  addButtonListener('remove', function() {
-    document.getElementById('remove').style.backgroundImage = 'url("Data/Images/icon_description_launch_clicked.png")';
-  }, function() {
-    document.getElementById('remove').style.backgroundImage = 'url("Data/Images/icon_description_launch.png")';
-  }, function() {
+  addSimpleButtonListener('remove', function() {
     ipcRenderer.send('remove', paths)
   })
 </script>

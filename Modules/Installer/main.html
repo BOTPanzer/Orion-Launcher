@@ -1,30 +1,30 @@
-<div id="content" style="padding: 10px;">
+<div id="content" style="padding: 2%;">
   <div style="width: 100%; display: flex; align-items: center; margin-bottom: 20px;">
-    <div id="title" style="color: var(--text2Color); font-size: 40px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">Installer</div>
+    <div id="title" style="color: var(--textColor2); font-size: 40px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">Installer</div>
   </div>
 
   <div style="width: 100%; display: flex;">
-    <input id='path' placeholder="File Path" type="text" style="height: 32px; width: calc(100% - 46px); margin-right: 10px; padding-left: 10px; padding-right: 10px; color: var(--text2Color); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
+    <input id='path' spellcheck="false" placeholder="File Path" type="text" style="height: 32px; width: calc(100% - 46px); margin-right: 10px; padding-left: 10px; padding-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
     
-    <div id="pathFolder" class="sbutton" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png');">
+    <div id="pathFolder" class="shortButton">
       <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/icon_folder.png"></img>
     </div>
   </div>
   
   <div style="width: calc(100% - 20px); margin-top: 20px;">
-    <input id='name' placeholder="Name (optional)" type="text" style="height: 32px; width: 100%; padding-left: 10px; padding-right: 10px; color: var(--text2Color); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
+    <input id='name' spellcheck="false" placeholder="Name (optional)" type="text" style="height: 32px; width: 100%; padding-left: 10px; padding-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
   </div>
   
   <div style="width: 100%; margin-top: 20px; display: flex;">
-    <input id='destination' placeholder="Destination" type="text" style="height: 32px; width: calc(100% - 46px); margin-right: 10px; padding-left: 10px; padding-right: 10px; color: var(--text2Color); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
-    <div id="destinationFolder" class="sbutton" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png');">
+    <input id='destination' spellcheck="false" placeholder="Destination" type="text" style="height: 32px; width: calc(100% - 46px); margin-right: 10px; padding-left: 10px; padding-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
+    <div id="destinationFolder" class="shortButton">
       <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/icon_folder.png"></img>
     </div>
   </div>
   
-  <div id="log" style="height: 20px; padding: 10px; padding-left: 0px; padding-right: 0px; display: flex; align-items: center; color: var(--text2Color); font-family: ItemFont;">Log</div>
+  <div id="log" style="height: 20px; padding: 10px; padding-left: 0px; padding-right: 0px; display: flex; align-items: center; color: var(--textColor2); font-family: ItemFont;">Log</div>
   
-  <div id="install" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin-bottom: 10px;">Install</div>
+  <div id="install" class="longButton" style="margin-bottom: 10px;">Install</div>
 </div>
 
 <script>
@@ -38,11 +38,7 @@
   document.getElementById('destination').value = json.installPath
   
   //GET FILE
-  addButtonListener('pathFolder', function() {
-    document.getElementById('pathFolder').style.backgroundImage = 'url("./Data/Images/icon_description_folder_clicked.png")';
-  }, function() {
-    document.getElementById('pathFolder').style.backgroundImage = 'url("./Data/Images/icon_description_folder.png")';
-  }, function() {
+  addSimpleButtonListener('pathFolder', function() {
     ipcRenderer.send('getFile', '', '', 'fileGottenInstaller')
   })
 
@@ -52,11 +48,7 @@
   })
 
   //GET DESTINATION
-  addButtonListener('destinationFolder', function() {
-    document.getElementById('destinationFolder').style.backgroundImage = 'url("./Data/Images/icon_description_folder_clicked.png")';
-  }, function() {
-    document.getElementById('destinationFolder').style.backgroundImage = 'url("./Data/Images/icon_description_folder.png")';
-  }, function() {
+  addSimpleButtonListener('destinationFolder', function() {
     ipcRenderer.send('getFolder', '', '', 'folderGottenInstaller')
   })
 
@@ -66,11 +58,7 @@
   })
 
   //INSTALL
-  addButtonListener('install', function() {
-    document.getElementById('install').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-  }, function() {
-    document.getElementById('install').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-  }, function() {
+  addSimpleButtonListener('install', function() {
     //PATH
     let path = document.getElementById('path').value
     if (path == '') {

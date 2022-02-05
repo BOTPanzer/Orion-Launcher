@@ -16,39 +16,39 @@
   }
 </style>
 
-<div id="storeList" style="padding: 10px;">
+<div id="storeList" style="padding: 2%;">
   <div style="margin-left: 20px; margin-right: 20px; display: flex; align-items: center;">
-    <div id="discover" class="sbutton" style="height: 36px; min-width: 107px; background-image: url('./Data/Images/icon_description_launch.png');">Discover</div>
-    <input id='editText' placeholder="Search Games" type="text" maxlength="50" style="height: 32px; width: 100%; margin-left: 10px; margin-right: 10px; padding-left: 10px; padding-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
-    <div id="search" class="sbutton" style="height: 36px; min-width: 107px; background-image: url('./Data/Images/icon_description_launch.png');">Search</div>
+    <div id="discover" class="longButton" style="min-width: 107px;">Discover</div>
+    <input id='editText' spellcheck="false" placeholder="Search Games" type="text" maxlength="50" style="height: 32px; width: 100%; margin-left: 10px; margin-right: 10px; padding-left: 10px; padding-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
+    <div id="search" class="longButton" style="min-width: 107px;">Search</div>
   </div>
 
   <div style="margin-bottom: 20px; margin-top: 20px; margin-left: 50px; margin-right: 50px;">
     <div style="display: flex; align-items: center; font-family: ItemFont; font-size: 20px; margin-top: 20px;">
-      <div id="Elamigos" style="color: var(--text2Color); padding: 5px; white-space: nowrap;">ElAmigos</div>
+      <div id="Elamigos" style="color: var(--textColor2); padding: 5px; white-space: nowrap;">ElAmigos</div>
       <div style="height: 1px; width: 100%; margin-left: 5px; margin-right: 5px; background-color: var(--lineColor);"></div>
-      <div id="moreElamigos" class="sbutton" style="color: var(--text2Color); padding: 5px;" onclick="openLink('https://www.elamigos-games.com/')">More</div>
+      <div id="moreElamigos" class="generalButton" style="color: var(--textColor2); padding: 5px;" onclick="openLink('https://www.elamigos-games.com/')">More</div>
     </div>
     <div class="list" id="listElamigos"></div>
   
     <div style="display: flex; align-items: center; font-family: ItemFont; font-size: 20px; margin-top: 20px;">
-      <div id="Fitgirl" style="color: var(--text2Color); padding: 5px; white-space: nowrap;">Fitgirl</div>
+      <div id="Fitgirl" style="color: var(--textColor2); padding: 5px; white-space: nowrap;">Fitgirl</div>
       <div style="height: 1px; width: 100%; margin-left: 5px; margin-right: 5px; background-color: var(--lineColor);"></div>
-      <div id="moreFitgirl" class="sbutton" style="color: var(--text2Color); padding: 5px;" onclick="openLink('https://fitgirl-repacks.site/')">More</div>
+      <div id="moreFitgirl" class="generalButton" style="color: var(--textColor2); padding: 5px;" onclick="openLink('https://fitgirl-repacks.site/')">More</div>
     </div>
     <div class="list" id="listFitgirl"></div>
   
     <div style="display: flex; align-items: center; font-family: ItemFont; font-size: 20px; margin-top: 20px;">
-      <div id="Pivi" style="color: var(--text2Color); padding: 5px; white-space: nowrap;">Pivi</div>
+      <div id="Pivi" style="color: var(--textColor2); padding: 5px; white-space: nowrap;">Pivi</div>
       <div style="height: 1px; width: 100%; margin-left: 5px; margin-right: 5px; background-color: var(--lineColor);"></div>
-      <div id="morePivi" class="sbutton" style="color: var(--text2Color); padding: 5px;" onclick="openLink('https://pivigames.blog/')">More</div>
+      <div id="morePivi" class="generalButton" style="color: var(--textColor2); padding: 5px;" onclick="openLink('https://pivigames.blog/')">More</div>
     </div>
     <div class="list" id="listPivi"></div>
   
     <div style="display: flex; align-items: center; font-family: ItemFont; font-size: 20px; margin-top: 20px;">
-      <div id="SteamUnlocked" style="color: var(--text2Color); padding: 5px; white-space: nowrap;">Steam Unlocked</div>
+      <div id="SteamUnlocked" style="color: var(--textColor2); padding: 5px; white-space: nowrap;">Steam Unlocked</div>
       <div style="height: 1px; width: 100%; margin-left: 5px; margin-right: 5px; background-color: var(--lineColor);"></div>
-      <div id="moreSteamUnlocked" class="sbutton" style="color: var(--text2Color); padding: 5px;" onclick="openLink('https://steamunlocked.net/')">More</div>
+      <div id="moreSteamUnlocked" class="generalButton" style="color: var(--textColor2); padding: 5px;" onclick="openLink('https://steamunlocked.net/')">More</div>
     </div>
     <div class="list" id="listSteamUnlocked"></div>
   </div>
@@ -57,7 +57,7 @@
 <script>
   //MODULE NAME CAN BE CHANGED FREELY 😎
   ipcRenderer.on('resized', (event, size) => {
-    s1 = size/6
+    s1 = size[0]/6
     if (s1 < 200) s1 = 200
     if (s1 > 300) s1 = 300
     document.body.style.setProperty('--size1', s1+'px')
@@ -377,7 +377,7 @@
   }
 
   function hasResults(id) {
-    document.getElementById(id).style.color = 'var(--text2Color)'
+    document.getElementById(id).style.color = 'var(--textColor2)'
     document.getElementById('list'+id).style.display = 'flex'
     let name = id
     if (name == 'Elamigos') name = 'ElAmigos'
@@ -404,7 +404,7 @@
   }
 
   function createStoreHTML(id, img, icon, name) {
-    let html = `<div id="${id}" class="sbutton" style="min-width: var(--size1); height: calc(var(--size1)/4*5); min-height: 250px; margin-top: 5px; margin-right: 5px; background-image: url('./Data/Images/icon_store_item.png'); background-repeat: no-repeat; background-size: cover; text-align: center; display: inline-block;">
+    let html = `<div id="${id}" class="generalButton" style="min-width: var(--size1); height: calc(var(--size1)/4*5); min-height: 250px; margin-top: 5px; margin-right: 5px; background-image: url('./Data/Images/icon_store_item.png'); background-repeat: no-repeat; background-size: cover; text-align: center; display: inline-block;">
                   <div style="width: var(--size1); height: 80%;">
                     <img id="${img}" style="width: 90%; height: 95%; margin: 10px; object-fit: contain; -webkit-user-drag: none;" src="${icon}"></img>
                   </div>
@@ -416,7 +416,7 @@
   }
 
   function createStoreHTML2(id, img, icon, name, info) {
-    let html = `<div id="${id}" class="sbutton" style="min-width: var(--size1); height: calc(var(--size1)/4*5); min-height: 250px; margin-top: 5px; margin-right: 5px; background-image: url('./Data/Images/icon_store_item.png'); background-repeat: no-repeat; background-size: cover; text-align: center; display: inline-block;">
+    let html = `<div id="${id}" class="generalButton" style="min-width: var(--size1); height: calc(var(--size1)/4*5); min-height: 250px; margin-top: 5px; margin-right: 5px; background-image: url('./Data/Images/icon_store_item.png'); background-repeat: no-repeat; background-size: cover; text-align: center; display: inline-block;">
                   <div style="width: var(--size1); height: 80%;">
                     <img id="${img}" style="width: 90%; height: 95%; margin: 10px; object-fit: contain; -webkit-user-drag: none;" src="${icon}"></img>
                   </div>
@@ -432,11 +432,7 @@
 
   //OTHER FUNCTIONS
   function setStoreListeners() {
-    addButtonListener('discover', function() {
-      document.getElementById('discover').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-    }, function() {
-      document.getElementById('discover').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-    }, function() {
+    addSimpleButtonListener('discover', function() {
       searchGames('')
     })
 
@@ -450,11 +446,7 @@
       }
     })
 
-    addButtonListener('search', function() {
-      document.getElementById('search').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
-    }, function() {
-      document.getElementById('search').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
-    }, function() {
+    addSimpleButtonListener('search', function() {
       let search = document.getElementById('editText').value
       if (search == '') return
       searchGames(search)
@@ -486,7 +478,7 @@
       document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_store_item.png")';
     }, function() {
       addNoti(document.getElementById('name-'+id).innerHTML, 'Store:')
-      ipcRenderer.send('newCustomWindow', false, link)
+      ipcRenderer.send('newCustomWindow', link)
     })
   }
 

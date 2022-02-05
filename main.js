@@ -71,15 +71,13 @@ if (!app.requestSingleInstanceLock()) {
   });
 
   win.on('resize', function () {
-    var size = win.getSize()
-    win.webContents.send('resized', size[0])
+    win.webContents.send('resized', win.getSize())
   })
 
   ipcMain.on('loaded', (event, path) => {
     currentModule = path
     
-    var size = win.getSize()
-    win.webContents.send('resized', size[0])
+    win.webContents.send('resized', win.getSize())
   })
 
   //MINI & MAXI & EXIT
@@ -349,19 +347,33 @@ if (!app.requestSingleInstanceLock()) {
     win.reload()
   })
 
-  ipcMain.on('newCustomWindow', (event, isFile, path) => {
-    let customWin = new BrowserWindow({
-      height: 540,
-      width: 955
-    })
+  ipcMain.on('newCustomWindow', (event, path, isFile, isResizable, hasFrame, height, width, specialData) => {
+    if (path == undefined) return
+    if (isFile == undefined) isFile = false
+    if (isResizable == undefined) isResizable = true
+    if (hasFrame == undefined) hasFrame = true
+    if (height == undefined) height = 540
+    if (width == undefined) width = 955
+
+    let options = {
+      height: height,
+      width: width,
+      resizable: isResizable,
+      frame: hasFrame,
+    }
+
+    let customWin = new BrowserWindow(options)
+    customWin.removeMenu()
+    //customWin.openDevTools()
 
     if (isFile)
       customWin.loadFile(path)
     else
       customWin.loadURL(path)
 
-    customWin.removeMenu()
-    //win.openDevTools()
+    customWin.on('close', function (event) {})
+
+    customWin.webContents.on('dom-ready', () => {})
   })
 
   ipcMain.on('requestIcon', (event, img, iconPath, actualPath) => {
@@ -401,7 +413,7 @@ if (!app.requestSingleInstanceLock()) {
 function createWindow() {
   win = new BrowserWindow({
     height: 530,
-    width: 957,
+    width: 962,
     minHeight: 460,
     minWidth: 800,
     frame: false,
@@ -419,12 +431,12 @@ function createWindow() {
 
   win.on('close', function (event) {
     if (!closing) {
-      event.preventDefault();
-      win.hide();
+      event.preventDefault()
+      win.hide()
     } else {
-      tray.destroy();
+      tray.destroy()
     }
-  });
+  })
 }
 
 function createTray() {

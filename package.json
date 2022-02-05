@@ -1,8 +1,8 @@
 {
   "name": "orion-launcher",
-  "version": "2.0.2",
+  "version": "2.0.6",
   "author": "BOT Panzer",
-  "description": "Themed Launcher & Game Store With Module Capacity",
+  "description": "Themed Launcher & Game Store With Modules",
   "main": "main.js",
   "scripts": {
     "start": "electron .",

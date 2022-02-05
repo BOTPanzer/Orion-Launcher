@@ -33,6 +33,7 @@
     
       mainSocket.on('data', function(chunk) {
         appendText('Received: '+chunk.toString())
+        //if (!notisTitle.includes('Connect:')) addNoti('Received: '+chunk.toString(), 'Connect:')
       })
 
       mainSocket.on('end', function() {
@@ -49,7 +50,7 @@
     fullLog = fullLog+text
     if (document.getElementById('text') != null) {
       document.getElementById('text').innerText = fullLog
-      document.getElementById('textDiv').scrollTop = document.getElementById('textDiv').scrollHeight;
+      document.getElementById('text').scrollTop = document.getElementById('text').scrollHeight;
       
       var documentHeight = document.getElementById('rightBar').offsetHeight;
       document.getElementById('rightBar').scrollTo(0, documentHeight);

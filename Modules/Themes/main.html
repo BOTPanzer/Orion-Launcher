@@ -1,31 +1,39 @@
-<div style="padding: 10px;">
-  <div style="width: 100%; display: flex; align-items: center;">
-    <div id="title" style="color: var(--text2Color); font-size: 40px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; margin-right: 10px;">Theme Manager</div>
-    <div id="folder" class="sbutton" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png');">
-      <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/icon_folder.png"></img>
+<style>
+  body {
+    --itemSize: 20%
+  }
+</style>
+
+<div style="padding: 2%;">
+  <div id="content">
+    <div style="width: 100%; display: flex; align-items: center;">
+      <div id="title" style="color: var(--textColor2); font-size: 40px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; margin-right: 10px;">Theme Manager</div>
+      <div id="folder" class="shortButton">
+        <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/icon_folder.png"></img>
+      </div>
     </div>
-  </div>
-
-	<div id="list" style="width: calc(100% + 5px); transform: translate(-5px, 0); margin-top: 10px; display: flex; flex-wrap: wrap; font-family: ItemFont;">
-
+  
+    <div id="themesList" style="margin-top: 10px; display: flex; flex-wrap: wrap; font-family: ItemFont;">
+  
+    </div>
   </div>
 </div>
 
 <script>
   //MODULE NAME CAN BE CHANGED FREELY 😎
-  ipcRenderer.on('resized', (event, size) => {
-    s1 = size/7
-    if (s1 < 150) s1 = 150
-    if (s1 > 171) s1 = 171
-    document.body.style.setProperty('--size1', s1+'px')
-  })
-
   createThemeList()
+
+  ipcRenderer.on('resized', (event, size) => {
+    let contentW = document.getElementById('content').offsetWidth
+    let i = 5
+    while (contentW/i > 180) { i++ }
+    document.body.style.setProperty('--itemSize', 100/i+'%')
+  })
 
   function createThemeList() {
     let themesFolder = currentModule+'Themes\\'
     if (!fs.existsSync(themesFolder)) return
-    document.getElementById('list').innerHTML = '';
+    document.getElementById('themesList').innerHTML = '';
     //START
     let allPaths = fs.readdirSync(themesFolder);
     for(i in allPaths) {
@@ -37,17 +45,19 @@
       let tmpimage = path+'\\Data\\Images\\icon_file.png'
       if (fs.existsSync(tmpimage)) image = themesFolder+name+'\\Data\\Images\\icon_file.png'
       //HTML
-      let html = `<div id="${id}" class="sbutton" style="width: var(--size1); height: var(--size1); margin-top: 5px; margin-left: 5px; background-image: url('./Data/Images/icon_item.png'); background-repeat: no-repeat; background-size: cover; text-align: center; display: inline-block;">
-                    <div style="width: 100%; height: 65%;">
-                      <div style="height: 10%;"></div>
-                      <img style="width: 90%; height: 90%; object-fit: contain; -webkit-user-drag: none;" src="${image}"></img>
-                    </div>
-                    <div style="width: 100%; height: 35%; display: flex;">
-                      <div style="width: 90%; margin: auto; font-size: calc(var(--size1)/9); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: var(--textColor);">${name}</div>
+      let html = `<div style="padding-top: var(--itemSize); width: var(--itemSize); position: relative;">
+                    <div id="${id}" class="generalButton" style="margin: 5px; text-align: center; display: block; position: absolute; top: 0; bottom: 0; left: 0; right: 0; background-image: url('./Data/Images/icon_item.png'); background-repeat: no-repeat; background-size: contain;">
+                      <div style="height: 65%;">
+                        <div style="height: 10%;"></div>
+                        <img style="width: 90%; height: 90%; object-fit: contain; -webkit-user-drag: none;" src="${image}"></img>
+                      </div>
+                      <div style="height: 35%; display: flex;">
+                        <div style="width: 90%; margin: auto; font-size: 16px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: var(--textColor);">${name}</div>
+                      </div>
                     </div>
                   </div>`
       //ADD HTML
-      document.getElementById('list').insertAdjacentHTML('beforeend', html)
+      document.getElementById('themesList').insertAdjacentHTML('beforeend', html)
       //ADD LISTENER
       addButtonListener(id, function() {
         document.getElementById(id).style.backgroundImage = 'url("./Data/Images/icon_item_clicked.png")';
@@ -69,11 +79,7 @@
     }
   }
 
-  addButtonListener('folder', function() {
-    document.getElementById('folder').style.backgroundImage = 'url("./Data/Images/icon_description_folder_clicked.png")';
-  }, function() {
-    document.getElementById('folder').style.backgroundImage = 'url("./Data/Images/icon_description_folder.png")';
-  }, function() {
+  addSimpleButtonListener('folder', function() {
     ipcRenderer.send('showOnExplorer', currentModule+'Themes\\', false)
   })
 </script>
