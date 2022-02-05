@@ -15,24 +15,45 @@
 </div>
 
 <script>
-  let paths = []
+  let paths = specialData.paths
 
-  ipcRenderer.on('setPaths', (event, argPaths) => {
-    paths = argPaths
-    document.getElementById('title').innerText = 'Oriøn: '+argPaths.length+' Games/Folders Selected:'
-    for(i in paths) {
-      let text = paths[i].substring(paths[i].lastIndexOf('\\')+1)
-      if (text.endsWith('.txt')) text = text.slice(0,-4)
-      let item = `<div style="height: 20px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">${text}</div>`
-      document.getElementById('list').insertAdjacentHTML('beforeend', item)
-    }
-  })
+  document.getElementById('title').innerText = 'Oriøn: '+paths.length+' Games/Folders Selected:'
+  for(i in paths) {
+    let text = paths[i].substring(paths[i].lastIndexOf('\\')+1)
+    if (text.endsWith('.txt')) text = text.slice(0,-4)
+    let item = `<div style="height: 20px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">${text}</div>`
+    document.getElementById('list').insertAdjacentHTML('beforeend', item)
+  }
   
   addSimpleButtonListener('move', function() {
-    ipcRenderer.send('move', paths)
+    ipcRenderer.send('getFolder', json.actualPath, 'Choose a Folder', 'movePaths')
   })
   
   addSimpleButtonListener('remove', function() {
     showRemoveWindow(paths)
+  })
+
+  //MOVE PATHS
+  ipcRenderer.on('movePaths', (event, newFilePath) => {
+    newFilePath = newFilePath+'\\'
+    if (!newFilePath.includes(specialData.launcherFolder)) return
+
+    //CHECK IF NEW FOLDER IS ALSO BEING MOVED
+    let posibleToMove = true
+    for (i in paths) {
+      if (newFilePath.includes(paths[i]))
+      posibleToMove = false
+    }
+
+    //IF NOT MOVE ヾ(•ω•`)o
+    if (posibleToMove) for (i in paths) {
+      let path = paths[i]
+      if (fs.existsSync(path)) {
+        let oldFilePath = path
+        if (path.endsWith('\\')) oldFilePath = path.slice(0,-1)
+        let name = oldFilePath.substring(oldFilePath.lastIndexOf('\\')+1)
+        fs.rename(path, newFilePath+name, function(err) { if (i == paths.length-1) closeWindow(json.actualPath) })
+      } else if (i == paths.length-1) closeWindow(json.actualPath)
+    }
   })
 </script>

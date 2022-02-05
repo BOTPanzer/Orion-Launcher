@@ -6,12 +6,16 @@
 
 <div style="padding: 2%;">
   <div id="content">
-    <div style="width: 100%; display: flex; align-items: center;">
-      <div id="title" style="width: 100%; padding-top: 10px; padding-bottom: 10px; color: var(--textColor2); font-size: 40px; line-height: 40px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">Home</div>
-      <input id='editText' spellcheck="false" placeholder="Search Games" type="text" maxlength="50" style="height: 32px; min-width: 150px; max-width: 150px; padding-left: 10px; padding-right: 10px; margin-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
-      <div id="search" class="longButton" style="min-width: 107px;">Search</div>
+    <div style="max-width: 100%; display: flex; align-items: center; overflow: hidden;">
+      <div style="width: 100%; max-width: calc(100% - 277px - 20px); display: flex; align-items: center;">
+        <div id="title" style="padding-top: 10px; padding-bottom: 10px; color: var(--textColor2); font-size: 40px; line-height: 40px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">Home</div>
+        <div id="add" class="shortButton" style="min-width: 36px; margin-left: 10px; font-size: 18px; font-family: Arial, Helvetica, sans-serif;">+</div>
+      </div>
+      <input id='editText' spellcheck="false" placeholder="Search Games" type="text" maxlength="50" style="height: 32px; min-width: 150px; padding-left: 10px; padding-right: 10px; margin-left: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
+      <div id="search" class="longButton" style="min-width: 107px; margin-left: 10px;">Search</div>
     </div>
-  
+
+    <div id="launcherEmpty" style="width: 100%; margin-top: 10px; display: none; font-family: ItemFont; text-align: center; color: var(--textColor2);">Such Empty... Try Importing From the + Button</div>
     <div id="launcherList" style="margin-top: 10px; display: flex; flex-wrap: wrap; font-family: ItemFont;">
   
     </div>
@@ -19,7 +23,7 @@
 </div>
 
 <script>
-  //DO NOT CHANGE THE MODULE NAME OR IT'LL STOP WORKING
+  //MODULE NAME CAN'T BE CHANGED FREELY (SETTINGS MODULE, TRAY & MAIN.HTML) 😡
   search = ''
   click = ''
   adding = false
@@ -39,13 +43,15 @@
     document.body.style.setProperty('--itemSize', 100/i+'%')
   })
 
-  ipcRenderer.on('refreshLauncher', (event) => {
-    createList(json.actualPath)
+  ipcRenderer.on('specialData', (event, specialData) => {
+    //LOAD SPECIAL DATA PATH / RELOAD
+    if (specialData == undefined) specialData = json.actualPath 
+    document.getElementById('content').style.minHeight = document.getElementById('content').offsetHeight+'px'
+    createList(specialData)
   })
 
   ipcRenderer.on('changeIcon', (event, img, icon, path) => {
-    if (json.actualPath == path)
-      document.getElementById(img).src = icon
+    if (json.actualPath == path) document.getElementById(img).src = icon
   })
 
   function startLauncher(s) {
@@ -59,9 +65,11 @@
 
     ipcRenderer.send('resume')
 
-    //SHOW ADD
-    if (document.getElementById('orionName').style.display != 'none')
-      document.getElementById('add').style.display = 'block'
+    //ADD
+    addSimpleButtonListener('add', function() {
+      ipcRenderer.send('pause')
+      ipcRenderer.send('newOrionWindow', currentModule+'add.html', false, 142, 390, true)
+    })
 
     //SEARCH
     $('#editText').bind('keydown', function(event) {
@@ -83,11 +91,13 @@
     })
 
     //CLEAR LIST
+    document.getElementById('launcherEmpty').style.display = 'none'
     document.getElementById('launcherList').innerHTML = '';
   }
 
   function createList(argPath, search) {
     if (search == undefined) search = ''
+    if (!fs.existsSync(argPath)) argPath = launcherFolder
     if (!argPath.startsWith(launcherFolder)) argPath = launcherFolder
     if (!argPath.endsWith('\\')) argPath = argPath+'\\'
     if (!fs.existsSync(argPath)) return
@@ -107,7 +117,7 @@
       paths = fs.readdirSync(json.actualPath)
       rest()
     } else {
-      var recursive = require("recursive-readdir");
+      var recursive = require("recursive-readdir")
       recursive(json.actualPath, function (err, files) {
         for(i in files) {
           let tmp = files[i].substring(json.actualPath.length)
@@ -136,7 +146,8 @@
       for(i in folders) { allPaths.push(folders[i]) }
       for(i in files) { allPaths.push(files[i]) }
       //START
-      for(i in allPaths) {
+      if (json.actualPath == launcherFolder && allPaths.length == 0) document.getElementById('launcherEmpty').style.display = 'block'
+      else for(i in allPaths) {
         //DATA
         let path = argPath+allPaths[i]
         let data = getFileInfo(path)
@@ -166,16 +177,12 @@
 
         if (isFile) {
           if (iconPath == '') iconPath = pathClean
-          if (fs.existsSync(iconPath) && fs.statSync(iconPath).isFile()) {
-            if (iconPath.toLowerCase().endsWith('.exe')) {
-              ipcRenderer.send('requestIcon', img, iconPath, json.actualPath)
-            } else {
-              document.getElementById(img).src = iconPath
-            }
-          }
+          if (fs.existsSync(iconPath) && fs.statSync(iconPath).isFile())
+            ipcRenderer.send('requestIcon', img, iconPath, json.actualPath)
         }
       }
       adding = false
+      document.getElementById('content').style.minHeight = ''
     }
   }
 
@@ -248,9 +255,16 @@
         if (!selecting) document.getElementById(id).style.backgroundImage = 'url("./Data/Images/buttonBig.png")';
         ipcRenderer.send('pause')
         if (isFile) {
-          ipcRenderer.send('createContext', 'contextFile', path, document.getElementById(img).src)
+          let argData = {}
+          argData.path = path
+          argData.src = document.getElementById(img).src
+          argData.launcherFolder = launcherFolder
+          ipcRenderer.send('newOrionWindow', currentModule+'context-file.html', false, 420, 390, true, argData)
         } else {
-          ipcRenderer.send('createContext', 'contextFolder', path)
+          let argData = {}
+          argData.path = path
+          argData.launcherFolder = launcherFolder
+          ipcRenderer.send('newOrionWindow', currentModule+'context-folder.html', false, 189, 390, true, argData)
         }
       } else if (selected.includes(id)) {
         let paths = []
@@ -258,7 +272,11 @@
           paths.push(document.getElementById('path-'+selected[i]).innerText)
         }
         ipcRenderer.send('pause')
-        ipcRenderer.send('createContext', 'contextMulti', paths)
+        let argData = {}
+        argData.paths = paths
+        argData.launcherFolder = launcherFolder
+        if (paths.length <3) ipcRenderer.send('newOrionWindow', currentModule+'context-multi.html', false, 195, 390, true, argData) //CORASONSITO :3
+        else ipcRenderer.send('newOrionWindow', currentModule+'context-multi.html', false, 215, 390, true, argData)
       }
     })
   }
@@ -347,7 +365,7 @@
         let spawn = require("child_process").spawn;
         let bat = spawn("cmd.exe", argsClean)
       } else {
-        shell.openPath(pathClean)
+        ipcRenderer.send('showOnExplorer', pathClean, false)
       }
       addNoti(name)
       click = ''

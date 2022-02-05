@@ -20,35 +20,59 @@
 </div>
 
 <script>
-  let actualPath = ''
-  let oldName = ''
- 
-  ipcRenderer.on('setLocation', (event, path) => {
-    actualPath = path
-  })
+  let folderPath = specialData.path
+  let oldName = folderPath.substring(folderPath.lastIndexOf("\\")+1)
 
-  ipcRenderer.on('setName', (event, name) => {
-    document.getElementById('nameText').value = name
-    oldName = name
-  })
+  document.getElementById('topTitle').innerText = 'Oriøn: Folder Properties'
+  document.getElementById('nameText').value = oldName
   
   addSimpleButtonListener('move', function() {
-    let paths = [actualPath]
-    ipcRenderer.send('move', paths)
+    ipcRenderer.send('getFolder', json.actualPath, 'Choose a Folder', 'movePaths')
   })
   
   addSimpleButtonListener('remove', function() {
-    let paths = [actualPath]
+    let paths = [folderPath]
     showRemoveWindow(paths)
   })
   
   addSimpleButtonListener('save', function() {
-    let newName = undefined
-    if (oldName != document.getElementById('nameText').value) newName = document.getElementById('nameText').value
-    ipcRenderer.send('save', actualPath, newName, undefined, undefined)
+    let newName = document.getElementById('nameText').value
+    saveFolder(newName)
   })
 
-  ipcRenderer.on('log', (event, text) => {
-    document.getElementById('log').innerText = text
+  //MOVE FOLDER
+  ipcRenderer.on('movePaths', (event, newFilePath) => {
+    let paths = [folderPath]
+    newFilePath = newFilePath+'\\'
+    if (!newFilePath.includes(specialData.launcherFolder)) return
+
+    //CHECK IF NEW FOLDER IS ALSO BEING MOVED
+    let posibleToMove = true
+    for (i in paths) {
+      if (newFilePath.includes(paths[i]))
+      posibleToMove = false
+    }
+
+    //IF NOT MOVE ヾ(•ω•`)o
+    if (posibleToMove) for (i in paths) {
+      let path = paths[i]
+      if (fs.existsSync(path)) {
+        let oldFilePath = path
+        if (path.endsWith('\\')) oldFilePath = path.slice(0,-1)
+        let name = oldFilePath.substring(oldFilePath.lastIndexOf('\\')+1)
+        fs.rename(path, newFilePath+name, function(err) { if (i == paths.length-1) closeWindow(json.actualPath) })
+      } else if (i == paths.length-1) closeWindow(json.actualPath)
+    }
   })
+  
+  //SAVE FOLDER
+  function saveFolder(newName) {
+    if (newName == oldName) closeWindow()
+    else if (newName == '') document.getElementById('log').innerText = 'Name Is Necesary'
+    else if (fs.existsSync(folderPath)) {
+      let newFilePath = json.actualPath+newName
+      if (fs.existsSync(newFilePath)) document.getElementById('log').innerText = 'Folder Already Exists'
+      else fs.rename(folderPath, newFilePath, function(err) { closeWindow(json.actualPath) })
+    }
+  }
 </script>

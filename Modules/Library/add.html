@@ -1,0 +1,247 @@
+<div style="height: 100%; width: 100%; margin: 0px; padding: 0px;">
+  <div id="addDiv" style="height: 100%; width: 100%; margin: 0px; padding: 0px;">
+    <div style="display: flex; align-items: center; justify-content: center; margin-top: 20px; margin-bottom: 10px;">
+      <div id="folder" class="longButton" style="margin-right: 10px;">Add Folder</div>
+      <div id="game" class="longButton">Add Game</div>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: center; margin-top: 10px; margin-bottom: 20px;">
+      <div id="import" class="longButton">import</div>
+    </div>
+  </div>
+
+  <div id="folderDiv" style="height: 100%; width: 100%; margin: 0px; padding: 0px; display: none;">
+    <div style="color: var(--textColor2);">
+      <div style="height: 20px; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 15px; padding: 5px; padding-left: 10px;">Name:</div>
+      <div style="align-items: center; margin: 20px; margin-top: 0px;">
+        <input id='nameTextFolder' spellcheck="false" type="text" maxlength="50" style="height: 32px; width: 330px; padding-left: 10px; padding-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
+      </div>
+    </div>
+  
+    <div style="width: 100%; position: absolute; bottom: 20px; display: flex; align-items: center;">
+      <div id="addFolder" class="longButton" style="margin-left: 20px;">Add Folder</div>
+      <div id="logFolder" style="margin-left: auto; margin-right: 25px; font-family: ItemFont; font-size: 16px; color: var(--textColor2);"></div>
+    </div>
+  </div>
+
+  <div id="gameDiv" style="height: 100%; width: 100%; margin: 0px; padding: 0px; display: none;">
+    <div style="color: var(--textColor2);">
+      <div style="height: 20px; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 15px; padding: 5px; padding-left: 10px;">Name:</div>
+      <div style="align-items: center; margin: 20px; margin-top: 0px;">
+        <input id='nameTextGame' type="text" maxlength="50" style="height: 32px; width: 330px; padding-left: 10px; padding-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
+      </div>
+    </div>
+  
+    <div style="color: var(--textColor2);">
+      <div style="height: 20px; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Path:</div>
+      <div style="align-items: center; margin: 20px; margin-top: 0px; display: flex;">
+        <input id='pathTextGame' spellcheck="false" type="text" style="height: 32px; width: 284px; padding-left: 10px; padding-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
+        <div id="folderGame" class="shortButton" style="margin-left: 10px;">
+          <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/iconFolder.png"></img>
+        </div>
+      </div>
+    </div>
+  
+    <div style="color: var(--textColor2);">
+      <div style="height: 20px; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Icon Path (Optional):</div>
+      <div style="align-items: center; margin: 20px; margin-top: 0px; display: flex;">
+        <input id='iconTextGame' spellcheck="false" type="text" style="height: 32px; width: 284px; padding-left: 10px; padding-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
+        <div id="folderIconGame" class="shortButton" style="margin-left: 10px;">
+          <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/iconFolder.png"></img>
+        </div>
+      </div>
+    </div>
+  
+    <div style="width: 100%; position: absolute; bottom: 20px; display: flex; align-items: center;">
+      <div id="addGame" class="longButton" style="margin-left: 20px;">Add Game</div>
+      <div id="logGame" style="margin-left: auto; margin-right: 25px; font-family: ItemFont; font-size: 16px; color: var(--textColor2);"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let importMax = 0
+  let imported = 0
+
+  
+  document.getElementById('topTitle').innerText = 'Oriøn: Add'
+  
+
+  addSimpleButtonListener('folder', function() {
+    document.getElementById('topTitle').innerText = 'Oriøn: Add Folder'
+    document.getElementById('addDiv').style.display = 'none'
+    document.getElementById('folderDiv').style.display = 'block'
+    win.setResizable(true)
+    win.setSize(390, 189)
+    win.setResizable(false)
+    win.center()
+  })
+  
+  addSimpleButtonListener('game', function() {
+    document.getElementById('topTitle').innerText = 'Oriøn: Add Game'
+    document.getElementById('addDiv').style.display = 'none'
+    document.getElementById('gameDiv').style.display = 'block'
+    win.setResizable(true)
+    win.setSize(390, 380)
+    win.setResizable(false)
+    win.center()
+  })
+
+  addSimpleButtonListener('addFolder', function() {
+    let name = document.getElementById('nameTextFolder').value
+    if (name == '') {
+      document.getElementById('logFolder').innerText = 'Name Is Necesary'
+      return
+    }
+      
+    let fullName = json.actualPath+name.trim()
+    if (!fs.existsSync(fullName)) {
+      fs.mkdirSync(fullName)
+      document.getElementById('logFolder').innerText = `Folder "${name}" Added`
+      closeWindow(json.actualPath)
+    } else document.getElementById('logFolder').innerText = `Folder "${name}" Already Exists`
+  })
+
+  addSimpleButtonListener('addGame', function() {
+    let name = document.getElementById('nameTextGame').value
+    if (name == '') {
+      document.getElementById('logGame').innerText = 'Name Is Necesary'
+      return
+    }
+    let path = document.getElementById('pathTextGame').value
+    if (path == '') {
+      document.getElementById('logGame').innerText = 'Path Is Necesary'
+      return
+    }
+    let icon = document.getElementById('iconTextGame').value
+
+    createGame(name, path, icon, false)
+  })
+  
+  addSimpleButtonListener('import', function() {
+    ipcRenderer.send('getFolder', '', 'Folder to Import Shortcuts From', 'importFolderGotten')
+  })
+  
+  ipcRenderer.on('importFolderGotten', (event, path) => {
+    if (path == '') return
+    document.getElementById('topTitle').innerText = 'Oriøn: Add - Importing...'
+    document.getElementById('wall').style.display = 'block'
+    var recursive = require("recursive-readdir")
+    recursive(path, function (err, files) {
+      if (err) closeWindow()
+      //GET NUMBER OF SHORTCUTS TO IMPORT
+      for(i in files) {
+        if (files[i].toLowerCase().endsWith('.lnk') || files[i].toLowerCase().endsWith('.url')) 
+          importMax++
+      }
+      if (importMax == 0) closeWindow()
+      //IMPORT SHORTCUTS
+      var ws = require('windows-shortcuts')
+      for(i in files) {
+        let shortcut = files[i]
+        if (shortcut.toLowerCase().endsWith('.lnk')) {
+          //LNK
+          ws.query(shortcut, createShortcut)
+          function createShortcut(a, options) {
+            let name = shortcut.substring(path.length)
+            name = name.substring(0, name.length-4)
+            let target = options.target
+            let icon = options.icon
+            console.log(target)
+            createGame(name, target, icon, true)
+          }
+        } else if (shortcut.toLowerCase().endsWith('.url')) {
+          //URL
+          importClose()
+        }
+      }
+    })
+  })
+
+  function createGame(name, path, icon, importing) {
+    let fullName = json.actualPath+name.trim()+'.txt'
+    let data = path
+    if (icon != '') data = path+'\n'+icon
+    if (!fs.existsSync(fullName)) {
+      console.log(name)
+      if (name.includes('\\')) {
+        //MAKE FOLDER
+        fs.mkdir(fullName.substring(0, fullName.lastIndexOf('\\')), { recursive: true }, (err) => {
+          fs.writeFile(fullName, data, (err) => {
+            if (!importing) {
+              document.getElementById('logGame').innerText = `Game "${name}" Added`
+              closeWindow(json.actualPath)
+            } else {
+              importClose()
+            }
+          })
+        })
+      } else {
+        //DONT MAKE FOLDER
+        fs.writeFile(fullName, data, (err) => {
+          if (!importing) {
+            document.getElementById('logGame').innerText = `Game "${name}" Added`
+            closeWindow(json.actualPath)
+          } else importClose()
+        })
+      }
+    } else {
+      if (!importing) document.getElementById('logGame').innerText = `Game "${name}" Already Exists`
+      else importClose()
+    }
+  }
+
+  function importClose() {
+    imported++
+    if (importMax == imported) {
+      closeWindow(json.actualPath)
+    }
+  }
+
+  addSimpleButtonListener('folderGame', function() {
+    let a = document.getElementById('pathTextGame').value
+    let gamePathArg = getPathInfo(a)
+    let path = gamePathArg.pathClean.substring(0, gamePathArg.pathClean.lastIndexOf('\\')+1)
+    ipcRenderer.send('getFile', path, 'Choose a Game', 'fileGotten')
+  })
+
+  ipcRenderer.on('fileGotten', (event, path) => {
+    if (path != '')
+      document.getElementById('pathTextGame').value = path
+    if (document.getElementById('nameTextGame').value == '')
+      document.getElementById('nameTextGame').value = path.substring(path.lastIndexOf('\\')+1)
+  })
+  
+  addSimpleButtonListener('folderIconGame', function() {
+    let a = document.getElementById('pathTextGame').value
+    if (document.getElementById('iconTextGame').value != '') a = document.getElementById('iconTextGame').value
+    let gamePathArg = getPathInfo(a)
+    let path = gamePathArg.pathClean.substring(0, gamePathArg.pathClean.lastIndexOf('\\')+1)
+    ipcRenderer.send('getFile', path, 'Choose an Icon', 'fileGottenIcon')
+  })
+
+  ipcRenderer.on('fileGottenIcon', (event, path) => {
+    if (path != '')
+      document.getElementById('iconTextGame').value = path
+  })
+
+  function getPathInfo(gamePath) {
+    gamePath = gamePath.trim()
+    let pathClean = gamePath
+    let argsClean = ''
+    if (gamePath.includes('--') && gamePath.includes(' ') && !gamePath.endsWith('"')) {
+      if (gamePath.startsWith('"') ) {
+        pathClean = gamePath.substring(1, gamePath.lastIndexOf('"'))
+        let args = gamePath.substring(pathClean.length+2).trim()
+        argsClean = args.split(' ')
+        argsClean.unshift("/c", pathClean)
+      } else {
+        pathClean = gamePath.substring(0, gamePath.lastIndexOf(' '))
+        let args = gamePath.substring(pathClean.length+2).trim()
+        argsClean = args.split(' ')
+        argsClean.unshift("/c", pathClean)
+      }
+    }
+    let data = {pathClean, argsClean}
+    return data
+  }
+</script>

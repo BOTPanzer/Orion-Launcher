@@ -139,11 +139,18 @@
     background-size: contain;
 
     height: 36px;
+    line-height: 36px;
     width: 36px;
+
+    color: var(--buttonTextColor);
+    text-align: center;
+    font-family: ItemFont;
+    font-size: 16px;
   }
   
   .shortButton:active {
     background-image: url('./Data/Images/buttonSmallClicked.png');
+    color: var(--buttonTextColorPressed);
   }
   
   .shortButton:hover {
@@ -172,27 +179,26 @@
       <div style="display: flex; align-items: center; margin: 10px;">
         <img id="orionLogo" class="generalButton" style="height: 50px; min-width: 50px; max-width: 50px; -webkit-user-drag: none;" src="./Data/Images/icon.png"/>
         <div style="margin-left: auto; margin-right: auto;">
-          <div id="orionName" style="margin-left: 5px; font-family: ItemFont; color: var(--textColor2);">Oriøn Launcher</div>
+          <div id="orionName" style="margin-left: 5px; font-family: ItemFont; color: var(--textColor2);">ORIØN LAUNCHER</div>
         </div>
       </div>
       
-      <div style="height: calc(100% - 70px); display: flex; flex-flow: column; flex: 1 1 auto; text-align: center; overflow-y: auto;">        
-        <div id="moduleButtons" style="flex: 1 1 auto;">
+      <div style="height: calc(100% - 70px); display: flex; flex-flow: column; flex: 1 1 auto; text-align: center;">        
+        <div id="moduleButtons" style="flex: 1 1 auto; overflow-y: auto;">
 
         </div>
 
-        <div id="add" style="flex: 0 1 auto; display: none;">
-          <div id="addfolder" class="longButton" style="margin-top: 10px; margin-bottom: 10px;">Add Folder</div>
-          <div id="addgame" class="longButton" style="margin-top: 10px; margin-bottom: 20px;">Add Game</div>
+        <div style="flex: 0 1 auto;">
+          <div id="settings" class="longButton" style="margin-top: 10px; margin-bottom: 20px;">Settings</div>
         </div>
       </div>
     </div>
 
     <div id="line" style="width: 1px; margin-top: 5px; margin-bottom: 5px; background-color: var(--lineColor); opacity: 0.5;"></div>
 
-    <div id="rightBar" style="width: 100%; overflow-y: auto; z-index: 0;">
-      <img id="logo" style="height: 20%; margin: 2%; margin-bottom: 0; -webkit-user-drag: none; object-fit: contain;" src="./Data/Images/logo.png"/> 
-      <div id="window" style="overflow-anchor: none;"></div>
+    <div id="rightBar" style="height: 100%; max-height: 100%; width: 100%; overflow-y: auto; z-index: 0;">
+      <img id="logo" style="height: 20%; margin: 2%; margin-bottom: 0; -webkit-user-drag: none; object-fit: cover;" src="./Data/Images/logo.png"/> 
+      <div id="window" style="height: 76%; max-height: 76%; overflow-anchor: none;"></div>
       <div id="start" style="display: none;"></div>
     </div>
     
@@ -251,14 +257,9 @@
       } if (modulestmp.includes('Themes')) {
         modules.push('Themes')
         modulestmp.splice(modulestmp.indexOf('Themes'), 1);
-      } if (modulestmp.includes('Installer')) {
-        modules.push('Installer')
-        modulestmp.splice(modulestmp.indexOf('Installer'), 1);
-      } if (modulestmp.includes('Connect')) {
-        modules.push('Connect')
-        modulestmp.splice(modulestmp.indexOf('Connect'), 1);
       }
       for(i in modulestmp) { modules.push(modulestmp[i]) }
+      if (modules.includes('Settings')) modules.splice(modules.indexOf('Settings'), 1)
       for(i in modules) {
         //DATA
         let id = 'module'+i
@@ -279,6 +280,10 @@
       updateModules()
 
       //ORION BUTTON
+      if (json.leftbar == undefined) {
+        json.leftbar = true
+        updateData(json)
+      }
       if (json.leftbar && document.getElementById('orionName').style.display == 'none')
         document.getElementById('orionLogo').click()
       else if (!json.leftbar && document.getElementById('orionName').style.display != 'none')
@@ -311,42 +316,39 @@
         document.getElementById('leftBar').style.position = 'fixed'
 
         document.getElementById('orionName').style.display = 'none'
-        document.getElementById('add').style.display = 'none'
         document.getElementById('line').style.opacity = '0'
 
         document.getElementById('logo').style.marginLeft = '72px'
 
-        let json = getData()
         json.leftbar = false
         updateData(json)
+
+        ipcRenderer.send('sendBack', 'resized')
       } else {
         document.getElementById('leftBar').style.width = '20%'
         document.getElementById('leftBar').style.height = '100%'
         document.getElementById('leftBar').style.position = 'relative'
 
         document.getElementById('orionName').style.display = 'flex'
-        if (currentModule.endsWith('Launcher'))
-          document.getElementById('add').style.display = 'block'
-        else
-          document.getElementById('add').style.display = 'none'
         document.getElementById('line').style.opacity = '0.5'
 
         document.getElementById('logo').style.marginLeft = '20px'
 
-        let json = getData()
         json.leftbar = true
         updateData(json)
+        
+        ipcRenderer.send('sendBack', 'resized')
       }
     })
 
     //MINI
     addSimpleButtonListener('mini', function() {
-      ipcRenderer.send('mini');
+      ipcRenderer.send('mini')
     })
 
     //MAXI
     addSimpleButtonListener('maxi', function() {
-      ipcRenderer.send('maxi');
+      ipcRenderer.send('maxi')
     })
 
     //EXIT
@@ -354,18 +356,9 @@
       ipcRenderer.send('exit')
     })
 
-    //ADDFOLDER
-    addSimpleButtonListener('addfolder', function() {
-      window.scrollTo(0, 0);
-      ipcRenderer.send('pause')
-      ipcRenderer.send('createContext', 'addfolder')
-    })
-
-    //ADDGAME
-    addSimpleButtonListener('addgame', function() {
-      window.scrollTo(0, 0);
-      ipcRenderer.send('pause')
-      ipcRenderer.send('createContext', 'addgame')
+    //SETTINGS
+    addSimpleButtonListener('settings', function() {
+      loadModule(data.modules+'Settings')
     })
   }
 
@@ -400,7 +393,6 @@
     loading = true
     $("#window").fadeOut(200)
     setTimeout(function() {
-      document.getElementById('add').style.display = 'none'
       document.getElementById('window').scrollTop = 0
       $("#window").load(html.replaceAll(' ', '%20'), function () {
         $("#window").fadeIn(200)

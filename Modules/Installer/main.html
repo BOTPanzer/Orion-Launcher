@@ -1,6 +1,6 @@
 <div id="content" style="padding: 2%;">
-  <div style="width: 100%; display: flex; align-items: center; margin-bottom: 20px;">
-    <div id="title" style="color: var(--textColor2); font-size: 40px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">Installer</div>
+  <div style="width: 100%; display: flex; align-items: center; margin-bottom: 10px;">
+    <div id="title" style="padding-top: 10px; padding-bottom: 10px; color: var(--textColor2); font-size: 40px; line-height: 40px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">Installer</div>
   </div>
 
   <div style="width: 100%; display: flex;">
@@ -35,6 +35,10 @@
     document.getElementById('log').innerText = `(${Date.now()}) `+text
   }
 
+  if (json.installPath == undefined) {
+    json.installPath = ''
+    updateData(json)
+  }
   document.getElementById('destination').value = json.installPath
   
   //GET FILE
@@ -97,14 +101,12 @@
     }
     //INSTALL
     ipcRenderer.send('pause')
-    let zip = currentModule+'7-Zip\\7z.exe'
-    console.log(zip)
     //CHECK IF FILE CONTAINS A FOLDER INSIDE
-    exec(`"${zip}" l "${path}" -x!*\\*`, function (error, stdOut, stdErr) {
+    exec(`"${data.zip}" l "${path}" -x!*\\*`, function (error, stdOut, stdErr) {
       if (!(error || stdErr)) {
         if (stdOut.replaceAll('\r', '').replaceAll('\n', '').endsWith('0 files, 1 folders')) { 
           //HAS A FOLDER
-          exec(`"${zip}" l -slt "${path}" -x!*\\*`, function (error, stdOut, stdErr) {
+          exec(`"${data.zip}" l -slt "${path}" -x!*\\*`, function (error, stdOut, stdErr) {
             if (!(error || stdErr)) {
               //GET FOLDER NAME
               let outSplit = stdOut.replaceAll('\r', '').split("\n")
@@ -128,7 +130,7 @@
               updateData(json)
               log('Installing '+name+'...')
               let tmpDestination = destination+'orion'+Date.now()+'\\'
-              exec(`"${zip}" x "${path}" -o"${tmpDestination}"`, function (error, stdOut, stdErr) {
+              exec(`"${data.zip}" x "${path}" -o"${tmpDestination}"`, function (error, stdOut, stdErr) {
                 if (!(error || stdErr)) {
                   fs.rename(tmpDestination+insideFolderName, finalDestination, function(err) {
                     if (!err) {
@@ -165,7 +167,7 @@
           json.installPath = destination
           updateData(json)
           log('Installing '+name+'...')
-          exec(`"${zip}" x "${path}" -o"${finalDestination}"`, function (error, stdOut, stdErr) {
+          exec(`"${data.zip}" x "${path}" -o"${finalDestination}"`, function (error, stdOut, stdErr) {
             if (!(error || stdErr)) {
               log('Installation successful')
               ipcRenderer.send('resume')

@@ -7,7 +7,7 @@
 <div style="padding: 2%;">
   <div id="content">
     <div style="width: 100%; display: flex; align-items: center;">
-      <div id="title" style="color: var(--textColor2); font-size: 40px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; margin-right: 10px;">Theme Manager</div>
+      <div id="title" style="padding-top: 10px; padding-bottom: 10px; color: var(--textColor2); font-size: 40px; line-height: 40px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; margin-right: 10px;">Theme Manager</div>
       <div id="folder" class="shortButton">
         <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/iconFolder.png"></img>
       </div>
@@ -20,7 +20,7 @@
 </div>
 
 <script>
-  //MODULE NAME CAN BE CHANGED FREELY 😎
+  //MODULE NAME CAN'T BE CHANGED FREELY (SETTINGS MODULE, TRAY & MAIN.HTML) 😡
   createThemeList()
 
   ipcRenderer.on('resized', (event, size) => {

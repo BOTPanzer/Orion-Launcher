@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-<title>Oriøn:</title>
+<title>Oriøn</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=0">
 
@@ -144,9 +144,11 @@
 
 <div id="themeDiv" style="height: 0; width: 0;"></div>
 
+<div id="wall" style="position: absolute; display: none; height: 100%; width: 100%; margin-top: 20px; display: none; z-index: 999; scroll-behavior: unset;"></div>
+
 <body id="body" style="height: 100%; width: 100%; margin: 0px; padding: 0px;">
   <div style="height: 20px; width: 100%; display: flex; background-color: var(--topColor);">
-    <div id="title" style="height: 16px; margin-top: 2px; margin-left: 5px; position: absolute; font-family: ItemFont; font-size: 16px; color: var(--textColor2);">Oriøn:</div>
+    <div id="topTitle" style="height: 16px; margin-top: 2px; margin-left: 5px; position: absolute; font-family: ItemFont; font-size: 16px; color: var(--textColor2);"></div>
     <div style="height: 15px; width: 100%; margin-left: 5px; margin-top: 5px; -webkit-app-region: drag; align-items: center;"></div>
     <div style="display: flex; font-family: Franklin Gothic Medium">
       <div style="display: flex; align-items: center;">
@@ -172,39 +174,43 @@
 </body>
 
 <script>
-  const { ipcRenderer } = require('electron');
-  window.$ = window.jQuery = require('jquery');
+  const { app, ipcRenderer, shell } = require('electron')
+  const { remote, BrowserWindow } = require('@electron/remote')
+  window.$ = window.jQuery = require('jquery')
   const fs = require('fs')
-  let removePaths = []
-  let windowH = 0
 
+  let win = null
+  let data = {}
+  let json = null
+  let specialData = null
+  let removePaths = []
+
+  
   $("#themeDiv").load('Data\\themeSettings.html')
 
-  ipcRenderer.on('load', (event, file, arg1, arg2) => {
-    let tmpfile = file.substring(file.lastIndexOf('\\')+1)
-    if (tmpfile == 'addfolder.html') {
-      document.getElementById('title').innerText = 'Oriøn: Add Folder'
-    } else if (tmpfile == 'addgame.html') {
-      document.getElementById('title').innerText = 'Oriøn: Add Game'
-    } else if (tmpfile == 'context-folder.html') {
-      document.getElementById('title').innerText = 'Oriøn: Folder Properties'
-    } else if (tmpfile == 'context-file.html') {
-      document.getElementById('title').innerText = 'Oriøn: Game Properties'
-    }
-    $("#window").load(file.replaceAll(' ', '%20'), function () {
-      ipcRenderer.send('loaded2', tmpfile, arg1, arg2)
-    })
+  ipcRenderer.on('load', (event, file, argData, argSpecialData) => {
+    win = require('@electron/remote').getCurrentWindow()
+    data = argData
+    json = getData()
+    specialData = argSpecialData
+
+    //LAOD FILE
+    $("#window").load(file.replaceAll(' ', '%20'))
   })
 
-  ipcRenderer.on('height', (event, height) => {
-    windowH = height
-  })
 
   //REMOVE WINDOW
+  let windowH = 0
   function showRemoveWindow(argPaths) {
     document.getElementById('window').style.display = 'none'
     document.getElementById('removeWindow').style.display = 'block'
-    ipcRenderer.send('resizeContext', 136)
+
+    let size = win.getSize()
+    windowH = size[1]
+    win.setResizable(true)
+    win.setSize(390, 136)
+    win.setResizable(false)
+    win.center()
 
     removePaths = argPaths
     if (removePaths.length == 1) {
@@ -217,40 +223,58 @@
   }
 
   addSimpleButtonListener('removeWindowRemove', function() {
-    ipcRenderer.send('removefinal', removePaths)
+    for (i in removePaths) {
+      let path = removePaths[i]
+      if (fs.existsSync(path)) {
+        if (fs.statSync(path).isFile()) {
+          fs.unlink(path, (err) => {
+            if (i == removePaths.length-1) {
+              closeWindow(json.actualPath)
+            }
+          })
+        } else {
+          const rimraf = require("rimraf")
+          rimraf(path, (err) => {
+            if (i == removePaths.length-1) {
+              closeWindow(json.actualPath)
+            }
+          })
+        }
+      } else if (i == removePaths.length-1) {
+        closeWindow()
+      }
+    }
   })
 
   addSimpleButtonListener('removeWindowCancel', function() {
     document.getElementById('window').style.display = 'block'
     document.getElementById('removeWindow').style.display = 'none'
-    ipcRenderer.send('resizeContext', windowH)
+    win.setResizable(true)
+    win.setSize(390, windowH)
+    win.setResizable(false)
+    win.center()
   })
+
+  //DATA FUNCTIONS
+  function getData() {
+    let jsonPath = data.data+'settings.json'
+    let rawdata = fs.readFileSync(jsonPath)
+    return JSON.parse(rawdata)
+  }
+
+  function updateData(json) {
+    fs.writeFileSync(data.data+'settings.json', JSON.stringify(json));
+  }
 
   //OTHER
-  addSimpleButtonListener('exit', function() {
-    ipcRenderer.send('exitContext')
-  })
-
-  function getPathInfo(gamePath) {
-    gamePath = gamePath.trim()
-    let pathClean = gamePath
-    let argsClean = ''
-    if (gamePath.includes('--') && gamePath.includes(' ') && !gamePath.endsWith('"')) {
-      if (gamePath.startsWith('"') ) {
-        pathClean = gamePath.substring(1, gamePath.lastIndexOf('"'))
-        let args = gamePath.substring(pathClean.length+2).trim()
-        argsClean = args.split(' ')
-        argsClean.unshift("/c", pathClean)
-      } else {
-        pathClean = gamePath.substring(0, gamePath.lastIndexOf(' '))
-        let args = gamePath.substring(pathClean.length+2).trim()
-        argsClean = args.split(' ')
-        argsClean.unshift("/c", pathClean)
-      }
-    }
-    let data = {pathClean, argsClean}
-    return data
+  function closeWindow(specialData) {
+    if (specialData != undefined) ipcRenderer.send('specialData', specialData)
+    win.close()
   }
+
+  addSimpleButtonListener('exit', function() {
+    closeWindow()
+  })
 
   function addSimpleButtonListener(id, click) {
     $('#'+id).bind('click', function() {

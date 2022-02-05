@@ -1,0 +1,175 @@
+<div style="padding: 2%;">
+  <div style="width: 100%; display: flex; align-items: center;">
+    <div id="title" style="width: 100%; padding-top: 10px; padding-bottom: 10px; color: var(--textColor2); font-size: 40px; line-height: 40px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">Settings</div>
+  </div>
+
+  <div style="width: 100%; margin-top: 10px;">
+    <div style="display: flex; align-items: center;">
+      <div id="visibility" class="longButton" style="min-width: 107px;">Visibility</div>
+      <div id="remove" class="shortButton" style="min-width: 36px; margin-left: 10px; font-size: 18px; font-family: Arial, Helvetica, sans-serif;">-</div>
+      <div id="add" class="shortButton" style="min-width: 36px; margin-left: 10px; font-size: 18px; font-family: Arial, Helvetica, sans-serif;">+</div>
+      <div id="log" style="width: 100%; font-family: ItemFont; font-size: 16px; color: var(--textColor2);"></div>
+      <div id="refresh" class="longButton" style="min-width: 107px; margin-left: 10px;">Refresh</div>
+    </div>
+    <div style="display: flex; justify-content: space-around; margin-top: 20px;">
+      <div style="display: flex;">
+        <div style="width: 1px; margin-top: 5px; margin-bottom: 5px; background-color: var(--lineColor); opacity: 0.5;"></div>
+        <div style="width: 150px; display: block; text-align: center; align-items: center;">
+          <div style="color: var(--textColor2); font-family: ItemFont;">Shown</div>
+          <div id="modulesShown"></div>
+        </div>        
+        <div style="width: 1px; margin-top: 5px; margin-bottom: 5px; background-color: var(--lineColor); opacity: 0.5;"></div>
+        <div style="width: 150px; display: block; text-align: center; align-items: center;">
+          <div style="color: var(--textColor2); font-family: ItemFont;">Hidden</div>
+          <div id="modulesHidden"></div>
+        </div> 
+        <div style="width: 1px; margin-top: 5px; margin-bottom: 5px; background-color: var(--lineColor); opacity: 0.5;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  //MODULE NAME CAN'T BE CHANGED FREELY (TRAY & MAIN.HTML) 😡
+  removing = false
+
+  document.getElementById('visibility').style.backgroundImage = 'url("./Data/Images/buttonLongClicked.png")'
+  addModulesShown()
+  addModulesHidden()
+
+  addSimpleButtonListener('visibility', function() {
+    removing = false
+    document.getElementById('visibility').style.backgroundImage = 'url("./Data/Images/buttonLongClicked.png")'
+    document.getElementById('remove').style.backgroundImage = 'url("./Data/Images/buttonSmall.png")'
+  })
+
+  addSimpleButtonListener('remove', function() {
+    removing = true
+    document.getElementById('visibility').style.backgroundImage = 'url("./Data/Images/buttonLong.png")'
+    document.getElementById('remove').style.backgroundImage = 'url("./Data/Images/buttonSmallClicked.png")'
+  })
+
+  addSimpleButtonListener('add', function() {
+    ipcRenderer.send('getFile', '', 'Module .Zip File', 'moduleFileGotten')
+  })
+
+  ipcRenderer.on('moduleFileGotten', (event, path) => {
+    if (!path.toLowerCase().endsWith('.zip')) return
+    ipcRenderer.send('pause')
+    let exec = require('child_process').exec
+    document.getElementById('title').innerHTML = 'Settings - Installing...'
+    exec(`"${data.zip}" l "${path}" -x!*\\*`, function (error, stdOut, stdErr) {
+      if (!(error || stdErr)) {
+        if (stdOut.replaceAll('\r', '').replaceAll('\n', '').endsWith('0 files, 1 folders')) { 
+          exec(`"${data.zip}" x "${path}" -o"${data.modules}"`, function (error, stdOut, stdErr) {
+            if (!(error || stdErr)) {
+              //INSTALLED
+              ipcRenderer.send('resume')
+              document.getElementById('title').innerHTML = 'Settings - Installed'
+              addModulesShown()
+              addModulesHidden()
+            } else {
+              //ERROR
+              ipcRenderer.send('resume')
+              document.getElementById('title').innerHTML = 'Settings - Error~3'
+            }
+          })
+        } else {
+          //NOT A MODULE (NO FOLDER)
+          ipcRenderer.send('resume')
+          document.getElementById('title').innerHTML = 'Settings - Error~2'
+        }
+      } else {
+        //ERROR
+        ipcRenderer.send('resume')
+        document.getElementById('title').innerHTML = 'Settings - Error~1'
+      }
+    })
+  })
+
+  addSimpleButtonListener('refresh', function() {
+    ipcRenderer.send('reloadTheme') 
+  })
+
+  function addModulesShown() {
+    if (!fs.existsSync(data.modules)) return
+    document.getElementById('modulesShown').innerHTML = ''
+    let modules = fs.readdirSync(data.modules)
+    if (modules.includes('Settings'))  modules.splice(modules.indexOf('Settings'), 1)
+    if (modules.includes('Store'))  modules.splice(modules.indexOf('Store'), 1)
+    if (modules.includes('Library')) modules.splice(modules.indexOf('Library'), 1)
+    if (modules.includes('Themes'))  modules.splice(modules.indexOf('Themes'), 1)
+    for(i in modules) {
+      //DATA
+      let id = 'moduleShown'+i
+      let name = modules[i]
+      let path = data.modules+name
+      let html = `<div id="${id}" class="longButton" style="margin-top: 10px; margin-bottom: 10px;">
+                    ${name}
+                    <div id="${'path-'+id}" style="display: none;">${path}</div>
+                  </div>`
+      //ADD MODULE
+      document.getElementById('modulesShown').insertAdjacentHTML('beforeend', html)
+      addSimpleButtonListener(id, function() {
+        if (removing) {
+          const rimraf = require("rimraf")
+          rimraf(data.modules+name, (err) => {
+            addModulesShown()
+            addModulesHidden()
+          })
+        } else {
+          if (fs.existsSync(data.modulesHidden+name)) {
+            document.getElementById('log').innerHTML = 'Module Already Exists'
+            return
+          }
+          fs.rename(data.modules+name, data.modulesHidden+name, function(err) {
+            if (err) document.getElementById('log').innerHTML = err
+            addModulesShown()
+            addModulesHidden()
+          })
+        }
+      })
+    }
+  }
+
+  function addModulesHidden() {
+    if (!fs.existsSync(data.modulesHidden)) return
+    document.getElementById('modulesHidden').innerHTML = ''
+    let modules = fs.readdirSync(data.modulesHidden);
+    if (modules.includes('Settings'))  modules.splice(modules.indexOf('Settings'), 1)
+    if (modules.includes('Store'))  modules.splice(modules.indexOf('Store'), 1)
+    if (modules.includes('Library')) modules.splice(modules.indexOf('Library'), 1)
+    if (modules.includes('Themes'))  modules.splice(modules.indexOf('Themes'), 1)
+    for(i in modules) {
+      //DATA
+      let id = 'moduleHidden'+i
+      let name = modules[i]
+      let path = data.modulesHidden+name
+      let html = `<div id="${id}" class="longButton" style="margin-top: 10px; margin-bottom: 10px;">
+                    ${name}
+                    <div id="${'path-'+id}" style="display: none;">${path}</div>
+                  </div>`
+      //ADD MODULE
+      document.getElementById('modulesHidden').insertAdjacentHTML('beforeend', html)
+      addSimpleButtonListener(id, function() {
+        if (removing) {
+          const rimraf = require("rimraf")
+          rimraf(data.modulesHidden+name, (err) => {
+            addModulesShown()
+            addModulesHidden()
+          })
+        } else {
+          if (fs.existsSync(data.modules+name)) {
+            document.getElementById('log').innerHTML = 'Module Already Exists'
+            return
+          }
+          fs.rename(data.modulesHidden+name, data.modules+name, function(err) {
+            if (err) document.getElementById('log').innerHTML = err
+            addModulesShown()
+            addModulesHidden()
+          })
+        }
+      })
+    }
+  }
+</script>

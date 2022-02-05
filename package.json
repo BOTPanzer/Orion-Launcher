@@ -1,6 +1,6 @@
 {
   "name": "orion-launcher",
-  "version": "2.0.9",
+  "version": "2.1.0",
   "author": "BOT Panzer",
   "description": "Themed Launcher & Game Store With Modules",
   "main": "main.js",
@@ -13,10 +13,12 @@
     "electron": "^15.2.0"
   },
   "dependencies": {
+    "@electron/remote": "^2.0.1",
     "fs-extra": "^10.0.0",
     "jquery": "^3.6.0",
     "recursive-readdir": "^2.2.2",
     "rimraf": "^3.0.2",
-    "superagent": "^6.1.0"
+    "superagent": "^6.1.0",
+    "windows-shortcuts": "^0.1.6"
   }
 }

@@ -51,47 +51,46 @@
 </div>
 
 <script>
-  let actualPath = ''
-  let oldName = ''
-  let oldPath = ''
-  let oldIcon = ''
-  let showPath = ''
- 
-  ipcRenderer.on('setLocation', (event, path, img) => {
-    actualPath = path
-    document.getElementById('img').src = img
-  })
+  //FILE PATH
+  let filePath = specialData.path
+  let fileInfo = getFileInfo(filePath, false)
+  //NAME
+  let oldName = fileInfo.name
+  //PATH
+  let oldPath = fileInfo.gamePath
+  let filePathInfo = getPathInfo(oldPath)
+  let showPath = filePathInfo.pathClean
+  let showPathFixed = showPath
+  if (showPathFixed.startsWith('?:')) showPathFixed = showPathFixed.replace('?:', data.root.substring(0, 2))
+  //ICON PATH
+  let oldIcon = fileInfo.iconPath
+  if (oldIcon == undefined) oldIcon = ''
 
-  ipcRenderer.on('setName', (event, name) => {
-    document.getElementById('nameText').value = name
-    oldName = name
-  })
-
-  ipcRenderer.on('changeIcon', (event, argPath, icon) => {
-    if (actualPath == argPath)
-      document.getElementById('img').src = icon
-  })
-
-  ipcRenderer.on('setPath', (event, path) => {
-    document.getElementById('pathText').value = path
-    oldPath = path
-    const fs = require('fs');
-    let gamePathArg = getPathInfo(path)
-    showPath = gamePathArg.pathClean
-    if (showPath.startsWith('?:')) showPath = showPath.replace('?:', actualPath.substring(0, 2))
-    if (!fs.existsSync(showPath)) document.getElementById('show').style.display = 'none'
-  })
-
-  ipcRenderer.on('setIconPath', (event, path) => {
-    document.getElementById('iconText').value = path
-    oldIcon = path
+  //TITLE
+  document.getElementById('topTitle').innerText = 'Oriøn: Game Properties'
+  //NAME
+  document.getElementById('nameText').value = oldName
+  //IMAGE
+  document.getElementById('img').src = specialData.src
+  if (oldIcon == '') ipcRenderer.send('requestIcon', 'img', showPathFixed, filePath)
+  else if (fs.existsSync(oldIcon) && fs.statSync(oldIcon).isFile()) ipcRenderer.send('requestIcon', 'img', oldIcon, filePath)
+  //PATH
+  document.getElementById('pathText').value = oldPath
+  if (showPath.startsWith('?:')) showPath = showPath.replace('?:', filePath.substring(0, 2))
+  if (!fs.existsSync(showPath)) document.getElementById('show').style.display = 'none'
+  //ICON PATH
+  document.getElementById('iconText').value = oldIcon
+  
+  //LISTENERS
+  ipcRenderer.on('changeIcon', (event, img, icon, argPath) => {
+    if (filePath == argPath) document.getElementById(img).src = icon
   })
 
   addSimpleButtonListener('folder', function() {
     let a = document.getElementById('pathText').value
     let gamePathArg = getPathInfo(a)
     let path = gamePathArg.pathClean.substring(0, gamePathArg.pathClean.lastIndexOf('\\')+1)
-    ipcRenderer.send('getFile2', path, 'Choose a Game', 'fileGotten')
+    ipcRenderer.send('getFile', path, 'Choose a Game', 'fileGotten')
   })
 
   ipcRenderer.on('fileGotten', (event, path) => {
@@ -102,48 +101,141 @@
   })
   
   addSimpleButtonListener('folderIcon', function() {
-    let a = document.getElementById('pathText').value
-    if (document.getElementById('iconText').value != '') a = document.getElementById('iconText').value
-    let gamePathArg = getPathInfo(a)
-    let path = gamePathArg.pathClean.substring(0, gamePathArg.pathClean.lastIndexOf('\\')+1)
-    ipcRenderer.send('getFile2', path, 'Choose an Icon', 'fileGottenIcon')
+    let a = document.getElementById('iconText').value
+    if (a == '') a = document.getElementById('pathText').value
+    let iconPathInfo = getPathInfo(a)
+    let path = iconPathInfo.pathClean.substring(0, iconPathInfo.pathClean.lastIndexOf('\\')+1)
+    ipcRenderer.send('getFile', path, 'Choose an Icon', 'fileGottenIcon')
   })
 
   ipcRenderer.on('fileGottenIcon', (event, path) => {
-    if (path != '')
-      document.getElementById('iconText').value = path
-    ipcRenderer.send('requestIcon2', actualPath, path)
+    if (path == '') return
+    document.getElementById('iconText').value = path
+    if (fs.existsSync(path) && fs.statSync(path).isFile()) ipcRenderer.send('requestIcon', 'img', path, filePath)
+    else document.getElementById(img).src = 'Data/Images/iconFile.png'
   })
 
   addSimpleButtonListener('show', function() {
     ipcRenderer.send('showOnExplorer', showPath, true)
   })
-    
+  
   addSimpleButtonListener('showstore', function() {
     ipcRenderer.send('resume')
     ipcRenderer.send('loadModule', 'Store', document.getElementById('nameText').value)
-    ipcRenderer.send('exitContext')
+    closeWindow()
   })
   
   addSimpleButtonListener('move', function() {
-    let paths = [actualPath]
-    ipcRenderer.send('move', paths)
+    ipcRenderer.send('getFolder', json.actualPath, 'Choose a Folder', 'movePaths')
   })
   
   addSimpleButtonListener('remove', function() {
-    let paths = [actualPath]
+    let paths = [filePath]
     showRemoveWindow(paths)
   })
   
   addSimpleButtonListener('save', function() {
-    let newName = undefined
-    if (oldName != document.getElementById('nameText').value) newName = document.getElementById('nameText').value
+    let newName = document.getElementById('nameText').value
     let newPath = document.getElementById('pathText').value
     let newIcon = document.getElementById('iconText').value
-    ipcRenderer.send('save', actualPath, newName, newPath, newIcon)
+    saveFile(newName, newPath, newIcon)
   })
 
-  ipcRenderer.on('log', (event, text) => {
-    document.getElementById('log').innerText = text
+  //MOVE FILE
+  ipcRenderer.on('movePaths', (event, newFilePath) => {
+    let paths = [filePath]
+    newFilePath = newFilePath+'\\'
+    if (!newFilePath.includes(specialData.launcherFolder)) return
+
+    //CHECK IF NEW FOLDER IS ALSO BEING MOVED
+    let posibleToMove = true
+    for (i in paths) {
+      if (newFilePath.includes(paths[i]))
+      posibleToMove = false
+    }
+
+    //IF NOT MOVE ヾ(•ω•`)o
+    if (posibleToMove) for (i in paths) {
+      let path = paths[i]
+      if (fs.existsSync(path)) {
+        let oldFilePath = path
+        if (path.endsWith('\\')) oldFilePath = path.slice(0,-1)
+        let name = oldFilePath.substring(oldFilePath.lastIndexOf('\\')+1)
+        fs.rename(path, newFilePath+name, function(err) { if (i == paths.length-1) closeWindow(json.actualPath) })
+      } else if (i == paths.length-1) closeWindow(json.actualPath)
+    }
   })
+
+  //SAVE FILE
+  function saveFile(newName, newPath, newIcon) {
+    if (newName == oldName && newPath == oldPath && newIcon == oldIcon) {
+      closeWindow()
+    } else if (newName == '') {
+      document.getElementById('log').innerText = 'Name Is Necesary'
+    } else if (newPath == '') {
+      document.getElementById('log').innerText = 'Path Is Necesary'
+    } else if (fs.existsSync(filePath)) {
+      let newFilePath = json.actualPath+newName+'.txt'
+      if (newName != oldName && fs.existsSync(newFilePath)) {
+        document.getElementById('log').innerText = 'File Already Exists'
+      } else fs.writeFile(filePath, newPath+'\n'+newIcon, (err) => {
+        if (newName != oldName) fs.rename(filePath, newFilePath, function(err) { closeWindow(json.actualPath) })
+        else closeWindow(json.actualPath)
+      })
+    }
+  }
+
+  //FUNCTIONS
+  function getFileInfo(argPath, fixed) {
+    if (fixed == undefined) fixed = true
+    let path = argPath
+    if (path.endsWith('\\')) path = path.slice(0,-1)
+    //isFile
+    let isFile = false
+    if (fs.statSync(argPath).isFile()) isFile = true
+    //Name
+    let name = argPath.substring(argPath.lastIndexOf("\\")+1)
+    if (name.includes('.')) name = name.substring(0, name.lastIndexOf('.'))
+    //File Stuff
+    if (isFile) {
+      let si = fs.readFileSync(argPath).toString().trim().split('\n')
+      //Path
+      let gamePath = si[0]
+      if (gamePath != undefined) {
+        gamePath = gamePath.replaceAll('\r', '')
+        if (gamePath.startsWith('?:') && fixed) gamePath = gamePath.replace('?:', data.root.substring(0, 2))
+      }
+      //Icon
+      let iconPath = si[1]
+      if (iconPath != undefined) {
+        iconPath = iconPath.replaceAll('\r', '')
+      }
+      let data = {isFile, name, gamePath, iconPath}
+      return data
+    } else {
+      let data = {isFile, name}
+      return data
+    }
+  }
+
+  function getPathInfo(gamePath) {
+    gamePath = gamePath.trim()
+    let pathClean = gamePath
+    let argsClean = ''
+    if (gamePath.includes('--') && gamePath.includes(' ') && !gamePath.endsWith('"')) {
+      if (gamePath.startsWith('"') ) {
+        pathClean = gamePath.substring(1, gamePath.lastIndexOf('"'))
+        let args = gamePath.substring(pathClean.length+2).trim()
+        argsClean = args.split(' ')
+        argsClean.unshift("/c", pathClean)
+      } else {
+        pathClean = gamePath.substring(0, gamePath.lastIndexOf(' '))
+        let args = gamePath.substring(pathClean.length+2).trim()
+        argsClean = args.split(' ')
+        argsClean.unshift("/c", pathClean)
+      }
+    }
+    let data = {pathClean, argsClean}
+    return data
+  }
 </script>
