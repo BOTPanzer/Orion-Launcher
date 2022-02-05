@@ -88,6 +88,12 @@ if (!app.requestSingleInstanceLock()) {
     window = 'themes'
   })
 
+  ipcMain.on('installer', (event) => {
+    if (window == 'installer') return
+    win.webContents.send('load', 'installer.html')
+    window = 'installer'
+  })
+
   ipcMain.on('ftp', (event) => {
     if (window == 'ftp') return
     win.webContents.send('load', 'ftp.html')
@@ -108,6 +114,8 @@ if (!app.requestSingleInstanceLock()) {
       else searchGames('')
     } else if (window == 'themes') {
       createThemeList()
+    } else if (window == 'installer') {
+      
     } else if (window == 'ftp') {
       
     }
@@ -867,6 +875,12 @@ if (!app.requestSingleInstanceLock()) {
     if (fs.existsSync(path)) win2.webContents.send(sendReturn, await getFile(title, path))
     else win2.webContents.send(sendReturn, await getFile(title))
   })
+
+  ipcMain.on('getFolder', async function(event, path, title, sendReturn) {
+    if (title == undefined || title == '') title = 'Choose a Folder'
+    if (fs.existsSync(path)) win.webContents.send(sendReturn, await getFolder(title, path))
+    else win.webContents.send(sendReturn, await getFolder(title))
+  })
   
   //INSTALLER
   ipcMain.on('install', async function(event, path, name, destination) {
@@ -1053,6 +1067,17 @@ function createTray() {
         if (window != 'themes') {
           win.webContents.send('load', 'themes.html')
           window = 'themes'
+        }
+        if (win.isMinimized() || !win.isVisible())
+        win.show();
+      }
+    },
+    {
+      label: 'Installer', click: function () {
+        if (paused) return
+        if (window != 'installer') {
+          win.webContents.send('load', 'installer.html')
+          window = 'installer'
         }
         if (win.isMinimized() || !win.isVisible())
         win.show();

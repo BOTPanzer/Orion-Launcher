@@ -1,0 +1,2 @@
+com.epicgames.launcher://apps/74d82b28ab424956ac24407229fe6faa%3A682122e968804007beadd755c79db11b%3ALaridae?action=launch&silent=true
+D:\Games\RUINER\Ruiner.exe

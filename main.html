@@ -91,6 +91,9 @@
         <div id="themes" style="height: 36px; width: 107px; margin: 20px; margin-left: 23px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
           <div style="font-family: ItemFont;">Themes</div>
         </div>
+        <div id="installer" style="height: 36px; width: 107px; margin: 20px; margin-left: 23px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
+          <div style="font-family: ItemFont;">Installer</div>
+        </div>
         <div id="ftp" style="height: 36px; width: 107px; margin: 20px; margin-left: 23px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
           <div style="font-family: ItemFont;">Connect</div>
         </div>
@@ -127,6 +130,7 @@
   const { ipcRenderer } = require('electron');
   window.$ = window.jQuery = require('jquery');
   const Net = require('net');
+  const fs = require('fs');
   let lastWin = ''
   let button = ''
   let fullLog = ''
@@ -183,6 +187,7 @@
         document.getElementById('store').style.display = 'none'
         document.getElementById('launcher').style.display = 'none'
         document.getElementById('themes').style.display = 'none'
+        document.getElementById('installer').style.display = 'none'
         document.getElementById('ftp').style.display = 'none'
         document.getElementById('add').style.display = 'none'
         document.getElementById('line').style.opacity = '0'
@@ -197,6 +202,7 @@
         document.getElementById('store').style.display = 'flex'
         document.getElementById('launcher').style.display = 'flex'
         document.getElementById('themes').style.display = 'flex'
+        document.getElementById('installer').style.display = 'flex'
         document.getElementById('ftp').style.display = 'flex'
         document.getElementById('line').style.opacity = '0.5'
         if (lastWin != 'launcher.html')
@@ -259,6 +265,15 @@
       document.getElementById('themes').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
     }, function() {
       ipcRenderer.send('themes')
+    })
+
+    //FTP
+    addButtonListener('installer', function() {
+      document.getElementById('installer').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+    }, function() {
+      document.getElementById('installer').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+    }, function() {
+      ipcRenderer.send('installer')
     })
 
     //FTP
