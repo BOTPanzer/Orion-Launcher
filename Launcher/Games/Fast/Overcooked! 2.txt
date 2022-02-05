@@ -1,0 +1,2 @@
+com.epicgames.launcher://apps/2d94b7b33d7f4d02a8fff6fbf71ac7ab%3A08addee88a7a400c940c9db6263b61db%3APotoo?action=launch&silent=true
+D:\Games\Overcooked2\Overcooked2.exe

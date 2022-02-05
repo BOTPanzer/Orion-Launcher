@@ -1,0 +1,49 @@
+<div style="margin: 10px;">
+  <div style="width: 100%; display: flex; align-items: center;">
+    <div id="title" style="color: var(--text2Color); font-size: 40px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; margin-left: 10px; margin-right: 10px;">Connect</div>
+  </div>
+
+	<div id="list" style="width: calc(100% + 5px); transform: translate(-5px, 0); margin-left: 10px; margin-top: 20px; display: block; flex-wrap: wrap; font-family: ItemFont;">
+    <div style="width: 100%; display: flex; align-items: center;">
+      <input id='editText' placeholder="Send Text" type="text" maxlength="50" style="height: 32px; width: 250px; padding-left: 10px; padding-right: 10px; margin-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
+      <div id="send" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
+        <div style="font-family: ItemFont;">Send</div>
+      </div>
+    </div>
+
+    <div id="text" style="margin-top: 10px; color: var(--text2Color); font-size: 16px; display: block; -moz-user-select: text; -ms-user-select: text; user-select: text;"></div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('text').innerText = fullLog
+  
+  $('#editText').unbind()
+  $('#editText').bind('keydown', function(event) {
+    if (event.keyCode === 13) {
+      event.preventDefault();
+      var text = document.getElementById('editText').value+'\r\n'
+      if (text != '\r\n') {
+        try {
+          mainSocket.write(text);
+          appendText('Sent: '+text)
+        } catch(e) {}
+      }
+      return false;
+    }
+  })
+
+  addButtonListener('send', function() {
+    document.getElementById('send').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+  }, function() {
+    document.getElementById('send').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+  }, function() {
+    var text = document.getElementById('editText').value+'\r\n'
+    if (text != '\r\n') {
+      try {
+        mainSocket.write(text);
+        appendText('Sent: '+text)
+      } catch(e) {}
+    }
+  })
+</script>

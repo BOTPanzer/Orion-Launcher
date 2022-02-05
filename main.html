@@ -68,15 +68,15 @@
     <div style="height: 15px; width: 100%; margin-left: 5px; margin-top: 5px; -webkit-app-region: drag;"></div>
     <div style="display: flex; font-family: Franklin Gothic Medium">
       <div style="display: flex; align-items: center;">
-        <div id="mini" style="height: 20px; width: 30px; color: var(--textColor); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">–</div>
-        <div id="maxi" style="height: 20px; width: 30px; color: var(--textColor); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">o</div>
-        <div id="exit" style="height: 20px; width: 30px; color: var(--textColor); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">x</div>
+        <div id="mini" style="height: 20px; width: 30px; color: var(--buttonColor2); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">–</div>
+        <div id="maxi" style="height: 20px; width: 30px; color: var(--buttonColor2); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">o</div>
+        <div id="exit" style="height: 20px; width: 30px; color: var(--buttonColor2); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">x</div>
       </div>
     </div>
   </div>
   
   <div style="height: calc(100% - 20px); width: 100%; display: flex; position: relative;">
-    <div id="leftBar" style="height: 100%; width: 185px; display: flex; position: relative;">
+    <div id="leftBar" style="height: 100%; width: 185px; display: flex; position: relative; z-index: 999;">
       <div style="height: 100%;">
         <div style="display: flex; align-items: center; margin: 10px;">
           <img id="orionLogo" style="min-height: 50px; min-width: 50px; max-height: 50px; max-width: 50px; -webkit-user-drag: none;" src="./Data/Images/icon.png"/>
@@ -90,6 +90,9 @@
         </div>
         <div id="themes" style="height: 36px; width: 107px; margin: 20px; margin-left: 23px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
           <div style="font-family: ItemFont;">Themes</div>
+        </div>
+        <div id="ftp" style="height: 36px; width: 107px; margin: 20px; margin-left: 23px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
+          <div style="font-family: ItemFont;">Connect</div>
         </div>
   
         <div id="add" style="position: absolute; bottom: 0; display: none;">
@@ -105,7 +108,7 @@
       <div id="line" style="width: 2px; margin-top: 5px; margin-bottom: 5px; background-color: var(--lineColor); opacity: 0.5;"></div>
     </div>
 
-    <div id="rightBar" style="width: 100%; overflow-y: auto;">
+    <div id="rightBar" style="width: 100%; overflow-y: auto; z-index: 0;">
       <img id="logo" style="height: 120px; margin: 20px; -webkit-user-drag: none;" src="./Data/Images/logo.png"/> 
       <div id="window">
       
@@ -123,11 +126,15 @@
 <script>
   const { ipcRenderer } = require('electron');
   window.$ = window.jQuery = require('jquery');
+  const Net = require('net');
   let lastWin = ''
   let button = ''
+  let fullLog = ''
+  let mainSocket = null
 
   a()
   setbuttons()
+  initializeFTP()
 
   function a() {
     ipcRenderer.on('load', (event, html) => {
@@ -176,7 +183,7 @@
         document.getElementById('store').style.display = 'none'
         document.getElementById('launcher').style.display = 'none'
         document.getElementById('themes').style.display = 'none'
-        document.getElementById('other').style.display = 'none'
+        document.getElementById('ftp').style.display = 'none'
         document.getElementById('add').style.display = 'none'
         document.getElementById('line').style.opacity = '0'
 
@@ -190,7 +197,7 @@
         document.getElementById('store').style.display = 'flex'
         document.getElementById('launcher').style.display = 'flex'
         document.getElementById('themes').style.display = 'flex'
-        document.getElementById('other').style.display = 'flex'
+        document.getElementById('ftp').style.display = 'flex'
         document.getElementById('line').style.opacity = '0.5'
         if (lastWin != 'launcher.html')
           document.getElementById('add').style.display = 'none'
@@ -254,6 +261,15 @@
       ipcRenderer.send('themes')
     })
 
+    //FTP
+    addButtonListener('ftp', function() {
+      document.getElementById('ftp').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
+    }, function() {
+      document.getElementById('ftp').style.backgroundImage = 'url("./Data/Images/icon_description_launch.png")';
+    }, function() {
+      ipcRenderer.send('ftp')
+    })
+
     //ADDFOLDER
     addButtonListener('addfolder', function() {
       document.getElementById('addfolder').style.backgroundImage = 'url("./Data/Images/icon_description_launch_clicked.png")';
@@ -277,6 +293,55 @@
     })
   }
 
+  //FTP
+  function initializeFTP() {
+    server = new Net.Server()
+
+    server.on('error', function (e) {
+      server.close();
+    })
+
+    server.listen(4444, function() {
+      var socket = Net.createConnection(80, 'www.google.com');
+      socket.on('connect', function() {
+        appendText(`Server Started on ${socket.address().address}:4444\r\n`)
+        socket.end()
+      })
+      socket.on('error', function(e) {
+        appendText(`Server Started on localhost:4444\r\n`)
+      });
+    })
+
+    server.on('connection', function(socket) {
+      mainSocket = socket
+      mainSocket.write('Connection Established\r\n');
+      appendText('Connection Established\r\n')
+    
+      mainSocket.on('data', function(chunk) {
+        appendText('Received: '+chunk.toString())
+      })
+
+      mainSocket.on('end', function() {
+        appendText('Connection Closed\r\n')
+      })
+
+      mainSocket.on('error', function(err) {
+        appendText(`Error: ${err}\r\n`)
+      })
+    })
+  }
+
+  function appendText(text) {
+    fullLog = fullLog+text
+    if (document.getElementById('text') != null) {
+      document.getElementById('text').innerText = fullLog
+      
+      var documentHeight = document.getElementById('rightBar').offsetHeight;
+      document.getElementById('rightBar').scrollTo(0, documentHeight);
+    }
+  }   
+
+  //BUTTON LISTENERS
   function addButtonListener(id, mousedown, mouseup, click) {
     $('#'+id).bind('mousedown', function() {
       if (event.which != 1) return

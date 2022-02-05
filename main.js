@@ -1,5 +1,6 @@
 const { app, ipcMain, BrowserWindow, Tray, Menu } = require('electron')
 const fs = require('fs');
+
 let closing = false
 let paused = false
 
@@ -87,10 +88,10 @@ if (!app.requestSingleInstanceLock()) {
     window = 'themes'
   })
 
-  ipcMain.on('other', (event) => {
-    if (window == 'other') return
-    win.webContents.send('load', 'other.html')
-    window = 'other'
+  ipcMain.on('ftp', (event) => {
+    if (window == 'ftp') return
+    win.webContents.send('load', 'ftp.html')
+    window = 'ftp'
   })
 
   ipcMain.on('loaded', (event) => {
@@ -107,10 +108,8 @@ if (!app.requestSingleInstanceLock()) {
       else searchGames('')
     } else if (window == 'themes') {
       createThemeList()
-    } else if (window == 'other') {
-      fs.readFile(dataFile, 'utf8' , (err, data) => {
-        win.webContents.send('gfolder', data)
-      })
+    } else if (window == 'ftp') {
+      
     }
   })
 
@@ -1002,7 +1001,6 @@ function createWindow() {
     minHeight: 460,
     minWidth: 800,
     frame: false,
-    transparent: true,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -1061,11 +1059,11 @@ function createTray() {
       }
     },
     {
-      label: 'Installer', click: function () {
+      label: 'Connect', click: function () {
         if (paused) return
-        if (window != 'other') {
-          win.webContents.send('load', 'other.html')
-          window = 'other'
+        if (window != 'ftp') {
+          win.webContents.send('load', 'ftp.html')
+          window = 'ftp'
         }
         if (win.isMinimized() || !win.isVisible())
         win.show();
@@ -1168,7 +1166,7 @@ function createWin2(file, size, arg1, arg2) {
   win2.hide()
   win2.loadFile('win2.html')
   win2.removeMenu()
-  win2.openDevTools()
+  //win2.openDevTools()
 
   win2.webContents.on('dom-ready', () => {
     win2.webContents.send('load', file, arg1, arg2)
