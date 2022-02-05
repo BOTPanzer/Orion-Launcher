@@ -1,8 +1,0 @@
-url('./Data/Images/lines.png')
-#251707
-#E8CFA6
-white
-white
-10px
-
-

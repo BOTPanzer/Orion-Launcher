@@ -10,25 +10,27 @@
 @font-face { font-family: ItemFont; src: url('Data/Fonts/font_item.ttf'); } 
 
 body {
+  background: #000000;
   font-family: BodyFont;
-  margin: 0px;
-  vertical-align: baseline;
-  background: linear-gradient(#000000, #000000);
-  background-attachment: fixed;
-  --c1: #000000;
-  --c2: #000000;
-  --c3: white;
-  --c4: white;
-  --round: 0px;
-
-  overflow: hidden;
+  overflow:hidden;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  -webkit-user-drag: none;
+
+  --buttonColor: #000000;
+  --topColor: #000000;
+  --lineColor: #000000;
+  --scrollColor: #000000;
+  --boxColor: #000000;
+  --boxBorderColor: #000000;
+  --placeholderColor: #000000;
+  --textColor: #000000;
+  --text2Color: #000000;
+  --round: 0px;
+  --size1: 150px;
 }
 
 ::-webkit-scrollbar {
@@ -47,35 +49,37 @@ body {
 }
 
 ::placeholder {
-  color: var(--c2);
+  color: var(--placeholderColor);
 }
 </style>
 </head>
 
-<body>
-  <div style="height: 20px; width: 100%; display: flex; background-color: var(--c1);">
-    <div style="height: 16px; margin-top: 2px; margin-left: 5px; position: absolute; font-family: ItemFont; font-size: 16px; color: var(--c4);">Oriøn: Selected</div>
+<div id="themeDiv" style="height: 0; width: 0;"></div>
+
+<body style="height: 100%; width: 100%; margin: 0px; padding: 0px;">
+  <div style="height: 20px; width: 100%; display: flex; background-color: var(--topColor);">
+    <div style="height: 16px; margin-top: 2px; margin-left: 5px; position: absolute; font-family: ItemFont; font-size: 16px; color: var(--text2Color);">Oriøn: Selected</div>
     <div style="height: 15px; width: 100%; margin-left: 5px; margin-top: 5px; -webkit-app-region: drag; align-items: center;"></div>
     <div style="display: flex; font-family: Franklin Gothic Medium">
       <div style="display: flex; align-items: center;">
-        <div id="exit" style="height: 20px; width: 30px; color: var(--c3); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">x</div>
+        <div id="exit" style="height: 20px; width: 30px; color: var(--textColor); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">x</div>
       </div>
     </div>
   </div>
 
-  <div style="color: var(--c4);">
+  <div style="color: var(--text2Color);">
     <div id="title" style="height: 20px; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 15px; padding: 5px; padding-left: 10px;">Games/Folders Selected:</div>
-    <div id="list" style="height: 60px; font-family: ItemFont; font-size: 16px; margin-left: 20px; margin-right: 20px; padding-left: 5px; padding-right: 5px; overflow-y: auto;">
+    <div id="list" style="height: 60px; font-family: ItemFont; font-size: 16px; margin-left: 20px; margin-right: 20px; padding-left: 5px; padding-right: 5px; overflow-y: auto; color: var(--textColor);">
       
     </div>
   </div>
 
-  <div style="width: 100%; position: absolute; bottom: 0; display: block;">
-    <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-      <div id="move" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px; color: var(--c3);">
+  <div style="width: 100%; position: absolute; bottom: 20px; display: block;">
+    <div style="display: flex; align-items: center; justify-content: center;">
+      <div id="move" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px; color: var(--textColor);">
         <div style="font-family: ItemFont;">Move</div>
       </div>
-      <div id="remove" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px; color: var(--c3);">
+      <div id="remove" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px; color: var(--textColor);">
         <div style="font-family: ItemFont;">Remove</div>
       </div>
     </div>
@@ -84,10 +88,11 @@ body {
 
 <script>
   const { ipcRenderer } = require('electron')
+  window.$ = window.jQuery = require('jquery');
   let paths = []
 
   addButtonListener('exit', function() {
-    document.getElementById('exit').style.backgroundColor = 'var(--c2)';
+    document.getElementById('exit').style.backgroundColor = 'var(--buttonColor)';
   }, function() {
     document.getElementById('exit').style.backgroundColor = 'rgba(0, 0, 0, 0)';
   }, function() {
@@ -95,14 +100,7 @@ body {
   })
 
   ipcRenderer.on('theme', (event, theme) => {
-    document.body.style.setProperty('--c1', theme.c1);
-    document.body.style.setProperty('--c2', theme.c2);
-    document.body.style.setProperty('--c3', theme.c3);
-    document.body.style.setProperty('--c4', theme.c4);
-    document.body.style.setProperty('--round', theme.round);
-    //BACKGROUND
-    document.body.style.background = theme.background
-    document.body.style.backgroundAttachment = 'fixed'
+    $("#themeDiv").load(theme)
   })
 
   ipcRenderer.on('setPaths', (event, argPaths) => {
@@ -166,18 +164,17 @@ body {
   }
 
   function addButtonListener(id, mousedown, mouseup, click) {
-    document.getElementById(id).addEventListener('mousedown', (event) => {
+    $('#'+id).bind('mousedown', function() {
       if (event.which != 1) return
       mousedown()
     })
 
-    document.addEventListener('mouseup', () => {
+    $(window).bind('mouseup', function() {
       if (event.which != 1) return
-      if (document.getElementById(id) == undefined) return
       mouseup()
     })
-    
-    document.getElementById(id).addEventListener('click', (event) => {
+
+    $('#'+id).bind('click', function() {
       if (event.which != 1) return
       click()
     })

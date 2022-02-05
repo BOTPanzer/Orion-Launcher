@@ -1,7 +1,0 @@
-linear-gradient(#010F1D, #001C32 75%)
-#1E2328
-#D9AB44
-#C7B88D
-#C7B88D
-
-

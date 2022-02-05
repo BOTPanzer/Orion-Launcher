@@ -13,12 +13,12 @@ let win3 = null
 
 let dataFolder = null
 let dataFile = null
+var theme = 'Data\\settings.html'
 let launcherFolder = null
 let actualPath = null
 
 let defImage = null
 
-var theme = []
 let tempsearch = undefined
 
 
@@ -101,7 +101,6 @@ if (!app.requestSingleInstanceLock()) {
   })
 
   win.webContents.on('dom-ready', function() {
-    updateTheme()
     if (window == '') {
       win.webContents.send('load', 'launcher.html')
       window = 'launcher'
@@ -516,7 +515,7 @@ if (!app.requestSingleInstanceLock()) {
   })
 
   ipcMain.on('addgame', (event) => {
-    createWin2('addgame.html', 375)
+    createWin2('addgame.html', 380)
 
     win2.on('close', function() {
       resume()
@@ -574,7 +573,7 @@ if (!app.requestSingleInstanceLock()) {
       height: 550,
       width: 970
     })
-  
+    
     winStore.loadURL(link)
     winStore.removeMenu()
   })
@@ -897,7 +896,7 @@ if (!app.requestSingleInstanceLock()) {
 
 
   //OTHER
-  ipcMain.on('install', (event, path, name, destination) => {
+  ipcMain.on('install', async function(event, path, name, destination) {
     //PATH
     if (!fs.existsSync(path)) {
       win.webContents.send('log', 'File path does not exist')
@@ -911,15 +910,64 @@ if (!app.requestSingleInstanceLock()) {
       resume()
       return
     }
-    //NEW FOLDER
-    let destination2 = destination+name+'\\'
-    if (fs.existsSync(destination2)) {
-      win.webContents.send('log', name+' is already installed')
-      resume()
-      return
-    }
-    //INSTALL
+    //CHECK TO CREATE FOLDER
+    var exec = require('child_process').exec
     let zip = dataFolder+'7zip\\7za.exe'
+    exec(`"${zip}" l "${path}" -x!*\\*`, function (error, stdOut, stdErr) {
+      if (error || stdErr) {
+        win.webContents.send('log', 'An error ocurred while reading the file')
+        resume()
+      } else {
+        stdOut = stdOut.replaceAll('\r', '').replaceAll('\n', '')
+        if (stdOut.endsWith('0 files, 1 folders')) {
+          exec(`"${zip}" l -slt "${path}" -x!*\\*`, function (error, stdOut, stdErr) {
+            if (error || stdErr) {
+              win.webContents.send('log', 'An error ocurred while reading the file')
+              resume()
+            } else {
+              let outSplit = stdOut.replaceAll('\r', '').split("\n")
+              let paths = []
+              for(i in outSplit) {
+                if (outSplit[i].includes('Path = ')) {
+                  paths.push(outSplit[i].substring(7))
+                }
+              }
+              let insideFolderName = paths[paths.length-1]
+              //FOLDER EXISTS
+              let destination2 = destination+insideFolderName+'\\'
+              if (fs.existsSync(destination2)) {
+                win.webContents.send('log', name+' is already installed')
+                resume()
+                return
+              }
+              //NAME
+              let tmpName = path.substring(path.lastIndexOf('\\')+1)
+              if (tmpName.includes('.')) tmpName = tmpName.substring(0, tmpName.lastIndexOf('.'))
+              //INSTALL
+              install(zip, path, tmpName, destination, destination, insideFolderName, name)
+            }
+          })
+        } else {
+          //NAME
+          if (name == '') {
+            name = path.substring(path.lastIndexOf('\\')+1)
+            if (name.includes('.')) name = name.substring(0, name.lastIndexOf('.'))
+          }
+          //NEW FOLDER EXISTS
+          let destination2 = destination+name+'\\'
+          if (fs.existsSync(destination2)) {
+            win.webContents.send('log', name+' is already installed')
+            resume()
+            return
+          }
+          //INSTALL
+          install(zip, path, name, destination, destination2)
+        }
+      }
+    })
+  })
+
+  function install(zip, path, name, destination, destination2, insideFolderName, nName) {
     updateData(destination)
     win.webContents.send('log', 'Installing '+name+'...')
     var exec = require('child_process').exec
@@ -928,14 +976,41 @@ if (!app.requestSingleInstanceLock()) {
         win.webContents.send('log', 'An error ocurred while unzipping')
         resume()
       } else {
-        win.webContents.send('log', 'Installation successful')
-        resume()
-        const { shell } = require('electron')
-        shell.openPath(destination2)
+        if (insideFolderName != undefined) {
+          if (nName == '') {
+            win.webContents.send('log', 'Installation successful')
+            resume()
+            const { shell } = require('electron')
+            shell.openPath(destination+insideFolderName)
+          } else {
+            //RENAME insideFolderName TO nName
+            let newPath = destination+nName+'\\'
+            if (fs.existsSync(newPath)) {
+              win.webContents.send('log', nName+' is already installed')
+              resume()
+              return
+            }
+            fs.rename(destination+insideFolderName, newPath, function(err) {
+              if (err) {
+                win.webContents.send('log', 'An error ocurred while renaming a folder')
+                resume()
+              } else {
+                win.webContents.send('log', 'Installation successful')
+                resume()
+                const { shell } = require('electron')
+                shell.openPath(newPath)
+              }
+            })
+          }
+        } else {
+          win.webContents.send('log', 'Installation successful')
+          resume()
+          const { shell } = require('electron')
+          shell.openPath(destination2)
+        }
       }
-      console.log(stdOut)
     })
-  })
+  }
 
   ipcMain.on('getFileOther', async function(event) {
     win.webContents.send('gottenFileOther', await getFile("Choose a File", app.getPath('downloads')))
@@ -949,11 +1024,12 @@ if (!app.requestSingleInstanceLock()) {
 //FUNCTIONS ALL
 function createWindow() {
   win = new BrowserWindow({
-    height: 550,
-    width: 970,
-    minHeight: 490,
-    minWidth: 815,
+    height: 540,
+    width: 955,
+    minHeight: 460,
+    minWidth: 800,
     frame: false,
+    transparent: true,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -1036,24 +1112,6 @@ function createTray() {
   appIcon.setToolTip('Oriøn Launcher')
   appIcon.setContextMenu(contextMenu)
   tray = appIcon
-}
-
-function updateTheme() {
-  let si = fs.readFileSync(dataFolder+'settings.txt').toString().trim().split('\n')
-  let background = si[0]
-  if (background != undefined) background = background.replaceAll('\r', '')
-  let c1 = si[1]
-  if (c1 != undefined) c1 = c1.replaceAll('\r', '')
-  let c2 = si[2]
-  if (c2 != undefined) c2 = c2.replaceAll('\r', '')
-  let c3 = si[3]
-  if (c3 != undefined) c3 = c3.replaceAll('\r', '')
-  let c4 = si[4]
-  if (c4 != undefined) c4 = c4.replaceAll('\r', '')
-  let round = si[5]
-  if (round == undefined) round = '0px'
-  else round = round.replaceAll('\r', '')
-  theme = { background, c1, c2, c3, c4, round}
 }
 
 function updateData(gfolder) {
@@ -1184,7 +1242,7 @@ function closeWin3() {
 
 
 function createDataHTML(id, img, icon, path, isFile, name, gamePath, iconPath, pathClean, argsClean) {
-  let html = `<div id="${id}" style="width: var(--size1); height: var(--size1); margin-top: 5px; margin-right: 5px; background-image: url('./Data/Images/icon_item.png'); background-repeat: no-repeat; background-size: cover; text-align: center; display: inline-block;">
+  let html = `<div id="${id}" style="width: var(--size1); height: var(--size1); margin-top: 5px; margin-left: 5px; background-image: url('./Data/Images/icon_item.png'); background-repeat: no-repeat; background-size: cover; text-align: center; display: inline-block;">
                 
                 <div id="${'path-'+id}" style="display: none;">${path}</div>
                 <div id="${'isFile-'+id}" style="display: none;">${isFile}</div>
@@ -1199,7 +1257,7 @@ function createDataHTML(id, img, icon, path, isFile, name, gamePath, iconPath, p
                   <img id="${img}" style="width: 90%; height: 90%; object-fit: contain; -webkit-user-drag: none;" src="${icon}"></img>
                 </div>
                 <div style="width: 100%; height: 35%; display: flex;">
-                  <div style="width: 90%; margin: auto; font-size: calc(var(--size1)/9); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: var(--c3);">${name}</div>
+                  <div style="width: 90%; margin: auto; font-size: calc(var(--size1)/9); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: var(--textColor);">${name}</div>
                 </div>
               </div>`
   return html

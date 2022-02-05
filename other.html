@@ -1,31 +1,31 @@
-<div id="content" style="margin: 10px; margin-bottom: 20px;">
-  <div style="margin: 10px; display: flex; align-items: center;">
-	  <div id="title" style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden; width: 100%; color: var(--c4); font-size: 40px; margin-right: 10px;">Other</div>
+<div style="margin: 10px;">
+  <div style="width: 100%; display: flex; align-items: center;">
+    <div id="title" style="color: var(--text2Color); font-size: 40px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">Installer</div>
   </div>
-</div>
 
-<div style="width: calc(100% - 40px); margin-left: 20px; display: flex;">
-  <input id='path' placeholder="File path" type="text" style="height: 32px; width: calc(100% - 46px); margin-right: 10px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px; border-radius: var(--round);"></input>
-  <div id="pathFolder" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png');">
-    <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/icon_folder.png"></img>
+  <div style="width: 100%; margin-top: 15px; display: flex;">
+    <input id='path' placeholder="File path (zip, rar...)" type="text" style="height: 32px; width: calc(100% - 46px); margin-right: 10px; padding-left: 10px; padding-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
+    <div id="pathFolder" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png');">
+      <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/icon_folder.png"></img>
+    </div>
   </div>
-</div>
-
-<div style="width: calc(100% - 60px); margin-left: 20px; margin-top: 20px;">
-  <input id='name' placeholder="Name (optional)" type="text" style="height: 32px; width: 100%; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px; border-radius: var(--round);"></input>
-</div>
-
-<div style="width: calc(100% - 40px); margin-left: 20px; margin-top: 20px; display: flex;">
-  <input id='destination' placeholder="Destination" type="text" style="height: 32px; width: calc(100% - 46px); margin-right: 10px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px; border-radius: var(--round);"></input>
-  <div id="destinationFolder" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png');">
-    <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/icon_folder.png"></img>
+  
+  <div style="width: calc(100% - 20px); margin-top: 20px;">
+    <input id='name' placeholder="Name (optional)" type="text" style="height: 32px; width: 100%; padding-left: 10px; padding-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
   </div>
-</div>
-
-<div id="log" style="height: 20px; margin-left: 10px; padding: 10px; display: flex; align-items: center;  color: var(--c3); font-family: ItemFont;">Log</div>
-
-<div id="install" style="height: 36px; width: 107px; margin: 20px; margin-top: 0px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
-  <div style="font-family: ItemFont;">Install</div>
+  
+  <div style="width: 100%; margin-top: 20px; display: flex;">
+    <input id='destination' placeholder="Destination" type="text" style="height: 32px; width: calc(100% - 46px); margin-right: 10px; padding-left: 10px; padding-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
+    <div id="destinationFolder" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png');">
+      <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/icon_folder.png"></img>
+    </div>
+  </div>
+  
+  <div id="log" style="height: 20px; margin-top: 10px; display: flex; align-items: center;  color: var(--textColor); font-family: ItemFont;">Log</div>
+  
+  <div id="install" style="height: 36px; width: 107px; margin-top: 10px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
+    <div style="font-family: ItemFont;">Install</div>
+  </div>
 </div>
 
 <script>
@@ -86,10 +86,6 @@
     }
     //NAME
     let name = document.getElementById('name').value
-    if (name == '') {
-      name = path.substring(path.lastIndexOf('\\')+1)
-      if (name.includes('.')) name = name.substring(0, name.lastIndexOf('.'))
-    }
     //DESTINATION
     let destination = document.getElementById('destination').value
     if (destination == '') {

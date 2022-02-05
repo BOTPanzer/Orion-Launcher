@@ -10,98 +10,102 @@
 @font-face { font-family: ItemFont; src: url('Data/Fonts/font_item.ttf'); } 
 
 body {
+  background: #000000;
   font-family: BodyFont;
-  margin: 0px;
-  vertical-align: baseline;
-  background: linear-gradient(#000000, #000000);
-  background-attachment: fixed;
-  --c1: #000000;
-  --c2: #000000;
-  --c3: white;
-  --c4: white;
-  --round: 0px;
-
-  overflow: hidden;
+  overflow:hidden;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  -webkit-user-drag: none;
+
+  --buttonColor: #000000;
+  --topColor: #000000;
+  --lineColor: #000000;
+  --scrollColor: #000000;
+  --boxColor: #000000;
+  --boxBorderColor: #000000;
+  --placeholderColor: #000000;
+  --textColor: #000000;
+  --text2Color: #000000;
+  --round: 0px;
+  --size1: 150px;
 }
 
 ::placeholder {
-  color: var(--c2);
+  color: var(--placeholderColor);
 }
 </style>
 </head>
 
-<body>
-  <div style="height: 20px; width: 100%; display: flex; background-color: var(--c1);">
-    <div style="height: 16px; margin-top: 2px; margin-left: 5px; position: absolute; font-family: ItemFont; font-size: 16px; color: var(--c4);">Oriøn: Properties</div>
+<div id="themeDiv" style="height: 0; width: 0;"></div>
+
+<body style="height: 100%; width: 100%; margin: 0px; padding: 0px;">
+  <div style="height: 20px; width: 100%; display: flex; background-color: var(--topColor);">
+    <div style="height: 16px; margin-top: 2px; margin-left: 5px; position: absolute; font-family: ItemFont; font-size: 16px; color: var(--text2Color);">Oriøn: Properties</div>
     <div style="height: 15px; width: 100%; margin-left: 5px; margin-top: 5px; -webkit-app-region: drag; align-items: center;"></div>
     <div style="display: flex; font-family: Franklin Gothic Medium">
       <div style="display: flex; align-items: center;">
-        <div id="exit" style="height: 20px; width: 30px; color: var(--c3); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">x</div>
+        <div id="exit" style="height: 20px; width: 30px; color: var(--textColor); text-align: center; align-items: center; background-color: rgba(0, 0, 0, 0);">x</div>
       </div>
     </div>
   </div>
 
-  <div id="name" style="height: 70px; margin-top: 15px; color: var(--c4); display: flex;">
+  <div id="name" style="color: var(--text2Color); height: 70px; margin-top: 15px; display: flex;">
     <div style="display: block;">
       <div style="height: 20px; font-family: ItemFont; font-size: 20px; margin-left: 10px; margin-bottom: 10px; padding: 5px; padding-left: 10px;">Name:</div>
       <div style="align-items: center; margin: 20px; margin-top: 0px;">
-        <input id='nameText' type="text" maxlength="50" style="height: 32px; width: 240px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px; border-radius: var(--round);"></input>
+        <input id='nameText' type="text" maxlength="50" style="height: 32px; width: 240px; padding-left: 10px; padding-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
       </div>
     </div>
 
     <img id="img" style="height: 70px; width: 70px; margin-top: 5px; margin-right: 20px; -webkit-user-drag: none;" src="./Data/Images/icon_file.png"></img>
   </div>
 
-  <div id="path" style="color: var(--c4);">
+  <div id="path" style="color: var(--text2Color);">
     <div style="height: 20px; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Game Path:</div>
     <div style="align-items: center; margin: 20px; margin-top: 0px; display: flex;">
-      <input id='pathText' type="text" style="height: 32px; width: 284px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px; border-radius: var(--round);"></input>
+      <input id='pathText' type="text" style="height: 32px; width: 284px; padding-left: 10px; padding-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
       <div id="folder" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px">
         <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/icon_folder.png"></img>
       </div>
     </div>
   </div>
 
-  <div id="iconPath" style="color: var(--c4);">
+  <div id="iconPath" style="color: var(--text2Color);">
     <div style="height: 20px; font-family: ItemFont; font-size: 20px; margin: 10px; margin-top: 20px; padding: 5px; padding-left: 10px;">Game Icon Path:</div>
     <div style="align-items: center; margin: 20px; margin-top: 0px; display: flex;">
-      <input id='iconText' type="text" style="height: 32px; width: 284px; padding-left: 10px; padding-right: 10px; color: var(--c3); font-size: 16px; font-family: ItemFont; background-color: var(--c1); border-style: solid; border-color: var(--c2); border-width: 1px; border-radius: var(--round);"></input>
+      <input id='iconText' type="text" style="height: 32px; width: 284px; padding-left: 10px; padding-right: 10px; color: var(--textColor); font-size: 16px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round);"></input>
       <div id="folderIcon" style="height: 36px; min-width: 36px; background-image: url('./Data/Images/icon_description_folder.png'); margin-left: 10px">
         <img style="height: 30px; min-width: 30px; margin: 3px; -webkit-user-drag: none;" src="./Data/Images/icon_folder.png"></img>
       </div>
     </div>
   </div>
 
-  <div id="log" style="margin: 10px; margin-bottom: 0px; padding: 5px; padding-left: 10px; position: absolute; bottom: -2px; color: var(--c4); font-family: ItemFont; font-size: 14px;"></div>
+  <div id="log" style="margin: 10px; margin-bottom: 0px; padding: 5px; padding-left: 10px; position: absolute; bottom: -2px; color: var(--text2Color); font-family: ItemFont; font-size: 14px;"></div>
 
   <div>
     <div style="width: 100%; position: absolute; bottom: 0; display: block;">
       <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
         <div></div> 
-        <div id="show" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px; color: var(--c3);">
+        <div id="show" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px; color: var(--textColor);">
           <div style="font-family: ItemFont;">Show</div>
         </div>
-        <div id="showstore" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
+        <div id="showstore" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
           <div style="font-family: ItemFont;">Store</div>
         </div>
         <div></div>
       </div>
 
       <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-        <div id="move" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px; color: var(--c3);">
+        <div id="move" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px; color: var(--textColor);">
           <div style="font-family: ItemFont;">Move</div>
         </div>
-        <div id="remove" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px; color: var(--c3);">
+        <div id="remove" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); margin-right: 10px; color: var(--textColor);">
           <div style="font-family: ItemFont;">Remove</div>
         </div>
-        <div id="save" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--c3);">
+        <div id="save" style="height: 36px; width: 107px; display: flex; justify-content: center; align-items: center; background-image: url('./Data/Images/icon_description_launch.png'); color: var(--textColor);">
           <div style="font-family: ItemFont;">Save</div>
         </div>
       </div>
@@ -111,6 +115,7 @@ body {
 
 <script>
   const { ipcRenderer } = require('electron');
+  window.$ = window.jQuery = require('jquery');
   let actualPath = ''
   let oldName = ''
   let oldPath = ''
@@ -118,7 +123,7 @@ body {
   let showPath = ''
 
   addButtonListener('exit', function() {
-    document.getElementById('exit').style.backgroundColor = 'var(--c2)';
+    document.getElementById('exit').style.backgroundColor = 'var(--buttonColor)';
   }, function() {
     document.getElementById('exit').style.backgroundColor = 'rgba(0, 0, 0, 0)';
   }, function() {
@@ -126,14 +131,7 @@ body {
   })
 
   ipcRenderer.on('theme', (event, theme) => {
-    document.body.style.setProperty('--c1', theme.c1);
-    document.body.style.setProperty('--c2', theme.c2);
-    document.body.style.setProperty('--c3', theme.c3);
-    document.body.style.setProperty('--c4', theme.c4);
-    document.body.style.setProperty('--round', theme.round);
-    //BACKGROUND
-    document.body.style.background = theme.background
-    document.body.style.backgroundAttachment = 'fixed'
+    $("#themeDiv").load(theme)
   })
   
   ipcRenderer.on('setLocation', (event, path, img) => {
@@ -287,18 +285,17 @@ body {
   }
 
   function addButtonListener(id, mousedown, mouseup, click) {
-    document.getElementById(id).addEventListener('mousedown', (event) => {
+    $('#'+id).bind('mousedown', function() {
       if (event.which != 1) return
       mousedown()
     })
 
-    document.addEventListener('mouseup', () => {
+    $(window).bind('mouseup', function() {
       if (event.which != 1) return
-      if (document.getElementById(id) == undefined) return
       mouseup()
     })
-    
-    document.getElementById(id).addEventListener('click', (event) => {
+
+    $('#'+id).bind('click', function() {
       if (event.which != 1) return
       click()
     })
