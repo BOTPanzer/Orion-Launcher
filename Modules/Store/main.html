@@ -55,6 +55,7 @@
 </div>
 
 <script>
+  //MODULE NAME CAN BE CHANGED FREELY 😎
   ipcRenderer.on('resized', (event, size) => {
     s1 = size/6
     if (s1 < 200) s1 = 200
@@ -62,6 +63,7 @@
     document.body.style.setProperty('--size1', s1+'px')
   })
 
+  storeModulePath = currentModule
   lastStoreUpdated = 0
 
   setStoreListeners()
@@ -127,7 +129,7 @@
 
   //STORE FUNCTIONS
   function elamigos(result, storeUpdated) {
-    if (currentPath != data.root+'Modules\\Store') return
+    if (currentModule != storeModulePath) return
     if (storeUpdated != lastStoreUpdated) return
     clearList('listElamigos')
     let part = result.substring(result.indexOf('<div class="col-lg-2 '), result.indexOf('<!-- /.row -->'))
@@ -171,12 +173,13 @@
       addListener(id, link)
     }
     $("#listElamigos").animate({height: $("#listElamigos").get(0).scrollHeight}, 500, function() {
-      document.getElementById('listElamigos').style.height = 'auto'
+      if (document.getElementById('listElamigos') != null)
+        document.getElementById('listElamigos').style.height = 'auto'
     })
   }
 
   function fitgirl(result, storeUpdated) {
-    if (currentPath != data.root+'Modules\\Store') return
+    if (currentModule != storeModulePath) return
     if (storeUpdated != lastStoreUpdated) return
     if (!result.includes('<article class="post')) {
       noResults('Fitgirl')
@@ -200,7 +203,6 @@
       }
     }
     //HAS RESULTS
-    if (storeUpdated != lastStoreUpdated) return
     if (links.length == 0) noResults('Fitgirl')
     else hasResults('Fitgirl')
     //ADD GAMES
@@ -230,7 +232,8 @@
       })
     }
     $("#listFitgirl").animate({height: $("#listFitgirl").get(0).scrollHeight}, 500, function() {
-      document.getElementById('listFitgirl').style.height = 'auto'
+      if (document.getElementById('listFitgirl') != null)
+        document.getElementById('listFitgirl').style.height = 'auto'
     })
 
     async function fitgirlImg(link) {
@@ -246,7 +249,7 @@
   }
 
   function pivi(result, storeUpdated) {
-    if (currentPath != data.root+'Modules\\Store') return
+    if (currentModule != storeModulePath) return
     if (storeUpdated != lastStoreUpdated) return
     clearList('listPivi')
     let part = result.substring(result.indexOf('<div id="gp-content-wrapper"')) //remove top bar
@@ -273,7 +276,6 @@
       }
     }
     //HAS RESULTS
-    if (storeUpdated != lastStoreUpdated) return
     if (links.length == 0) noResults('Pivi')
     else hasResults('Pivi')
     //ADD GAMES
@@ -294,12 +296,13 @@
       addListener(id, link)
     }
     $("#listPivi").animate({height: $("#listPivi").get(0).scrollHeight}, 500, function() {
-      document.getElementById('listPivi').style.height = 'auto'
+      if (document.getElementById('listPivi') != null)
+        document.getElementById('listPivi').style.height = 'auto'
     })
   }
 
   function steamunlocked(result, search, storeUpdated) {
-    if (currentPath != data.root+'Modules\\Store') return
+    if (currentModule != storeModulePath) return
     if (storeUpdated != lastStoreUpdated) return
     clearList('listSteamUnlocked')
     var si
@@ -337,7 +340,6 @@
       }
     }
     //HAS RESULTS
-    if (storeUpdated != lastStoreUpdated) return
     if (links.length == 0) noResults('SteamUnlocked')
     else hasResults('SteamUnlocked')
     //ADD GAMES
@@ -359,7 +361,8 @@
       addListener(id, link)
     }
     $("#listSteamUnlocked").animate({height: $("#listSteamUnlocked").get(0).scrollHeight}, 500, function() {
-      document.getElementById('listSteamUnlocked').style.height = 'auto'
+      if (document.getElementById('listSteamUnlocked') != null)
+        document.getElementById('listSteamUnlocked').style.height = 'auto'
     })
   }
 

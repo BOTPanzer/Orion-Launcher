@@ -28,7 +28,8 @@
 </div>
 
 <script>
-  log('Log')
+  //MODULE NAME CAN BE CHANGED FREELY 😎
+  exec = require('child_process').exec
 
   function log(text) {
     document.getElementById('log').innerText = `(${Date.now()}) `+text
@@ -108,8 +109,8 @@
     }
     //INSTALL
     ipcRenderer.send('pause')
-    var exec = require('child_process').exec
-    let zip = data.root+'Data\\7-Zip\\7z.exe'
+    let zip = currentModule+'7-Zip\\7z.exe'
+    console.log(zip)
     //CHECK IF FILE CONTAINS A FOLDER INSIDE
     exec(`"${zip}" l "${path}" -x!*\\*`, function (error, stdOut, stdErr) {
       if (!(error || stdErr)) {

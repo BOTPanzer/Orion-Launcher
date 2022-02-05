@@ -10,8 +10,11 @@ let win2 = null
 let win3 = null
 
 let rootFolder = null
-let loadedPath = null
+let dataFolder = null
+let modulesFolder = null
+
 let launcherFolder = null
+let currentModule = null
 
 let defImage = null
 
@@ -36,7 +39,11 @@ if (!app.requestSingleInstanceLock()) {
   //|__/     |__/|__/  |__/|______/|__/  \__/
 
   rootFolder = app.getAppPath()+'\\'
-  launcherFolder = rootFolder+'Launcher\\'
+  dataFolder = rootFolder+'Data\\'
+  modulesFolder = rootFolder+'Modules\\'
+
+  launcherFolder = modulesFolder+'Launcher\\Launcher\\'
+
   createWindow()
   createTray()
 
@@ -47,7 +54,8 @@ if (!app.requestSingleInstanceLock()) {
 
     var data = {}
     data.root = rootFolder
-    data.launcher = launcherFolder
+    data.data = dataFolder
+    data.modules = modulesFolder
 
     win.webContents.send('data', data)
   })
@@ -68,7 +76,7 @@ if (!app.requestSingleInstanceLock()) {
   })
 
   ipcMain.on('loaded', (event, path) => {
-    loadedPath = path
+    currentModule = path
     
     var size = win.getSize()
     win.webContents.send('resized', size[0])
@@ -181,7 +189,7 @@ if (!app.requestSingleInstanceLock()) {
     if (win2 != null)
     win2.show()
   })
-  
+
   //FUNCTIONS
   ipcMain.on('requestIcon2', async function(event, argPath, path) {
     requestIcon2(argPath, path)
@@ -325,12 +333,12 @@ if (!app.requestSingleInstanceLock()) {
   //| $$  | $$   | $$   | $$  | $$| $$      | $$  \ $$
   //|  $$$$$$/   | $$   | $$  | $$| $$$$$$$$| $$  | $$
   // \______/    |__/   |__/  |__/|________/|__/  |__/
-    
+
   ipcMain.on('loadModule', (event, path, specialData) => {
     if (fs.existsSync(path))
       win.webContents.send('loadModule', path, specialData)
     else
-      win.webContents.send('loadModule', rootFolder+'Modules\\'+path, specialData)
+      win.webContents.send('loadModule', modulesFolder+path, specialData)
   })
 
   ipcMain.on('specialData', (event, specialData) => {
@@ -420,7 +428,7 @@ function createWindow() {
 }
 
 function createTray() {
-  let trayMenu = new Tray(rootFolder+"Data\\Images\\icon.ico");
+  let trayMenu = new Tray(dataFolder+'Images\\icon.ico');
   const contextMenu = Menu.buildFromTemplate([
     {
       label: 'Quit Oriøn', click: function () {
@@ -430,7 +438,6 @@ function createTray() {
     }
   ])
 
-  let modulesFolder = rootFolder+'Modules\\'
   if (!fs.existsSync(modulesFolder)) return
   let modulestmp = fs.readdirSync(modulesFolder);
   let modules = []
@@ -505,7 +512,7 @@ function createWin2(file, size, arg1, arg2) {
   //win2.openDevTools()
 
   win2.webContents.on('dom-ready', () => {
-    win2.webContents.send('load', rootFolder+'Modules/Launcher/'+file, arg1, arg2)
+    win2.webContents.send('load', modulesFolder+'Launcher/'+file, arg1, arg2)
     win2.show()
   })
 }
@@ -629,13 +636,13 @@ function getFileInfo(argPath, fixed) {
 }
 
 function getData() {
-  let jsonPath = rootFolder+'Data\\settings.json'
+  let jsonPath = dataFolder+'settings.json'
   let rawdata = fs.readFileSync(jsonPath)
   return JSON.parse(rawdata)
 }
 
 function updateData(json) {
-  fs.writeFileSync(rootFolder+'Data\\settings.json', JSON.stringify(json));
+  fs.writeFileSync(dataFolder+'settings.json', JSON.stringify(json));
 }
 
 

@@ -11,10 +11,12 @@
 </div>
 
 <script>
+  //DO NOT CHANGE THE MODULE NAME OR IT'LL STOP WORKING
   search = ''
   click = ''
   adding = false
 
+  launcherFolder = currentModule+'Launcher\\'
   selecting = false
   selected = []
   timeId = ''
@@ -87,7 +89,7 @@
 
   function createList(argPath, search) {
     if (search == undefined) search = ''
-    if (!argPath.startsWith(data.launcher)) argPath = data.launcher
+    if (!argPath.startsWith(launcherFolder)) argPath = launcherFolder
     if (!argPath.endsWith('\\')) argPath = argPath+'\\'
     if (!fs.existsSync(argPath)) return
     startLauncher(search)
@@ -95,7 +97,7 @@
     json.actualPath = argPath
     updateData(json)
     let title = 'Home'
-    if (json.actualPath != data.launcher) title = json.actualPath.slice(0,-1).substring(json.actualPath.slice(0,-1).lastIndexOf("\\")+1)
+    if (json.actualPath != launcherFolder) title = json.actualPath.slice(0,-1).substring(json.actualPath.slice(0,-1).lastIndexOf("\\")+1)
     if (search != '') title = title+' - '+search
     document.getElementById('title').innerText = title
     //BACK BUTTON
@@ -179,7 +181,7 @@
   }
 
   function createBackButt(argPath, search) {
-    if (search == '' && argPath != data.launcher) {
+    if (search == '' && argPath != launcherFolder) {
       //bpath
       let bpath = argPath
       if (bpath.endsWith("\\")) bpath = bpath.slice(0,-1)
@@ -306,7 +308,7 @@
       let gamePath = si[0]
       if (gamePath != undefined) {
         gamePath = gamePath.replaceAll('\r', '')
-        if (gamePath.startsWith('?:') && fixed) gamePath = gamePath.replace('?:', data.launcher.substring(0, 2))
+        if (gamePath.startsWith('?:') && fixed) gamePath = gamePath.replace('?:', launcherFolder.substring(0, 2))
       }
       //Icon
       let iconPath = si[1]

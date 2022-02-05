@@ -24,6 +24,7 @@
 </div>
 
 <script>
+  //MODULE NAME CAN BE CHANGED FREELY 😎
   document.getElementById('text').innerText = fullLog
 
   if (json.startServer)
@@ -74,13 +75,11 @@
       updateData(json)
       document.getElementById('starts').innerText = 'Start: No'
       appendText('Server Will Not Start After Restart\n')
-    } else if (!json.startServer) {
+    } else {
       json.startServer = true
       updateData(json)
       document.getElementById('starts').innerText = 'Start: Yes'
       appendText('Server Will Start After Restart\n')
-    } else {
-      document.getElementById('starts').innerText = 'Start: a?'
     }
   })
 </script>

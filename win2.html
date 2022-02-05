@@ -106,10 +106,8 @@
     } else if (tmpfile == 'context-file.html') {
       document.getElementById('title').innerText = 'Oriøn: Game Properties'
     }
-    $(function(){
-      var result = $("#window").load(file.replaceAll(' ', '%20'), function () {
-        ipcRenderer.send('loaded2', tmpfile, arg1, arg2)
-      })
+    $("#window").load(file.replaceAll(' ', '%20'), function () {
+      ipcRenderer.send('loaded2', tmpfile, arg1, arg2)
     })
   })
 

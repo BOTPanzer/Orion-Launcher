@@ -1,0 +1,58 @@
+<script>
+  //SERVER
+  let fullLog = ''
+  let mainSocket = null
+  
+  //START FTP
+  if (json.startServer) initializeFTP()
+  
+  //FTP FUNCTIONS
+  function initializeFTP() {
+    const Net = require('net');
+    server = new Net.Server()
+
+    server.on('error', function (e) {
+      server.close();
+    })
+
+    server.listen(4444, function() {
+      var socket = Net.createConnection(80, 'www.google.com');
+      socket.on('connect', function() {
+        appendText(`Server Started on ${socket.address().address}:4444\r\n`)
+        socket.end()
+      })
+      socket.on('error', function(e) {
+        appendText(`Server Started on localhost:4444\r\n`)
+      });
+    })
+
+    server.on('connection', function(socket) {
+      mainSocket = socket
+      mainSocket.write('Connection Established\r\n');
+      appendText('Connection Established\r\n')
+    
+      mainSocket.on('data', function(chunk) {
+        appendText('Received: '+chunk.toString())
+      })
+
+      mainSocket.on('end', function() {
+        appendText('Connection Closed\r\n')
+      })
+
+      mainSocket.on('error', function(err) {
+        appendText(`Error: ${err}\r\n`)
+      })
+    })
+  }
+
+  function appendText(text) {
+    fullLog = fullLog+text
+    if (document.getElementById('text') != null) {
+      document.getElementById('text').innerText = fullLog
+      document.getElementById('textDiv').scrollTop = document.getElementById('textDiv').scrollHeight;
+      
+      var documentHeight = document.getElementById('rightBar').offsetHeight;
+      document.getElementById('rightBar').scrollTo(0, documentHeight);
+    }
+  }
+</script>

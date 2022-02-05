@@ -115,6 +115,7 @@
     <div id="rightBar" style="width: 100%; overflow-y: scroll; z-index: 0;">
       <img id="logo" style="height: 120px; margin: 20px; -webkit-user-drag: none;" src="./Data/Images/logo.png"/> 
       <div id="window"></div>
+      <div id="start" style="display: none;"></div>
     </div>
     
     <div id="noti" style="height: 70px; width: 200px; position: fixed; bottom: 20px; right: 20px; font-family: ItemFont; background-color: var(--boxColor); border-style: solid; border-color: var(--boxBorderColor); border-width: 1px; border-radius: var(--round); pointer-events: none; opacity: 0; display: flex; justify-content: space-between; flex-direction: column;">
@@ -132,17 +133,14 @@
   const fs = require('fs');
 
   //DATA
-  let data = {} //root, launcher (folders)
+  let data = {} //root, data, modules (folder paths)
   let json = null
-  let currentPath = ''
   let loading = false
+  let currentModule = ''
   //NOTI
   let showingNoti = false
   let notis = []
   let notisTitle = []
-  //SERVER
-  let fullLog = ''
-  let mainSocket = null
 
   a()
   setbuttons()
@@ -157,10 +155,9 @@
       json = getData()
 
       //ADD MODULES
-      let modulesFolder = data.root+'Modules\\'
-      if (!fs.existsSync(modulesFolder)) return
+      if (!fs.existsSync(data.modules)) return
       document.getElementById('moduleButtons').innerHTML = ''
-      let modulestmp = fs.readdirSync(modulesFolder);
+      let modulestmp = fs.readdirSync(data.modules);
       let modules = []
       if (modulestmp.includes('Store')) {
         modules.push('Store')
@@ -183,24 +180,26 @@
         //DATA
         let id = 'module'+i
         let name = modules[i]
-        let path = modulesFolder+name
+        let path = data.modules+name
         let html = `<div id="${id}" class="sbutton" style="height: 36px; width: 107px; background-image: url('./Data/Images/icon_description_launch.png'); margin-bottom: 20px; margin-left: auto; margin-right: auto; margin-top: 10px;">
                       ${name}
                       <div id="${'path-'+id}" style="display: none;">${path}</div>
                     </div>`
         //ADD MODULE
         document.getElementById('moduleButtons').insertAdjacentHTML('beforeend', html)
+        //LOAD MODULE START.HTML
+        let startHTML = path+'\\start.html'
+        if (fs.existsSync(startHTML)) {
+          $("#start").load(startHTML.replaceAll(' ', '%20'), function () {})
+        }
       }
       updateModules()
 
-      //START FTP
-      if (json.startServer && fs.existsSync(data.root+'Modules\\Connect')) initializeFTP()
-
       //ORION BUTTON
       if (json.leftbar && document.getElementById('orionName').style.display == 'none')
-        document.getElementById('orionLogo').click();
+        document.getElementById('orionLogo').click()
       else if (!json.leftbar && document.getElementById('orionName').style.display != 'none')
-        document.getElementById('orionLogo').click();
+        document.getElementById('orionLogo').click()
       document.getElementById('leftBar').style.opacity = '1'
     })
 
@@ -243,7 +242,7 @@
         document.getElementById('leftBar').style.position = 'relative'
 
         document.getElementById('orionName').style.display = 'flex'
-        if (currentPath.endsWith('\\Launcher'))
+        if (currentModule.endsWith('Launcher'))
           document.getElementById('add').style.display = 'block'
         else
           document.getElementById('add').style.display = 'none'
@@ -322,7 +321,7 @@
         loadModule(path)
       })
 
-      if (path.endsWith('Modules\\Launcher') && currentPath == '' && children.length > 0)
+      if (path.endsWith('Modules\\Launcher') && currentModule == '' && children.length > 0)
         item.click()
         //document.getElementById('moduleButtons').firstChild.click()
     })
@@ -330,11 +329,11 @@
 
   function loadModule(path, specialData) {
     if (loading) return
-    let html = path+'\\main.html'
+    if (!path.endsWith('\\')) path = path+'\\'
+    let html = path+'main.html'
     if (!fs.existsSync(html)) return
-    else console.log('exists')
-    if (currentPath == path) return
-    else currentPath = path
+    if (currentModule == path) return
+    else currentModule = path
 
     setbuttons()
     ipcRenderer.removeAllListeners()
@@ -344,7 +343,7 @@
     setTimeout(function() {
       document.getElementById('add').style.display = 'none'
       document.getElementById('window').scrollTop = 0
-      var result = $("#window").load(html.replaceAll(' ', '%20'), function () {
+      $("#window").load(html.replaceAll(' ', '%20'), function () {
         $("#window").fadeIn(200)
         ipcRenderer.send('loaded', path)
         ipcRenderer.send('specialData', specialData)
@@ -358,65 +357,14 @@
 
   //DATA FUNCTIONS
   function getData() {
-    let jsonPath = data.root+'Data\\settings.json'
+    let jsonPath = data.data+'settings.json'
     let rawdata = fs.readFileSync(jsonPath)
     return JSON.parse(rawdata)
   }
 
   function updateData(json) {
-    fs.writeFileSync(data.root+'Data\\settings.json', JSON.stringify(json));
+    fs.writeFileSync(data.data+'settings.json', JSON.stringify(json));
   }
-
-
-  //FTP FUNCTIONS
-  function initializeFTP() {
-    const Net = require('net');
-    server = new Net.Server()
-
-    server.on('error', function (e) {
-      server.close();
-    })
-
-    server.listen(4444, function() {
-      var socket = Net.createConnection(80, 'www.google.com');
-      socket.on('connect', function() {
-        appendText(`Server Started on ${socket.address().address}:4444\r\n`)
-        socket.end()
-      })
-      socket.on('error', function(e) {
-        appendText(`Server Started on localhost:4444\r\n`)
-      });
-    })
-
-    server.on('connection', function(socket) {
-      mainSocket = socket
-      mainSocket.write('Connection Established\r\n');
-      appendText('Connection Established\r\n')
-    
-      mainSocket.on('data', function(chunk) {
-        appendText('Received: '+chunk.toString())
-      })
-
-      mainSocket.on('end', function() {
-        appendText('Connection Closed\r\n')
-      })
-
-      mainSocket.on('error', function(err) {
-        appendText(`Error: ${err}\r\n`)
-      })
-    })
-  }
-
-  function appendText(text) {
-    fullLog = fullLog+text
-    if (document.getElementById('text') != null) {
-      document.getElementById('text').innerText = fullLog
-      document.getElementById('textDiv').scrollTop = document.getElementById('textDiv').scrollHeight;
-      
-      var documentHeight = document.getElementById('rightBar').offsetHeight;
-      document.getElementById('rightBar').scrollTo(0, documentHeight);
-    }
-  }   
 
 
   //NOTI
