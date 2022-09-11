@@ -1,4 +1,4 @@
 # Orion-Launcher
-Orion Launcher Source Code
+Orion Launcher source code
 
-Repository to Save the Orion Launcher Source Code (old Version of Orion Assistant).
+Repository to save the Orion Launcher's source code (old version of Orion Assistant).
